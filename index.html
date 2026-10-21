@@ -95,7 +95,8 @@ body{
 }
 .intro{max-width:610px;font-size:14px;line-height:1.85;color:var(--muted)}
 .headrow{position:relative;align-items:center;gap:28px;margin-bottom:34px}
-.headrow:after{
+#main:not([data-page="home"]) .headrow:after{display:none}
+#main[data-page="home"] .headrow:after{
  content:"";flex:0 0 clamp(145px,20vw,270px);height:clamp(145px,20vw,270px);
  border-radius:50%;
  background:
@@ -272,6 +273,7 @@ function go(page) {
 function render(){
   const pageTitles={home:"Overview",app:"Market explorer",deep:"Deep forecasts",futarchy:"Futarchy",opportunity:"Opportunity markets",risk:"Risk pricing"};
   document.title="Seer Six — "+(pageTitles[state.page]||"Markets for better decisions");
+  document.getElementById("main").dataset.page=state.page;
   const focusedId = document.activeElement && document.activeElement.id === "marketSearch" ? "marketSearch" : null;
   const caret = focusedId ? document.activeElement.selectionStart : null;
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===state.page));
