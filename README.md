@@ -6,12 +6,12 @@ A responsive six-interface concept for the Seer prediction-market ecosystem. The
 
 Once GitHub Pages is enabled, use these direct links:
 
-- Overview: [#/home](./#/home)
-- Market explorer: [#/app](./#/app)
-- Deep forecasts: [#/deep](./#/deep)
-- Futarchy: [#/futarchy](./#/futarchy)
-- Opportunity markets: [#/opportunity](./#/opportunity)
-- Risk pricing: [#/risk](./#/risk)
+- Overview: https://pascaline06.github.io/Seer-six-interfaces/#/home
+- Market explorer: https://pascaline06.github.io/Seer-six-interfaces/#/app
+- Deep forecasts: https://pascaline06.github.io/Seer-six-interfaces/#/deep
+- Futarchy: https://pascaline06.github.io/Seer-six-interfaces/#/futarchy
+- Opportunity markets: https://pascaline06.github.io/Seer-six-interfaces/#/opportunity
+- Risk pricing: https://pascaline06.github.io/Seer-six-interfaces/#/risk
 
 Public demo base URL (after Pages is enabled): https://pascaline06.github.io/Seer-six-interfaces/
 
@@ -41,6 +41,10 @@ Open `index.html` in a modern browser. No build step or package installation is 
 ## Deploy
 
 In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main` and `/(root)`, then save. The entry file must be named lowercase `index.html` for the default GitHub Pages route. Wait for the Pages deployment to finish before sharing the demo links.
+
+## Submission preview image
+
+The repository includes [`preview.svg`](./preview.svg), a 1200×630 concept image for the submission card/social preview. Capture a real browser screenshot of the deployed interface as the primary visual if the submission specifically requires an in-product screenshot.
 
 ## Accessibility and responsive behavior
 
