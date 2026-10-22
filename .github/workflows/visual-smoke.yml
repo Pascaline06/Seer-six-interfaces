@@ -36,7 +36,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -261,7 +261,14 @@ jobs:
                   if (detailVisible) {
                     const hasPrice = await page.locator("#marketDetail .market-detail-price").count() === 1;
                     const hasSourceFacts = await page.locator("#marketDetail .market-detail-facts").count() === 1;
+                    const traceVisible = await page.locator("#marketDetail .market-trace").count() === 1;
+                    const traceChart = await page.locator("#marketDetail .market-trace-chart").count();
+                    const traceEmpty = await page.locator("#marketDetail .market-trace-empty").count();
+                    const traceNote = await page.locator("#marketDetail .market-trace-note").count() === 1;
                     if (!hasPrice || !hasSourceFacts) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing price or source facts");
+                    if (!traceVisible || !traceNote || traceChart + traceEmpty !== 1) report.failures.push(viewport.name+"/"+theme+"/app: observed price trace is missing or has neither chart nor honest empty state");
+                    const traceLabel = await page.locator("#marketDetail .market-trace-chart svg").getAttribute("aria-label").catch(() => null);
+                    if (traceChart === 1 && !traceLabel?.includes("successful snapshots")) report.failures.push(viewport.name+"/"+theme+"/app: observed price chart is missing its provenance label");
                     await page.locator('#marketDetail button[data-market-action="close-detail"]').click();
                   }
                 } else {
