@@ -45,7 +45,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Instrument+Sans:wght@400;500;600;700") && html.includes("Sora:wght@400;500;600;700;800") && html.includes("JetBrains+Mono:wght@400;500;600;700")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("clash-display@400,500,600,700") && html.includes("satoshi@400,500,600,700") && html.includes("JetBrains+Mono:wght@400;500;600;700")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -92,8 +92,8 @@ jobs:
                 if (current !== wanted) document.getElementById("themeToggle")?.click();
                 // Explicitly request the font weights used by the visual system.
                 await Promise.all([
-                  document.fonts.load('400 15px "Instrument Sans"'),
-                  document.fonts.load('700 32px "Sora"'),
+                  document.fonts.load('400 15px "Satoshi"'),
+                  document.fonts.load('700 32px "Clash Display"'),
                   document.fonts.load('400 14px "JetBrains Mono"')
                 ]);
                 await document.fonts.ready;
@@ -118,8 +118,8 @@ jobs:
                   heading: heading?.innerText || null,
                   headingFontFamily: font,
                   theme: document.body.dataset.theme || "dark",
-                  bodyFontLoaded: document.fonts.check('400 15px "Instrument Sans"'),
-                  displayFontLoaded: document.fonts.check('700 32px "Sora"'),
+                  bodyFontLoaded: document.fonts.check('400 15px "Satoshi"'),
+                  displayFontLoaded: document.fonts.check('700 32px "Clash Display"'),
                   monoFontLoaded: document.fonts.check('400 14px "JetBrains Mono"'),
                   interfaceNavCount: main?.querySelectorAll("a[data-suite-page]").length || 0,
                   interfaceNavTargets: [...(main?.querySelectorAll("a[data-suite-page]") || [])].map(a => a.getAttribute("href")),
