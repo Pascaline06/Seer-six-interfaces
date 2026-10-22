@@ -135,6 +135,9 @@ jobs:
                   heroSignalCount: main?.querySelectorAll(".hero-signal").length || 0,
                   interfaceArtCount: main?.querySelectorAll(".interface-art svg").length || 0,
                   explorerControlCount: ["#marketSearch","#marketFilter","#marketNetwork","#marketSort"].filter(selector => document.querySelector(selector)).length,
+                  explorerVisibleCardCount: main?.querySelectorAll(".explorer-market-grid .market").length || 0,
+                  explorerWatchlistButtonCount: main?.querySelectorAll(".market-save[data-market-action='save']").length || 0,
+                  marketPulseItemCount: main?.querySelectorAll(".market-pulse .pulse-item").length || 0,
                   explorerIndexStatus: main?.querySelector("#explorerStatus")?.dataset.status || "not-app",
                   explorerPageLabel: main?.querySelector("#pageStatus")?.innerText?.trim() || null,
                   heroMarketStatus: main?.querySelector(".hero-signal")?.dataset.marketStatus || "not-home",
@@ -164,6 +167,12 @@ jobs:
               if (!metrics.footerOutsideWorkspace) report.failures.push(viewport.name+"/"+theme+"/"+route+": footer is inside the sidebar/content workspace");
               if (route === "home" && (metrics.heroSignalCount !== 1 || metrics.interfaceArtCount !== 6)) report.failures.push(viewport.name+"/"+theme+"/home: expected hero signal artwork and six interface illustrations");
               if (route === "app" && metrics.explorerControlCount !== 4) report.failures.push(viewport.name+"/"+theme+"/app: expected search, category, network and sort controls");
+              if (route === "app" && metrics.explorerIndexStatus === "live" && metrics.explorerPageLabel) {
+                const pageParts = metrics.explorerPageLabel.match(/(\\d+)\\s*\\/\\s*(\\d+)/);
+                if (pageParts && Number(pageParts[1]) < Number(pageParts[2]) && metrics.explorerVisibleCardCount !== 12) report.failures.push(viewport.name+"/"+theme+"/app: a full live page should show 12 server-returned records, found "+metrics.explorerVisibleCardCount);
+                if (metrics.explorerVisibleCardCount !== metrics.explorerWatchlistButtonCount) report.failures.push(viewport.name+"/"+theme+"/app: each market card needs its own save-to-watchlist control");
+              }
+              if (route === "home" && metrics.marketPulseItemCount !== 4) report.failures.push(viewport.name+"/"+theme+"/home: the market pulse must show four source records");
               if (route === "home" && !["live","fallback"].includes(metrics.heroMarketStatus)) report.failures.push(viewport.name+"/"+theme+"/home: hero signal never left its loading state");
               if (route === "app" && !["live","fallback"].includes(metrics.explorerIndexStatus)) report.failures.push(viewport.name+"/"+theme+"/app: full-index explorer never left its loading state before screenshot");
               if (route === "app" && metrics.explorerIndexStatus === "live" && !metrics.explorerPageLabel) report.failures.push(viewport.name+"/"+theme+"/app: live results loaded without pagination state");
@@ -198,7 +207,7 @@ jobs:
           }
 
           fs.writeFileSync("artifacts/report.json", JSON.stringify(report, null, 2));
-          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus}) => ({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus})) }, null, 2));
+          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerVisibleCardCount, explorerWatchlistButtonCount, marketPulseItemCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus}) => ({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerVisibleCardCount, explorerWatchlistButtonCount, marketPulseItemCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus})) }, null, 2));
           await browser.close();
           if (report.failures.length) process.exit(1);
           NODE
