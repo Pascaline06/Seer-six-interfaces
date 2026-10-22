@@ -999,7 +999,8 @@ function renderFutarchy(){
 function isBinaryOpportunityMarket(m){
  const outcomes=Array.isArray(m&&m.outcomes)?m.outcomes:[];
  const prices=Array.isArray(m&&m.outcomePrices)?m.outcomePrices:[];
- const firstRaw=prices[0]&&prices[0].p!==null&&prices[0].p!==undefined?Number(prices[0].p):Number(m&&m.p);
+ const fallbackRaw=m&&m.p!==null&&m.p!==undefined&&m.p!==""?Number(m.p):NaN;
+ const firstRaw=prices[0]&&prices[0].p!==null&&prices[0].p!==undefined&&prices[0].p!==""?Number(prices[0].p):fallbackRaw;
  return outcomes.length===2&&Number.isFinite(firstRaw)&&firstRaw>=0&&firstRaw<=100;
 }
 function opportunityOutcomeLabel(m,index){
@@ -1010,7 +1011,7 @@ function opportunityOutcomePrice(m,index){
  const values=Array.isArray(m&&m.outcomePrices)?m.outcomePrices:[];
  const raw=values[index]&&values[index].p!==null&&values[index].p!==undefined?Number(values[index].p):NaN;
  if(Number.isFinite(raw)&&raw>=0&&raw<=100)return raw;
- if(index===0){const first=Number(m&&m.p);return Number.isFinite(first)&&first>=0&&first<=100?first:NaN;}
+ if(index===0){const raw=m&&m.p!==null&&m.p!==undefined&&m.p!==""?Number(m.p):NaN;return Number.isFinite(raw)&&raw>=0&&raw<=100?raw:NaN;}
  if(index===1&&isBinaryOpportunityMarket(m)){const first=opportunityOutcomePrice(m,0);return Number.isFinite(first)?100-first:NaN;}
  return NaN;
 }
