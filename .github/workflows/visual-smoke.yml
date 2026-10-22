@@ -164,6 +164,8 @@ jobs:
                 };
               });
 
+              // Market Wire is hidden on home because the homepage uses the featured Market Tape instead.
+              if (route !== "home") {
               // The movement log opens and closes, and its empty state must be honest on an unchanged source snapshot.
               const historyToggle = page.locator('#marketWire button[data-wire-action="history"]');
               if (await historyToggle.count() !== 1) {
@@ -179,6 +181,7 @@ jobs:
                 const historyClosed = await page.locator("#marketWire .wire-ledger").count() === 0;
                 const historyCollapsed = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
                 if (!historyClosed || historyCollapsed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not close");
+              }
               }
               // The homepage market tape must show real market records, move continuously, and respect reduced motion.
               if (route === "home") {
@@ -203,7 +206,8 @@ jobs:
                   await page.emulateMedia({ reducedMotion: "no-preference" });
                 }
               }
-              // Validate the motion control, then restore the default moving wire before capture.
+              // Validate Market Wire pause/resume only on routes where that strip is visible.
+              if (route !== "home") {
               const wireToggle = page.locator('#marketWire button[data-wire-action="pause"]');
               if (await wireToggle.count() !== 1) {
                 report.failures.push(viewport.name+"/"+theme+"/"+route+": Market Wire pause/resume control is missing");
@@ -216,6 +220,7 @@ jobs:
                 const resumedClass = await page.locator("#marketWire").getAttribute("class");
                 const resumedPressed = await page.locator('#marketWire button[data-wire-action="pause"]').getAttribute("aria-pressed");
                 if (resumedClass?.includes("is-paused") || resumedPressed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": resume control did not restore ticker motion");
+              }
               }
               const screenshot = `artifacts/${viewport.name}-${theme}-${route}.png`;
               await page.screenshot({ path: screenshot, fullPage: true, animations: "disabled" });
@@ -517,33 +522,17 @@ jobs:
               const footerNavigationWorks = await page.locator("#main").getAttribute("data-page") === nextRoute;
               if (!footerNavigationWorks) report.failures.push(`${viewport.name}/${theme}/${route}: footer link did not navigate to ${nextRoute}`);
               if (route === "risk") {
-                // The risk route's footer link just returned us to home, so verify the moving wire is a real entry point.
-                const pauseTicker = page.locator("#marketWire button[data-wire-action='pause']");
-                if (await pauseTicker.count() !== 1) {
-                  report.failures.push(`${viewport.name}/${theme}: Market Wire pause control is missing`);
+                // The footer has returned to home: assert the visible market tape is present, populated and moving.
+                const homeTape = page.locator("#main .signal-ticker.market-tape");
+                if (await homeTape.count() !== 1) {
+                  report.failures.push(`${viewport.name}/${theme}: home Market Tape is missing after footer navigation`);
                 } else {
-                  await pauseTicker.click();
-                  const paused = await page.locator("#marketWire").evaluate(el => el.classList.contains("is-paused"));
-                  if (!paused) report.failures.push(`${viewport.name}/${theme}: Market Wire pause control did not pause motion`);
-                }
-                const tickerItem = page.locator("#marketWire .market-wire-set:first-child button[data-wire-action='inspect']").first();
-                if (await tickerItem.count() !== 1) {
-                  report.failures.push(`${viewport.name}/${theme}: Market Wire does not expose an accessible inspect action`);
-                } else {
-                  const tickerTitle = (await tickerItem.locator(".wire-title").innerText()).trim();
-                  await tickerItem.click();
-                  const opened = await page.waitForFunction((wanted) => {
-                    const main = document.querySelector("#main");
-                    const heading = document.querySelector("#marketDetail h2");
-                    return main?.dataset.page === "app" && heading?.innerText.trim() === wanted;
-                  }, tickerTitle, { timeout: 15000 }).then(() => true).catch(() => false);
-                  if (!opened) report.failures.push(`${viewport.name}/${theme}: clicking a Market Wire item did not open the matching record inspector`);
-                  // This explicit pause is for stable click automation; do not leak paused state into the next theme.
-                  const pauseStateAfterInspect = await page.locator("#marketWire").evaluate(el => el.classList.contains("is-paused"));
-                  if (pauseStateAfterInspect) await page.locator("#marketWire button[data-wire-action='pause']").click();
-                  const resetPausedState = await page.locator("#marketWire").evaluate(el => el.classList.contains("is-paused"));
-                  const resetPressedState = await page.locator('#marketWire button[data-wire-action="pause"]').getAttribute("aria-pressed");
-                  if (resetPausedState || resetPressedState === "true") report.failures.push(`${viewport.name}/${theme}: ticker remained paused after interaction QA cleanup`);
+                  const animation = await homeTape.locator(".signal-ticker-track").evaluate(el => getComputedStyle(el).animationName);
+                  const items = homeTape.locator(".signal-ticker-set:not([aria-hidden="true"]) .market-tape-item");
+                  const count = await items.count();
+                  const avatars = await items.locator(".market-avatar").count();
+                  if (animation !== "signalTickerRun") report.failures.push(`${viewport.name}/${theme}: home Market Tape stopped after route navigation`);
+                  if (count < 1 || avatars !== count) report.failures.push(`${viewport.name}/${theme}: home Market Tape is missing per-market avatars`);
                 }
               }
               if (metrics.marketFeedStatus !== "live") report.warnings.push(`${viewport.name}/${theme}/${route}: live API status was ${metrics.marketFeedStatus}; check CORS/API availability`);
