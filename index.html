@@ -176,23 +176,23 @@ input[type="range"]{padding:0!important;border:0!important;background:transparen
 .optionrow strong{display:block;font-size:15px;font-weight:650;line-height:1.5}
 .optionrow small{display:block;margin-top:4px;color:var(--muted);font-size:13px;line-height:1.7}
 .optionprob{font-size:26px;font-weight:600;letter-spacing:-.055em;text-align:right}
-.site-footer{margin-top:70px;padding-top:25px;border-top:1px solid var(--line)}
-.site-footer-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:13px}
-.site-footer-heading .eyebrow{color:var(--muted);font-size:10px;letter-spacing:.14em}
-.site-footer-count{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;color:var(--dim)}
-.interface-nav{display:flex;flex-wrap:wrap;align-items:center;gap:3px 25px;padding:14px 0 17px;border-block:1px solid var(--line)}
-.interface-link{display:inline-flex;align-items:baseline;gap:8px;min-height:38px;padding:9px 0;color:var(--muted);white-space:nowrap;transition:color .16s}
+.site-footer{
+  max-width:1760px;width:100%;margin:0 auto;padding:30px clamp(24px,5vw,82px) 22px;
+  border-top:1px solid var(--line);background:var(--bg);
+}
+.site-footer-inner{display:grid;grid-template-columns:minmax(180px,.75fr) minmax(0,2fr);align-items:center;gap:34px}
+.footer-brand-lockup{display:inline-flex;align-items:center;gap:9px}
+.footer-brand-lockup img{width:27px;height:27px;object-fit:contain;display:block}
+.footer-brand-lockup .wordmark{font-size:24px}
+.footer-tagline{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+.interface-nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:7px 24px;padding:0;border:0}
+.interface-link{display:inline-flex;align-items:center;min-height:38px;padding:7px 0;color:var(--muted);font-size:13px;font-weight:600;white-space:nowrap;transition:color .16s}
 .interface-link:hover{color:var(--text)}
-.interface-link-num{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--dim);letter-spacing:.02em}
-.interface-link-label{font-family:"Satoshi",sans-serif;font-size:13px;font-weight:650;letter-spacing:-.01em}
-.interface-link-arrow{font-size:11px;color:var(--dim);transition:transform .16s,color .16s}
-.interface-link:hover .interface-link-arrow{transform:translate(2px,-2px);color:var(--violet)}
-.interface-link.current{color:var(--text)}
-.interface-link.current .interface-link-num{color:var(--violet)}
-.interface-link.current .interface-link-label{text-decoration:underline;text-decoration-color:var(--violet);text-decoration-thickness:2px;text-underline-offset:6px}
+.interface-link.current{color:var(--text);text-decoration:underline;text-decoration-color:var(--violet);text-decoration-thickness:2px;text-underline-offset:7px}
 .interface-link:focus-visible{outline-offset:2px}
-.foot{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px 22px;margin-top:15px;padding:0 0 3px;border-top:0;color:var(--dim);font-size:11px;line-height:1.7}
-.foot span:last-child{max-width:70ch}
+.site-footer-bottom{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px 22px;margin-top:22px;padding-top:15px;border-top:1px solid var(--line);color:var(--dim);font-size:11px;line-height:1.7}
+.site-footer-bottom span:last-child{max-width:72ch}
+
 body[data-theme="light"]{
   color-scheme:light;--bg:#f7f7f9;--surface:#fff;--panel:#fff;--panel-raised:#f2f0f7;
   --line:#dfdde7;--text:#201b2b;--muted:#5c566b;--dim:#756f83;
@@ -223,12 +223,10 @@ body[data-theme="light"] td{border-bottom-color:#e9e6ef;color:#292333}
 body[data-theme="light"] tbody tr:hover{background:#6c2bd908}
 body[data-theme="light"] .field select,body[data-theme="light"] .field input{background:#fff;border-color:#d9d6e2;color:var(--text)}
 body[data-theme="light"] .notice{background:#fff9ed;border-color:#efdfbd;color:#735927}
-body[data-theme="light"] .site-footer{border-color:var(--line)}
-body[data-theme="light"] .interface-nav{border-color:var(--line)}
+body[data-theme="light"] .site-footer{border-color:var(--line);background:var(--bg)}
+body[data-theme="light"] .site-footer-bottom{border-color:var(--line)}
 body[data-theme="light"] .interface-link{color:#5c566b}
-body[data-theme="light"] .interface-link:hover{color:#201b2b}
-body[data-theme="light"] .interface-link.current{color:#201b2b}
-body[data-theme="light"] .interface-link.current .interface-link-num{color:#5125a8}
+body[data-theme="light"] .interface-link:hover,body[data-theme="light"] .interface-link.current{color:#201b2b}
 @media(max-width:1200px){
  .layout{grid-template-columns:215px minmax(0,1fr)}
  .main{padding-inline:clamp(24px,3.5vw,46px)}
@@ -291,16 +289,16 @@ body[data-theme="light"] .interface-link.current .interface-link-num{color:#5125
  .optionrow strong{font-size:14px}
  .optionrow small{font-size:12px;line-height:1.6}
  .optionprob,.outcome{font-size:22px}
- .site-footer{margin-top:47px;padding-top:19px}
- .site-footer-heading{margin-bottom:8px}
- .interface-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;padding:8px 0 10px}
- .interface-link{min-width:0;white-space:normal;gap:7px;min-height:40px;padding:11px 0}
+ .site-footer{padding:24px 17px 18px}
+ .site-footer-inner{grid-template-columns:1fr;gap:20px}
+ .footer-brand-lockup .wordmark{font-size:22px}
+ .footer-tagline{margin-top:5px;font-size:12px}
+ .interface-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:start;gap:0 18px;padding:8px 0}
+ .interface-link{min-width:0;min-height:40px;white-space:normal;padding:10px 0;font-size:12px}
  .interface-link:nth-child(-n+4){border-bottom:1px solid var(--line)}
- .interface-link-label{font-size:12px}
- .interface-link-arrow{margin-left:auto}
+ .site-footer-bottom{display:block;margin-top:12px;padding-top:12px;font-size:10px}
+ .site-footer-bottom span{display:block;margin-top:5px}
  body[data-theme="light"] .interface-link:nth-child(-n+4){border-bottom-color:var(--line)}
- .foot{display:block;margin-top:18px;font-size:10px;line-height:1.7}
- .foot span{display:block;margin-top:5px}
 }
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
@@ -330,6 +328,7 @@ body[data-theme="light"] .interface-link.current .interface-link-num{color:#5125
 </aside>
 <main class="main" id="main" tabindex="-1"></main>
 </div>
+<footer class="site-footer" id="siteFooter" aria-label="Site footer"></footer>
 </div>
 <script>
 const state={page:"home",filter:"All markets",search:"",metric:"Treasury runway",riskA:25,riskB:60,pass:true};
@@ -418,16 +417,18 @@ function render(){
   const caret = focusedId ? document.activeElement.selectionStart : null;
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===state.page));
   const views={home:renderHome,app:renderApp,deep:renderDeep,futarchy:renderFutarchy,opportunity:renderOpportunity,risk:renderRisk};
-  const interfaceItems=[["home","01","Overview"],["app","02","Market explorer"],["deep","03","Deep forecasts"],["futarchy","04","Futarchy"],["opportunity","05","Opportunities"],["risk","06","Risk pricing"]];
-  const suiteNav=`<footer class="site-footer"><div class="site-footer-heading"><span class="eyebrow">Explore the interfaces</span><span class="site-footer-count">SEER / 06</span></div><nav class="interface-nav" aria-label="Seer interfaces">${interfaceItems.map(([key,n,title])=>`<a class="interface-link ${key===state.page?"current":""}" href="#/${key}" data-suite-page="${key}" ${key===state.page?'aria-current="page"':""}><span class="interface-link-num">${n}</span><span class="interface-link-label">${title}</span><span class="interface-link-arrow" aria-hidden="true">↗</span></a>`).join("")}</nav><div class="foot"><span>SEER SIX / INTERFACE CONCEPT</span><span>${marketFeed.status==="live"?"Seer API market records · specialist scenarios remain illustrative":"Demo fallback until live market data is available"} · Not financial or governance advice</span></div></footer>`;
-  document.getElementById("main").innerHTML=views[state.page]()+suiteNav;
+  const interfaceItems=[["home","Overview"],["app","Market explorer"],["deep","Deep forecasts"],["futarchy","Futarchy"],["opportunity","Opportunities"],["risk","Risk pricing"]];
+  const logoSrc=document.querySelector(".top .logo img")?.getAttribute("src")||"";
+  const footerMarkup=`<div class="site-footer-inner"><div class="footer-brand"><a class="footer-brand-lockup" href="#/home" aria-label="Seer Six home" onclick="go('home');return false"><img src="${logoSrc}" alt=""><span class="wordmark">seer</span></a><p class="footer-tagline">Every opinion has a price.<br>One protocol, six decision interfaces.</p></div><nav class="interface-nav" aria-label="Seer interfaces">${interfaceItems.map(([key,title])=>`<a class="interface-link ${key===state.page?"current":""}" href="#/${key}" data-suite-page="${key}" ${key===state.page?'aria-current="page"':""}>${title}</a>`).join("")}</nav></div><div class="site-footer-bottom"><span>SEER SIX / INTERFACE CONCEPT</span><span>${marketFeed.status==="live"?"Seer API market records · specialist scenarios remain illustrative":"Demo fallback until live market data is available"} · Not financial or governance advice</span></div>`;
+  document.getElementById("main").innerHTML=views[state.page]();
+  document.getElementById("siteFooter").innerHTML=footerMarkup;
   if(focusedId){
     const next=document.getElementById(focusedId);
     if(next){next.focus();if(typeof caret==="number")next.setSelectionRange(caret,caret);}
   }
 }
 document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-page]");if(b)go(b.dataset.page)});
-document.getElementById("main").addEventListener("click",e=>{const b=e.target.closest("a[data-suite-page]");if(b){e.preventDefault();go(b.dataset.suitePage)}});
+document.getElementById("siteFooter").addEventListener("click",e=>{const b=e.target.closest("a[data-suite-page]");if(b){e.preventDefault();go(b.dataset.suitePage)}});
 render();
 loadLiveMarkets();
 
