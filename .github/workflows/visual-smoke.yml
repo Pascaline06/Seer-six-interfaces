@@ -114,7 +114,7 @@ jobs:
                   monoFontLoaded: document.fonts.check('500 14px "IBM Plex Mono"'),
                   headingAlign: heading ? getComputedStyle(heading).textAlign : "missing",
                   introAlign: main?.querySelector(".intro") ? getComputedStyle(main.querySelector(".intro")).textAlign : "missing",
-                  nonLeftAlignedCopy: [...(main?.querySelectorAll(".sectionhead h2,.sectionhead p,.panel p,.evidenceitem,.crumb,.market h3,.notice") || [])].filter(el => getComputedStyle(el).textAlign !== "left").map(el => ({selector:el.tagName.toLowerCase()+"."+el.className,text:(el.innerText||"").slice(0,60),align:getComputedStyle(el).textAlign})),
+                  nonLeftAlignedCopy: [...(main?.querySelectorAll(".sectionhead h2,.sectionhead p,.panel p,.evidenceitem,.crumb,.market h3,.notice") || [])].filter(el => !["left","start"].includes(getComputedStyle(el).textAlign)).map(el => ({selector:el.tagName.toLowerCase()+"."+el.className,text:(el.innerText||"").slice(0,60),align:getComputedStyle(el).textAlign})),
                   viewportWidth: window.innerWidth,
                   documentWidth: Math.max(root.scrollWidth, body.scrollWidth),
                   horizontalOverflow: Math.max(root.scrollWidth, body.scrollWidth) > window.innerWidth + 1,
@@ -132,7 +132,7 @@ jobs:
               if (metrics.activeRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: active navigation route was ${metrics.activeRoute}`);
               if (metrics.theme !== theme) report.failures.push(`${viewport.name}/${theme}/${route}: theme state mismatch (${metrics.theme})`);
               if (!metrics.heading) report.failures.push(`${viewport.name}/${theme}/${route}: missing page heading`);
-              if (metrics.headingAlign !== "left" || (metrics.introAlign !== "left" && metrics.introAlign !== "missing") || metrics.nonLeftAlignedCopy.length) report.failures.push("Copy alignment issue on " + viewport.name + "/" + theme + "/" + route + ": " + JSON.stringify(metrics.nonLeftAlignedCopy));
+              if (!["left","start"].includes(metrics.headingAlign) || (!["left","start"].includes(metrics.introAlign) && metrics.introAlign !== "missing") || metrics.nonLeftAlignedCopy.length) report.failures.push("Copy alignment issue on " + viewport.name + "/" + theme + "/" + route + ": " + JSON.stringify(metrics.nonLeftAlignedCopy));
               if (pageErrors.length) report.failures.push(`${viewport.name}/${theme}/${route}: browser errors: ${pageErrors.join("; ")}`);
               if (!metrics.interLoaded || !metrics.displayFontLoaded || !metrics.monoFontLoaded) report.warnings.push(`${viewport.name}/${theme}/${route}: one or more requested font families did not confirm as loaded`);
               if (metrics.marketFeedStatus !== "live") report.warnings.push(`${viewport.name}/${theme}/${route}: live API status was ${metrics.marketFeedStatus}; check CORS/API availability`);
