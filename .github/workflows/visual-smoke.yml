@@ -366,6 +366,17 @@ jobs:
                 }
               }
               if (route === "app") {
+                // Each Explorer prediction card needs circular Seer-style artwork or the branded fallback.
+                const explorerCards = page.locator("#main .explorer-market-grid .market-record");
+                const explorerCardCount = await explorerCards.count();
+                const cardAvatars = await explorerCards.locator(".market-card-heading .market-avatar").count();
+                if (explorerCardCount > 0 && cardAvatars !== explorerCardCount) {
+                  report.failures.push(viewport.name+"/"+theme+"/app: every prediction card must have circular market artwork or the branded fallback");
+                }
+                const cardTitles = await explorerCards.locator(".market-card-title").count();
+                if (explorerCardCount > 0 && cardTitles !== explorerCardCount) {
+                  report.failures.push(viewport.name+"/"+theme+"/app: prediction titles must sit beside their market artwork");
+                }
                 const compareButtons = page.locator('#main button[data-market-action="compare"]');
                 if (await compareButtons.count() >= 2) {
                   await compareButtons.nth(0).click();
