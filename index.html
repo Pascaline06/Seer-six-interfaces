@@ -644,6 +644,7 @@ function render(){
   }
 }
 document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-page]");if(b)go(b.dataset.page)});
+document.getElementById("main").addEventListener("click",e=>{const b=e.target.closest("button[data-suite-page]");if(b)go(b.dataset.suitePage)});
 render();
 loadLiveMarkets();
 
