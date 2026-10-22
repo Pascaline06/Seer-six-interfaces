@@ -45,7 +45,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("clash-display@400,500,600,700") && html.includes("satoshi@400,500,600,700") && html.includes("JetBrains+Mono:wght@400;500;600;700")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("clash-display@400,500,600,700") && html.includes("satoshi@400,500,600,700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"')) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -121,9 +121,9 @@ jobs:
                   bodyFontLoaded: document.fonts.check('400 15px "Satoshi"'),
                   displayFontLoaded: document.fonts.check('700 32px "Clash Display"'),
                   monoFontLoaded: document.fonts.check('400 14px "JetBrains Mono"'),
-                  interfaceNavCount: main?.querySelectorAll("a[data-suite-page]").length || 0,
-                  interfaceNavTargets: [...(main?.querySelectorAll("a[data-suite-page]") || [])].map(a => a.getAttribute("href")),
-                  currentFooterRoute: main?.querySelector("a[data-suite-page][aria-current=\"page\"]")?.dataset.suitePage || null,
+                  interfaceNavCount: document.querySelectorAll("#siteFooter a[data-suite-page]").length || 0,
+                  interfaceNavTargets: [...document.querySelectorAll("#siteFooter a[data-suite-page]")].map(a => a.getAttribute("href")),
+                  currentFooterRoute: document.querySelector("#siteFooter a[data-suite-page][aria-current=\"page\"]")?.dataset.suitePage || null,
                   headingAlign: heading ? getComputedStyle(heading).textAlign : "missing",
                   introAlign: main?.querySelector(".intro") ? getComputedStyle(main.querySelector(".intro")).textAlign : "missing",
                   nonLeftAlignedCopy: [...(main?.querySelectorAll(".sectionhead h2,.sectionhead p,.panel p,.evidenceitem,.crumb,.market h3,.notice") || [])].filter(el => !["left","start"].includes(getComputedStyle(el).textAlign)).map(el => ({selector:el.tagName.toLowerCase()+"."+el.className,text:(el.innerText||"").slice(0,60),align:getComputedStyle(el).textAlign})),
@@ -149,7 +149,7 @@ jobs:
               if (!metrics.bodyFontLoaded || !metrics.displayFontLoaded || !metrics.monoFontLoaded) report.warnings.push(`${viewport.name}/${theme}/${route}: one or more requested font families did not confirm as loaded`);
               if (metrics.interfaceNavCount !== 6 || metrics.interfaceNavTargets.length !== 6 || metrics.currentFooterRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: footer must show all six directly-accessible routes with the current route marked`);
               const nextRoute = routes[(routes.indexOf(route) + 1) % routes.length];
-              const nextLink = page.locator(`.interface-link[data-suite-page="${nextRoute}"]`);
+              const nextLink = page.locator(`#siteFooter .interface-link[data-suite-page="${nextRoute}"]`);
               await nextLink.click();
               const footerNavigationWorks = await page.locator("#main").getAttribute("data-page") === nextRoute;
               if (!footerNavigationWorks) report.failures.push(`${viewport.name}/${theme}/${route}: footer link did not navigate to ${nextRoute}`);
