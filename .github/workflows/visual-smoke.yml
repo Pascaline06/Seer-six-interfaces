@@ -42,7 +42,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes("function renderLiquidityLandscape") && html.includes("Liquidity landscape") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:hover .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes('id="getAppButton"') && html.includes("top-app-cta") && html.includes("function renderLiquidityLandscape") && html.includes("Liquidity landscape") && html.includes("landscape-rail is-unreported") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:hover .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -157,6 +157,10 @@ jobs:
                   activeRoute: active,
                   marketFeedStatus: /Live Seer record|live records|Data status\s*Connected/.test(document.body.innerText) ? "live" : /Demo fallback|live endpoint unavailable|Data status\s*Fallback/.test(document.body.innerText) ? "fallback" : "not-visible",
                   mainWidth: Math.round(main?.getBoundingClientRect().width || 0),
+                  getAppButtonVisible: (() => { const el = document.querySelector("#getAppButton"); if (!el) return false; const r = el.getBoundingClientRect(); const s = getComputedStyle(el); return r.width > 0 && r.height > 0 && s.display !== "none" && s.visibility !== "hidden"; })(),
+                  getAppButtonTarget: document.querySelector("#getAppButton")?.getAttribute("href") || null,
+                  marketWireHasGradient: /linear-gradient/i.test(getComputedStyle(document.querySelector("#marketWire") || body).backgroundImage),
+                  signalTickerHasGradient: /linear-gradient/i.test(getComputedStyle(document.querySelector("#main .signal-ticker") || body).backgroundImage),
                 };
               });
 
@@ -211,6 +215,9 @@ jobs:
               const result = { viewport: viewport.name, theme, route, screenshot, ...metrics, pageErrors: [...pageErrors] };
               report.results.push(result);
               if (metrics.horizontalOverflow) report.failures.push(`${viewport.name}/${route}: horizontal overflow at ${metrics.viewportWidth}px (document ${metrics.documentWidth}px)`);
+              if (!metrics.getAppButtonVisible || metrics.getAppButtonTarget !== "#/app") report.failures.push(viewport.name+"/"+theme+"/"+route+": Get the app CTA is missing, hidden, or targets the wrong route");
+              if (!metrics.marketWireHasGradient) report.failures.push(viewport.name+"/"+theme+"/"+route+": Market Wire lost its themed surface treatment");
+              if (route === "home" && !metrics.signalTickerHasGradient) report.failures.push(viewport.name+"/"+theme+"/home: source briefing ticker lost its themed surface treatment");
               if (metrics.activeRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: active navigation route was ${metrics.activeRoute}`);
               if (metrics.theme !== theme) report.failures.push(`${viewport.name}/${theme}/${route}: theme state mismatch (${metrics.theme})`);
               if (!metrics.heading) report.failures.push(`${viewport.name}/${theme}/${route}: missing page heading`);
@@ -438,6 +445,41 @@ jobs:
                       }
                     }
                   }
+                }
+              }
+
+              if (route === "home") {
+                const getApp = page.locator("#getAppButton");
+                if (await getApp.count() !== 1) {
+                  report.failures.push(viewport.name+"/"+theme+"/home: Get the app CTA is missing");
+                } else {
+                  await getApp.click();
+                  const appOpened = await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "app" && !!document.querySelector("#main h1"), null, { timeout: 8000 }).then(() => true).catch(() => false);
+                  if (!appOpened) {
+                    report.failures.push(viewport.name+"/"+theme+"/home: Get the app CTA did not open Market Explorer");
+                  } else {
+                    await page.locator('#nav button[data-page="home"]').click();
+                    const returnedHome = await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "home", null, { timeout: 8000 }).then(() => true).catch(() => false);
+                    if (!returnedHome) report.failures.push(viewport.name+"/"+theme+"/home: navigation could not return from Market Explorer");
+                  }
+                }
+              }
+
+              if (route === "deep") {
+                const landscapeRows = page.locator(".liquidity-landscape .landscape-row");
+                const rowCount = await landscapeRows.count();
+                if (metrics.marketFeedStatus === "live" && rowCount === 0) {
+                  report.failures.push(viewport.name+"/"+theme+"/deep: live Deep Forecasts data did not populate the liquidity landscape");
+                } else if (rowCount > 0) {
+                  const reportedLabels = await page.locator(".liquidity-landscape .landscape-meta b").allInnerTexts();
+                  const knownBars = page.locator(".liquidity-landscape .landscape-rail:not(.is-unreported) > i");
+                  const widths = await knownBars.evaluateAll(nodes => nodes.map(node => Number.parseFloat(node.style.width)).filter(Number.isFinite));
+                  if (reportedLabels.some(label => label.trim().startsWith("$")) && (!widths.length || !widths.some(width => width > 0) || Math.max(...widths) < 99.5)) {
+                    report.failures.push(viewport.name+"/"+theme+"/deep: reported liquidity did not render as correctly normalized bars");
+                  }
+                  const unavailable = await page.locator(".liquidity-landscape .landscape-rail.is-unreported").count();
+                  const unavailableLabels = reportedLabels.filter(label => label.trim() === "Not reported").length;
+                  if (unavailable !== unavailableLabels) report.failures.push(viewport.name+"/"+theme+"/deep: unreported liquidity was not represented honestly");
                 }
               }
 

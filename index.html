@@ -614,34 +614,52 @@ body[data-theme="light"] .lab-metric{background:#ffffffb8}
 @media(prefers-reduced-motion:reduce){.lab-side-button,.lab-metric{transition:none!important}}
 
 
-/* VISUAL RESTORE — keep the six interfaces on one deliberate grid */
+/* VISUAL SYSTEM — one shared grid, token-driven surfaces and restrained data motion */
 .main{max-width:1240px;min-width:0;padding:30px clamp(18px,3vw,40px) 54px}
 .main section,.main .page-section{min-width:0}
 .page-heading{margin-bottom:22px}
 .panel,.card,.surface{min-width:0}
 .grid,.panel-grid,.metric-grid{align-items:stretch}
-.market-wire{grid-template-columns:142px minmax(0,1fr) 218px;margin:0 0 18px;border:1px solid #dedfe3;border-radius:10px;background:#fff;color:#17191d;box-shadow:0 5px 18px rgba(15,20,30,.07)}
-.market-wire-head{border-right:1px solid #e5e7eb}
-.market-wire-brand,.market-wire .wire-title,.market-wire .wire-price,.market-wire .wire-metric,.market-wire .wire-chain,.market-wire .market-wire-meta,.market-wire .market-wire-status{color:#17191d}
-.market-wire .wire-item{color:#17191d;border-right-color:#e5e7eb;background:#fff}
-.market-wire .wire-item:hover{background:#f1f3f5}
-.market-wire .wire-item-updated{background:#f4f7fa}
-.market-wire .wire-status-led,.market-wire .live,.market-wire .wire-live-dot{background:#16834a;box-shadow:0 0 0 3px #16834a18}
-.market-wire .market-wire-head small,.market-wire .market-wire-foot,.market-wire .wire-empty{color:#5f6672}
-.market-wire .market-wire-head{background:#fff}
-.market-wire .market-wire-meta{border-left:1px solid #e5e7eb;background:#fafbfc}
-.market-wire .wire-separator,.market-wire .market-wire-divider{border-color:#e5e7eb}
-.signal-ticker{background:#fff;color:#17191d;border-bottom:1px solid #e2e4e8}
-.signal-ticker-label{background:#f3f4f6;color:#17191d;border-right:1px solid #e2e4e8}
-.signal-ticker-label small,.signal-ticker-detail{color:#5f6672}
-.signal-ticker-item{border-right-color:#e2e4e8}
-.signal-ticker-kind{color:#5c39b8}
-.signal-ticker-item strong{color:#17191d}
-.signal-ticker-live-dot{background:#16834a;box-shadow:0 0 9px #16834a66}
+
+/* A proper launch CTA: it opens this build's live market explorer. */
+.top-app-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:34px;padding:7px 13px;border:1px solid rgba(183,160,255,.42);border-radius:999px;background:linear-gradient(135deg,rgba(139,92,246,.24),rgba(139,92,246,.09));color:var(--text);font:600 11px/1 "DM Sans",sans-serif;letter-spacing:.01em;white-space:nowrap;box-shadow:inset 0 1px rgba(255,255,255,.07);transition:background .18s,border-color .18s,transform .18s,box-shadow .18s}
+.top-app-cta span{color:var(--violet);font-size:13px}
+.top-app-cta:hover{border-color:var(--violet);background:linear-gradient(135deg,rgba(139,92,246,.34),rgba(139,92,246,.15));transform:translateY(-1px);box-shadow:0 7px 20px rgba(70,42,130,.18)}
+body[data-theme="light"] .top-app-cta{background:linear-gradient(135deg,#eee7ff,#fff);border-color:#d3c3fb;color:#5125a8;box-shadow:inset 0 1px #fff}
+body[data-theme="light"] .top-app-cta span{color:#6531c9}
+@media(max-width:560px){.top-app-cta{min-height:31px;padding:7px 9px;gap:5px;font-size:10px}.topright .pill{display:none}}
+
+/* Market Wire uses the same surfaces and contrast rules as the rest of the product. */
+.market-wire{grid-template-columns:142px minmax(0,1fr) 218px;margin:0 0 18px;border:1px solid color-mix(in srgb,var(--violet) 24%,var(--line));border-radius:12px;background:linear-gradient(105deg,color-mix(in srgb,var(--violet-strong) 13%,var(--panel)),var(--panel) 38%,color-mix(in srgb,var(--green) 4%,var(--panel)));color:var(--text);box-shadow:inset 0 1px rgba(255,255,255,.035),0 10px 26px rgba(0,0,0,.11)}
+.market-wire-head{border-right:1px solid var(--line);background:rgba(139,92,246,.055)}
+.market-wire-brand,.market-wire .wire-title,.market-wire .wire-price,.market-wire .wire-metric,.market-wire .wire-chain,.market-wire .market-wire-meta,.market-wire .market-wire-status{color:var(--text)}
+.market-wire .wire-title{color:var(--muted)}
+.market-wire .wire-price{color:var(--text)}
+.market-wire .wire-metric{color:var(--dim)}
+.market-wire .wire-chain{color:var(--violet)}
+.market-wire .wire-item{color:var(--text);border-right-color:var(--line);background:transparent}
+.market-wire .wire-item:hover{background:rgba(183,160,255,.08)}
+.market-wire .wire-item-updated{background:rgba(183,160,255,.13)}
+.market-wire .wire-status-led,.market-wire .live,.market-wire .wire-live-dot{background:var(--green);box-shadow:0 0 0 3px rgba(119,221,176,.1),0 0 10px rgba(119,221,176,.23)}
+.market-wire .market-wire-head small,.market-wire .market-wire-foot,.market-wire .wire-empty{color:var(--dim)}
+.market-wire .market-wire-meta{border-left:1px solid var(--line);background:color-mix(in srgb,var(--panel-raised) 72%,transparent)}
+.market-wire .wire-separator,.market-wire .market-wire-divider{border-color:var(--line)}
+
+/* The homepage briefing shares the same tinted, quiet editorial surface. */
+.signal-ticker{background:linear-gradient(90deg,rgba(139,92,246,.13),var(--panel) 48%,rgba(119,221,176,.06));color:var(--text);border-bottom:1px solid var(--line)}
+.signal-ticker-label{background:rgba(139,92,246,.11);color:var(--text);border-right:1px solid var(--line)}
+.signal-ticker-label small,.signal-ticker-detail{color:var(--dim)}
+.signal-ticker-item{border-right-color:var(--line)}
+.signal-ticker-kind{color:var(--violet)}
+.signal-ticker-item strong{color:var(--text)}
+.signal-ticker-live-dot{background:var(--green);box-shadow:0 0 10px rgba(119,221,176,.5)}
 .forecast-live-row{padding:13px 0;gap:11px}
 .forecast-live-copy strong{color:var(--text)}
-@media(max-width:900px){.main{padding:24px 20px 44px}.market-wire{grid-template-columns:120px minmax(0,1fr)}.market-wire-meta,.market-wire-side{display:none}}
-@media(max-width:600px){.main{padding:18px 14px 36px}.market-wire{grid-template-columns:1fr}.market-wire-head{padding:10px 13px;border-right:0;border-bottom:1px solid #e5e7eb}.market-wire .market-wire-meta{display:none}.signal-ticker{grid-template-columns:1fr}.signal-ticker-label{padding:8px 12px;border-right:0;border-bottom:1px solid #e2e4e8}.forecast-live-row{padding:11px 0}}
+
+/* Breakpoints preserve a real grid instead of letting the side rail collide with the tape. */
+@media(max-width:1100px){.main{padding:24px 20px 44px}.market-wire{grid-template-columns:125px minmax(0,1fr)}.market-wire-tools{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;border-left:0;border-top:1px solid var(--line);padding:8px 12px}.market-wire-meta,.market-wire-side{display:none}.wire-item{min-height:57px;padding:9px 13px}}
+@media(max-width:850px){.main{padding-top:34px}.market-wire{grid-template-columns:120px minmax(0,1fr)}}
+@media(max-width:600px){.main{padding:18px 14px 36px}.market-wire{grid-template-columns:1fr;margin-bottom:14px}.market-wire-head{padding:10px 13px;border-right:0;border-bottom:1px solid var(--line)}.market-wire-viewport{padding:0 4px}.market-wire-tools{gap:10px;flex-wrap:wrap}.market-wire .market-wire-meta{display:none}.signal-ticker{grid-template-columns:1fr}.signal-ticker-label{padding:8px 12px;border-right:0;border-bottom:1px solid var(--line)}.forecast-live-row{padding:11px 0}}
 
 
 /* Deep Forecasts: restrained source-backed price/liquidity comparison */
@@ -656,6 +674,7 @@ body[data-theme="light"] .lab-metric{background:#ffffffb8}
 .landscape-label strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 13px/1.4 "DM Sans",sans-serif}
 .landscape-price{font:600 14px "JetBrains Mono",monospace;color:var(--violet)}
 .landscape-rail{height:8px;margin:10px 0 8px 40px;border-radius:99px;background:var(--line);overflow:hidden}
+.landscape-rail.is-unreported{background:repeating-linear-gradient(90deg,var(--line) 0 4px,transparent 4px 8px)}
 .landscape-rail i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--violet-strong),var(--violet));transition:width .35s ease}
 .landscape-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-left:40px;font:9px "JetBrains Mono",monospace;color:var(--dim);letter-spacing:.03em}
 .landscape-meta b{color:var(--muted);font-weight:500}
@@ -669,7 +688,7 @@ body[data-theme="light"] .lab-metric{background:#ffffffb8}
 <div class="shell">
 <header class="top">
 <a class="brand" href="#/home" aria-label="Seer Six home" onclick="go('home');return false"><span class="logo" aria-hidden="true"><img alt="" src="data:image/png;base64,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"></span><span class="wordmark">seer</span><span class="brand-note">/ six interfaces</span></a>
-<div class="topright"><span class="chain">Every opinion has a price</span><button class="theme-toggle" id="themeToggle" type="button" onclick="toggleTheme()" aria-label="Switch to light theme" title="Switch theme">☼ <span>Light</span></button><span class="pill"><i class="live"></i>Preview environment</span></div>
+<div class="topright"><span class="chain">Every opinion has a price</span><button class="theme-toggle" id="themeToggle" type="button" onclick="toggleTheme()" aria-label="Switch to light theme" title="Switch theme">☼ <span>Light</span></button><span class="pill"><i class="live"></i>Preview environment</span><a class="top-app-cta" id="getAppButton" href="#/app" onclick="go('app');return false" aria-label="Get the app: open Market Explorer">Get the app <span aria-hidden="true">↗</span></a></div>
 </header>
 <div id="marketWire" class="market-wire is-loading" aria-label="Seer market wire"></div>
 <div class="layout">
@@ -1080,16 +1099,40 @@ async function loadExplorerMarkets(){
  if(state.page==="app")render();
 }const forecasts=[{name:"Submission A · Open-source tooling",p:72,low:60,high:81,signal:"Strongest forecast"},{name:"Submission B · Public-goods analytics",p:61,low:47,high:72,signal:"Competitive"},{name:"Submission C · Developer education",p:48,low:34,high:62,signal:"High uncertainty"},{name:"Submission D · Infrastructure research",p:39,low:25,high:54,signal:"High uncertainty"}];
 function renderLiquidityLandscape(records,live){
- const rows=(records||[]).filter(m=>m&&m.p!==null&&m.p!==undefined).map(m=>{
-  const raw=String(m.depth||"").replace(/[$,\\s]/g,"").toUpperCase();
-  const match=raw.match(/^([0-9]*\\.?[0-9]+)([KMB])?$/);
-  const multiplier=match?({K:1e3,M:1e6,B:1e9}[match[2]]||1):0;
-  return {m,p:Number(m.p),liquidity:match?Number(match[1])*multiplier:0,liquidityLabel:m.depth||"Not reported"};
- }).sort((a,b)=>b.liquidity-a.liquidity).slice(0,6);
+ const rows=(records||[])
+  .filter(m=>m&&m.p!==null&&m.p!==undefined&&Number.isFinite(Number(m.p)))
+  .map(m=>{
+   // Prefer the exact numeric value returned by Seer; parse compact labels only as a fallback.
+   const exact=m.liquidityUSD;
+   const hasExact=exact!==null&&exact!==undefined&&Number.isFinite(Number(exact))&&Number(exact)>=0;
+   const raw=String(m.depth||"").replace(/[$,\s]/g,"").toUpperCase();
+   const match=raw.match(/^([0-9]+(?:\.[0-9]+)?)([KMB])?$/);
+   const multiplier=match?({K:1e3,M:1e6,B:1e9}[match[2]]||1):1;
+   const parsed=match?Number(match[1])*multiplier:null;
+   const liquidity=hasExact?Number(exact):parsed;
+   const rawLabel=String(m.depth||"").trim();
+   const hasRawLabel=rawLabel!==""&&rawLabel!=="—"&&rawLabel.toLowerCase()!=="not reported";
+   const liquidityLabel=liquidity===null?"Not reported":(hasRawLabel?rawLabel:compactUSD(liquidity));
+   return {m,p:Number(m.p),liquidity,liquidityLabel};
+  })
+  .sort((a,b)=>{
+   if(a.liquidity===null)return b.liquidity===null?0:1;
+   if(b.liquidity===null)return -1;
+   return b.liquidity-a.liquidity;
+  })
+  .slice(0,6);
  if(!rows.length)return '<section class="panel liquidity-landscape"><div class="sectionhead"><div><h2>Liquidity landscape</h2><p>No priced records available for comparison.</p></div></div><div class="notice">The landscape appears when the source returns priced records.</div></section>';
- const maxL=Math.max(1,...rows.map(x=>x.liquidity));
- const bars=rows.map((x,i)=>'<div class="landscape-row"><div class="landscape-label"><span class="landscape-index">0'+(i+1)+'</span><strong title="'+htmlEscape(x.m.title)+'">'+htmlEscape(x.m.title)+'</strong><span class="landscape-price">'+Math.round(x.p)+'%</span></div><div class="landscape-rail" aria-label="Reported liquidity '+htmlEscape(x.liquidityLabel)+'"><i style="width:'+Math.max(1,Math.min(100,x.liquidity/maxL*100))+'%"></i></div><div class="landscape-meta"><span>LIQUIDITY <b>'+htmlEscape(x.liquidityLabel)+'</b></span><span>QUOTE <b>'+Math.round(x.p)+'%</b></span></div></div>').join("");
- return '<section class="panel liquidity-landscape"><div class="sectionhead"><div><div class="category">PRICE × REPORTED LIQUIDITY</div><h2>Liquidity landscape</h2><p>Compare quoted price with reported liquidity across returned records.</p></div><span class="pill">'+(live?"Source response":"Demo sample")+'</span></div><div class="landscape-legend"><span><i class="landscape-dot"></i>Liquidity · relative to this view</span><span>Price shown separately</span></div><div class="landscape-list">'+bars+'</div><p class="muted specialist-source-note">Bars compare reported liquidity in this sample; unreported values remain unavailable, not zero. This is a snapshot comparison, not historical movement, executable depth, or a trade estimate.</p></section>';
+ const reported=rows.filter(x=>x.liquidity!==null).map(x=>x.liquidity);
+ const maxL=Math.max(0,...reported);
+ const bars=rows.map((x,i)=>{
+  const known=x.liquidity!==null;
+  const width=known&&maxL>0?Math.max(0,Math.min(100,(x.liquidity/maxL)*100)):0;
+  const railClass=known?"landscape-rail":"landscape-rail is-unreported";
+  const railLabel=known?"Reported liquidity "+x.liquidityLabel:"Reported liquidity unavailable";
+  const rail=known?'<i aria-hidden="true" style="width:'+width.toFixed(2)+'%"></i>':"";
+  return '<div class="landscape-row"><div class="landscape-label"><span class="landscape-index">0'+(i+1)+'</span><strong title="'+htmlEscape(x.m.title)+'">'+htmlEscape(x.m.title)+'</strong><span class="landscape-price">'+Math.round(x.p)+'%</span></div><div class="'+railClass+'" role="img" aria-label="'+htmlEscape(railLabel)+'">'+rail+'</div><div class="landscape-meta"><span>LIQUIDITY <b>'+htmlEscape(x.liquidityLabel)+'</b></span><span>QUOTE <b>'+Math.round(x.p)+'%</b></span></div></div>';
+ }).join("");
+ return '<section class="panel liquidity-landscape"><div class="sectionhead"><div><div class="category">PRICE × REPORTED LIQUIDITY</div><h2>Liquidity landscape</h2><p>Compare quoted price with reported liquidity across returned records.</p></div><span class="pill">'+(live?"Source response":"Demo sample")+'</span></div><div class="landscape-legend"><span><i class="landscape-dot"></i>Liquidity · normalized to the largest reported value</span><span>Price shown separately</span></div><div class="landscape-list">'+bars+'</div><p class="muted specialist-source-note">Bars are scaled to the largest reported liquidity in this view. Unreported values stay visibly unreported, not zero. This is a snapshot comparison—not historical movement, executable depth, or a trade estimate.</p></section>';
 }
 function renderDeep(){
  const records=sortedSpecialistMarkets(markets).slice(0,6);
