@@ -215,7 +215,7 @@ jobs:
               const result = { viewport: viewport.name, theme, route, screenshot, ...metrics, pageErrors: [...pageErrors] };
               report.results.push(result);
               if (metrics.horizontalOverflow) report.failures.push(`${viewport.name}/${route}: horizontal overflow at ${metrics.viewportWidth}px (document ${metrics.documentWidth}px)`);
-              if (!metrics.getAppButtonVisible || metrics.getAppButtonTarget !== "#/app") report.failures.push(viewport.name+"/"+theme+"/"+route+": Get the app CTA is missing, hidden, or targets the wrong route");
+              if (!metrics.getAppButtonVisible || metrics.getAppButtonTarget !== "https://app.seer.pm/") report.failures.push(viewport.name+"/"+theme+"/"+route+": Get the app CTA is missing, hidden, or targets the wrong route");
               if (!metrics.marketWireHasGradient) report.failures.push(viewport.name+"/"+theme+"/"+route+": Market Wire lost its themed surface treatment");
               if (route === "home" && !metrics.signalTickerHasGradient) report.failures.push(viewport.name+"/"+theme+"/home: source briefing ticker lost its themed surface treatment");
               if (metrics.activeRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: active navigation route was ${metrics.activeRoute}`);
@@ -453,14 +453,24 @@ jobs:
                 if (await getApp.count() !== 1) {
                   report.failures.push(viewport.name+"/"+theme+"/home: Get the app CTA is missing");
                 } else {
-                  await getApp.click();
-                  const appOpened = await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "app" && !!document.querySelector("#main h1"), null, { timeout: 8000 }).then(() => true).catch(() => false);
-                  if (!appOpened) {
-                    report.failures.push(viewport.name+"/"+theme+"/home: Get the app CTA did not open Market Explorer");
+                  const destination = await getApp.getAttribute("href");
+                  const target = await getApp.getAttribute("target");
+                  if (destination !== "https://app.seer.pm/" || target !== "_blank") {
+                    report.failures.push(viewport.name+"/"+theme+"/home: Get the app CTA must open the official Seer app in a new tab");
                   } else {
-                    await page.locator('#nav button[data-page="home"]').click();
-                    const returnedHome = await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "home", null, { timeout: 8000 }).then(() => true).catch(() => false);
-                    if (!returnedHome) report.failures.push(viewport.name+"/"+theme+"/home: navigation could not return from Market Explorer");
+                    const [popup] = await Promise.all([
+                      page.context().waitForEvent("page", { timeout: 10000 }),
+                      getApp.click()
+                    ]).catch(() => [null]);
+                    if (!popup) {
+                      report.failures.push(viewport.name+"/"+theme+"/home: Get the app CTA did not open the official Seer app");
+                    } else {
+                      await popup.waitForLoadState("domcontentloaded", { timeout: 12000 }).catch(() => {});
+                      if (!popup.url().startsWith("https://app.seer.pm/")) {
+                        report.failures.push(viewport.name+"/"+theme+"/home: Get the app opened unexpected destination "+popup.url());
+                      }
+                      await popup.close().catch(() => {});
+                    }
                   }
                 }
               }
