@@ -468,6 +468,12 @@ jobs:
                     return main?.dataset.page === "app" && heading?.innerText.trim() === wanted;
                   }, tickerTitle, { timeout: 15000 }).then(() => true).catch(() => false);
                   if (!opened) report.failures.push(`${viewport.name}/${theme}: clicking a Market Wire item did not open the matching record inspector`);
+                  // This explicit pause is for stable click automation; do not leak paused state into the next theme.
+                  const pauseStateAfterInspect = await page.locator("#marketWire").evaluate(el => el.classList.contains("is-paused"));
+                  if (pauseStateAfterInspect) await page.locator("#marketWire button[data-wire-action='pause']").click();
+                  const resetPausedState = await page.locator("#marketWire").evaluate(el => el.classList.contains("is-paused"));
+                  const resetPressedState = await page.locator('#marketWire button[data-wire-action="pause"]').getAttribute("aria-pressed");
+                  if (resetPausedState || resetPressedState === "true") report.failures.push(`${viewport.name}/${theme}: ticker remained paused after interaction QA cleanup`);
                 }
               }
               if (metrics.marketFeedStatus !== "live") report.warnings.push(`${viewport.name}/${theme}/${route}: live API status was ${metrics.marketFeedStatus}; check CORS/API availability`);
