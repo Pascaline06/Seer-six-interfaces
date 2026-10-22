@@ -45,7 +45,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes(\'id="marketWire"\') && html.includes("function renderMarketWire") && html.includes("AUTO-REFRESH 60S")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -138,6 +138,10 @@ jobs:
                   explorerVisibleCardCount: main?.querySelectorAll(".explorer-market-grid .market").length || 0,
                   explorerWatchlistButtonCount: main?.querySelectorAll(".market-save[data-market-action='save']").length || 0,
                   marketPulseItemCount: main?.querySelectorAll(".market-pulse .pulse-item").length || 0,
+                  marketWireVisible: !!document.querySelector("#marketWire"),
+                  marketWireItemCount: document.querySelectorAll("#marketWire .market-wire-set:not([aria-hidden='true']) .wire-item").length,
+                  marketWireAnimation: getComputedStyle(document.querySelector("#marketWire .market-wire-track") || body).animationName,
+                  marketWireStatus: document.querySelector("#marketWire .market-wire-head small")?.innerText || "missing",
                   explorerIndexStatus: main?.querySelector("#explorerStatus")?.dataset.status || "not-app",
                   explorerPageLabel: main?.querySelector("#pageStatus")?.innerText?.trim() || null,
                   heroMarketStatus: main?.querySelector(".hero-signal")?.dataset.marketStatus || "not-home",
@@ -153,6 +157,20 @@ jobs:
                 };
               });
 
+              // Validate the motion control, then restore the default moving wire before capture.
+              const wireToggle = page.locator('#marketWire button[data-wire-action="pause"]');
+              if (await wireToggle.count() !== 1) {
+                report.failures.push(viewport.name+"/"+theme+"/"+route+": Market Wire pause/resume control is missing");
+              } else {
+                await wireToggle.click();
+                const pausedClass = await page.locator("#marketWire").getAttribute("class");
+                const pausedPressed = await page.locator('#marketWire button[data-wire-action="pause"]').getAttribute("aria-pressed");
+                if (!pausedClass?.includes("is-paused") || pausedPressed !== "true") report.failures.push(viewport.name+"/"+theme+"/"+route+": pause control did not pause the ticker");
+                await page.locator('#marketWire button[data-wire-action="pause"]').click();
+                const resumedClass = await page.locator("#marketWire").getAttribute("class");
+                const resumedPressed = await page.locator('#marketWire button[data-wire-action="pause"]').getAttribute("aria-pressed");
+                if (resumedClass?.includes("is-paused") || resumedPressed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": resume control did not restore ticker motion");
+              }
               const screenshot = `artifacts/${viewport.name}-${theme}-${route}.png`;
               await page.screenshot({ path: screenshot, fullPage: true, animations: "disabled" });
               const result = { viewport: viewport.name, theme, route, screenshot, ...metrics, pageErrors: [...pageErrors] };
@@ -173,6 +191,10 @@ jobs:
                 if (metrics.explorerVisibleCardCount !== metrics.explorerWatchlistButtonCount) report.failures.push(viewport.name+"/"+theme+"/app: each market card needs its own save-to-watchlist control");
               }
               if (route === "home" && metrics.marketPulseItemCount !== 4) report.failures.push(viewport.name+"/"+theme+"/home: the market pulse must show four source records");
+              if (!metrics.marketWireVisible) report.failures.push(viewport.name+"/"+theme+"/"+route+": the Market Wire is missing from the shared shell");
+              if (!metrics.marketWireStatus.includes("AUTO-REFRESH 60S")) report.failures.push(viewport.name+"/"+theme+"/"+route+": Market Wire refresh cadence/status is missing");
+              if (metrics.marketWireItemCount < 1) report.failures.push(viewport.name+"/"+theme+"/"+route+": Market Wire has no rendered snapshot items");
+              if (!metrics.marketWireAnimation.includes("marketWireRun") && !matchMedia("(prefers-reduced-motion: reduce)").matches) report.failures.push(viewport.name+"/"+theme+"/"+route+": Market Wire motion is not running when motion is allowed");
               if (route === "home" && !["live","fallback"].includes(metrics.heroMarketStatus)) report.failures.push(viewport.name+"/"+theme+"/home: hero signal never left its loading state");
               if (route === "app" && !["live","fallback"].includes(metrics.explorerIndexStatus)) report.failures.push(viewport.name+"/"+theme+"/app: full-index explorer never left its loading state before screenshot");
               if (route === "app" && metrics.explorerIndexStatus === "live" && !metrics.explorerPageLabel) report.failures.push(viewport.name+"/"+theme+"/app: live results loaded without pagination state");
@@ -260,7 +282,7 @@ jobs:
           }
 
           fs.writeFileSync("artifacts/report.json", JSON.stringify(report, null, 2));
-          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerVisibleCardCount, explorerWatchlistButtonCount, marketPulseItemCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus}) => ({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerVisibleCardCount, explorerWatchlistButtonCount, marketPulseItemCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus})) }, null, 2));
+          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerVisibleCardCount, explorerWatchlistButtonCount, marketPulseItemCount, marketWireVisible, marketWireItemCount, marketWireAnimation, marketWireStatus, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus}) => ({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerVisibleCardCount, explorerWatchlistButtonCount, marketPulseItemCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus})) }, null, 2));
           await browser.close();
           if (report.failures.length) process.exit(1);
           NODE
