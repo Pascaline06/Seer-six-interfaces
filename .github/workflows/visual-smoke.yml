@@ -90,8 +90,17 @@ jobs:
               await page.evaluate(async (wanted) => {
                 const current = document.body.dataset.theme || "dark";
                 if (current !== wanted) document.getElementById("themeToggle")?.click();
+                // Explicitly request the font weights used by the visual system.
+                await Promise.all([
+                  document.fonts.load('400 15px "Instrument Sans"'),
+                  document.fonts.load('700 32px "Sora"'),
+                  document.fonts.load('400 14px "JetBrains Mono"')
+                ]);
                 await document.fonts.ready;
+                // Smooth route transitions should not produce mid-scroll screenshots.
+                window.scrollTo({ top: 0, behavior: "instant" });
               }, theme);
+              await page.waitForFunction(() => window.scrollY === 0);
               pageErrors.length = 0;
               await page.waitForFunction(() => /Live Seer record|live records|Demo fallback|live endpoint unavailable|Data status\s*(Connected|Fallback)/.test(document.body.innerText), null, { timeout: 12000 }).catch(() => {});
               await page.waitForTimeout(500);
@@ -109,9 +118,9 @@ jobs:
                   heading: heading?.innerText || null,
                   headingFontFamily: font,
                   theme: document.body.dataset.theme || "dark",
-                  bodyFontLoaded: document.fonts.check('500 16px "Instrument Sans"'),
+                  bodyFontLoaded: document.fonts.check('400 15px "Instrument Sans"'),
                   displayFontLoaded: document.fonts.check('700 32px "Sora"'),
-                  monoFontLoaded: document.fonts.check('500 14px "JetBrains Mono"'),
+                  monoFontLoaded: document.fonts.check('400 14px "JetBrains Mono"'),
                   interfaceNavCount: main?.querySelectorAll("a[data-suite-page]").length || 0,
                   interfaceNavTargets: [...(main?.querySelectorAll("a[data-suite-page]") || [])].map(a => a.getAttribute("href")),
                   currentFooterRoute: main?.querySelector("a[data-suite-page][aria-current=\"page\"]")?.dataset.suitePage || null,
