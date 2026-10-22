@@ -454,7 +454,7 @@ function renderHome(){
    <div class="hero-actions"><button class="button primary" onclick="go('app')">Explore live markets <span aria-hidden="true">↗</span></button><button class="button secondary" onclick="go('deep')">Explore forecasts <span aria-hidden="true">→</span></button></div>
    <div class="hero-notes"><span><i class="hero-note-dot"></i>${live?"Connected to Seer market data":marketFeed.status==="loading"?"Connecting to Seer market data":"Fallback data clearly labelled"}</span><span>Six decision interfaces</span><span>Human decisions stay human</span></div>
   </div>
-  <aside class="hero-signal" aria-label="Market signal visualization based on the top returned market">
+  <aside class="hero-signal" data-market-status="${marketFeed.status}" aria-label="Market signal visualization based on the top returned market">
    <div class="hero-signal-header"><span>SEER SIGNAL / 001</span><span class="hero-signal-live"><i></i>${live?"LIVE RECORD":"PREVIEW"}</span></div>
    <div class="hero-signal-stage" style="--signal-value:${signalValue}%">
     <div class="signal-grid"></div><div class="signal-orbit orbit-outer"></div><div class="signal-orbit orbit-mid"></div><div class="signal-orbit orbit-inner"></div><div class="signal-sweep"></div><div class="signal-meter"></div>
@@ -515,7 +515,7 @@ function setExplorerFilter(kind,value){
  else if(kind==="filter")state.filter=String(value||"All markets");
  else if(kind==="sort")state.sort=["liquidityUSD","volumeUSD","openingTs"].includes(value)?value:"liquidityUSD";
  else if(kind==="network")state.network=["all","100","10","8453","1"].includes(value)?value:"all";
- state.explorerPage=1;explorerFeed.status="loading";explorerFeed.error="";
+ state.explorerPage=1;explorerFeed.requestId++;explorerFeed.status="loading";explorerFeed.error="";
  render();
  if(explorerSearchTimer)clearTimeout(explorerSearchTimer);
  explorerSearchTimer=setTimeout(()=>loadExplorerMarkets(),kind==="search"?360:0);
@@ -528,7 +528,7 @@ function setExplorerPage(page){
 }
 function resetExplorerFilters(){
  state.search="";state.filter="All markets";state.network="all";state.sort="liquidityUSD";state.explorerPage=1;
- explorerFeed.status="loading";explorerFeed.error="";render();loadExplorerMarkets();
+ explorerFeed.requestId++;explorerFeed.status="loading";explorerFeed.error="";render();loadExplorerMarkets();
 }
 async function loadExplorerMarkets(){
  const requestId=++explorerFeed.requestId;
