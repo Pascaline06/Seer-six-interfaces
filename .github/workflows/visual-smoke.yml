@@ -42,7 +42,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("data-opportunity-field=\"belief\"")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -346,6 +346,50 @@ jobs:
                   report.failures.push(viewport.name+"/"+theme+"/app: fewer than two compare actions were rendered");
                 }
               }
+
+              if (route === "opportunity") {
+                const lab = page.locator("#opportunityLab");
+                if (await lab.count() !== 1) {
+                  report.failures.push(viewport.name+"/"+theme+"/opportunity: Decision Lab is missing");
+                } else {
+                  const marketPriceText = await page.locator("#oppMarketPrice").innerText();
+                  const marketPrice = Number.parseFloat(marketPriceText);
+                  if (!Number.isFinite(marketPrice)) {
+                    report.failures.push(viewport.name+"/"+theme+"/opportunity: Decision Lab does not show a usable market price");
+                  } else {
+                    const belief = marketPrice <= 85 ? marketPrice + 10 : marketPrice - 10;
+                    await page.locator("#oppBeliefInput").evaluate((el, value) => {
+                      el.value = String(value);
+                      el.dispatchEvent(new Event("input", { bubbles: true }));
+                    }, belief);
+                    await page.locator("#oppSideYesBtn").click();
+                    const yesEdge = Number.parseFloat((await page.locator("#oppEdgeValue").innerText()).replace(" pp", ""));
+                    await page.locator("#oppSideNoBtn").click();
+                    const noEdge = Number.parseFloat((await page.locator("#oppEdgeValue").innerText()).replace(" pp", ""));
+                    if (!Number.isFinite(yesEdge) || !Number.isFinite(noEdge) || Math.abs(yesEdge + noEdge) > 1.1) {
+                      report.failures.push(viewport.name+"/"+theme+"/opportunity: choosing NO did not correctly invert the user-vs-market edge");
+                    }
+                    await page.locator("#oppStakeInput").fill("250");
+                    const sharesText = await page.locator("#oppSharesValue").innerText();
+                    const payoutText = await page.locator("#oppPayoutValue").innerText();
+                    const pnlText = await page.locator("#oppExpectedValue").innerText();
+                    if (sharesText === "—" || payoutText === "—" || !pnlText.startsWith("$")) {
+                      report.failures.push(viewport.name+"/"+theme+"/opportunity: position sizing outputs did not update after input");
+                    }
+                    const selector = page.locator("#oppMarketSelect");
+                    if (await selector.locator("option").count() > 1) {
+                      const before = await page.locator("#oppMarketPrice").innerText();
+                      await selector.selectOption({ index: 1 });
+                      await page.waitForTimeout(80);
+                      const after = await page.locator("#oppMarketPrice").innerText();
+                      if (!after || await page.locator("#oppScenarioContext").count() !== 1) {
+                        report.failures.push(viewport.name+"/"+theme+"/opportunity: changing the source market broke the decision scenario");
+                      }
+                    }
+                  }
+                }
+              }
+
               const nextRoute = routes[(routes.indexOf(route) + 1) % routes.length];
               const nextLink = page.locator(`#siteFooter .interface-link[data-suite-page="${nextRoute}"]`);
               await nextLink.click();
