@@ -528,7 +528,7 @@ jobs:
                   report.failures.push(`${viewport.name}/${theme}: home Market Tape is missing after footer navigation`);
                 } else {
                   const animation = await homeTape.locator(".signal-ticker-track").evaluate(el => getComputedStyle(el).animationName);
-                  const items = homeTape.locator(".signal-ticker-set:not([aria-hidden="true"]) .market-tape-item");
+                  const items = homeTape.locator('.signal-ticker-set:not([aria-hidden="true"]) .market-tape-item');
                   const count = await items.count();
                   const avatars = await items.locator(".market-avatar").count();
                   if (animation !== "signalTickerRun") report.failures.push(`${viewport.name}/${theme}: home Market Tape stopped after route navigation`);
