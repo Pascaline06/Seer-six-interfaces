@@ -42,7 +42,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("data-opportunity-field=\"belief\"")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes("data-opportunity-field=\"belief\"")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -423,6 +423,22 @@ jobs:
               await nextLink.click();
               const footerNavigationWorks = await page.locator("#main").getAttribute("data-page") === nextRoute;
               if (!footerNavigationWorks) report.failures.push(`${viewport.name}/${theme}/${route}: footer link did not navigate to ${nextRoute}`);
+              if (route === "risk") {
+                // The risk route's footer link just returned us to home, so verify the moving wire is a real entry point.
+                const tickerItem = page.locator("#marketWire .market-wire-set:first-child button[data-wire-action='inspect']").first();
+                if (await tickerItem.count() !== 1) {
+                  report.failures.push(`${viewport.name}/${theme}: Market Wire does not expose an accessible inspect action`);
+                } else {
+                  const tickerTitle = (await tickerItem.locator(".wire-title").innerText()).trim();
+                  await tickerItem.click();
+                  const opened = await page.waitForFunction((wanted) => {
+                    const main = document.querySelector("#main");
+                    const heading = document.querySelector("#marketDetail h2");
+                    return main?.dataset.page === "app" && heading?.innerText.trim() === wanted;
+                  }, tickerTitle, { timeout: 15000 }).then(() => true).catch(() => false);
+                  if (!opened) report.failures.push(`${viewport.name}/${theme}: clicking a Market Wire item did not open the matching record inspector`);
+                }
+              }
               if (metrics.marketFeedStatus !== "live") report.warnings.push(`${viewport.name}/${theme}/${route}: live API status was ${metrics.marketFeedStatus}; check CORS/API availability`);
               }
             }
