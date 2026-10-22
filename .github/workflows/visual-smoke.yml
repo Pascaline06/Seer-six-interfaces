@@ -45,7 +45,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"')) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"')) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -124,6 +124,10 @@ jobs:
                   interfaceNavCount: document.querySelectorAll("#siteFooter a[data-suite-page]").length || 0,
                   interfaceNavTargets: [...document.querySelectorAll("#siteFooter a[data-suite-page]")].map(a => a.getAttribute("href")),
                   currentFooterRoute: document.querySelector("#siteFooter a[data-suite-page][aria-current=\"page\"]")?.dataset.suitePage || null,
+                  footerOutsideWorkspace: !document.querySelector(".layout")?.contains(document.querySelector("#siteFooter")),
+                  heroSignalCount: main?.querySelectorAll(".hero-signal").length || 0,
+                  interfaceArtCount: main?.querySelectorAll(".interface-art svg").length || 0,
+                  explorerControlCount: ["#marketSearch","#marketFilter","#marketNetwork","#marketSort"].filter(selector => document.querySelector(selector)).length,
                   headingAlign: heading ? getComputedStyle(heading).textAlign : "missing",
                   introAlign: main?.querySelector(".intro") ? getComputedStyle(main.querySelector(".intro")).textAlign : "missing",
                   nonLeftAlignedCopy: [...(main?.querySelectorAll(".sectionhead h2,.sectionhead p,.panel p,.evidenceitem,.crumb,.market h3,.notice") || [])].filter(el => !["left","start"].includes(getComputedStyle(el).textAlign)).map(el => ({selector:el.tagName.toLowerCase()+"."+el.className,text:(el.innerText||"").slice(0,60),align:getComputedStyle(el).textAlign})),
@@ -147,7 +151,28 @@ jobs:
               if (!["left","start"].includes(metrics.headingAlign) || (!["left","start"].includes(metrics.introAlign) && metrics.introAlign !== "missing") || metrics.nonLeftAlignedCopy.length) report.failures.push("Copy alignment issue on " + viewport.name + "/" + theme + "/" + route + ": " + JSON.stringify(metrics.nonLeftAlignedCopy));
               if (pageErrors.length) report.failures.push(`${viewport.name}/${theme}/${route}: browser errors: ${pageErrors.join("; ")}`);
               if (!metrics.bodyFontLoaded || !metrics.displayFontLoaded || !metrics.monoFontLoaded) report.warnings.push(`${viewport.name}/${theme}/${route}: one or more requested font families did not confirm as loaded`);
+              if (!metrics.footerOutsideWorkspace) report.failures.push(viewport.name+"/"+theme+"/"+route+": footer is inside the sidebar/content workspace");
+              if (route === "home" && (metrics.heroSignalCount !== 1 || metrics.interfaceArtCount !== 6)) report.failures.push(viewport.name+"/"+theme+"/home: expected hero signal artwork and six interface illustrations");
+              if (route === "app" && metrics.explorerControlCount !== 4) report.failures.push(viewport.name+"/"+theme+"/app: expected search, category, network and sort controls");
               if (metrics.interfaceNavCount !== 6 || metrics.interfaceNavTargets.length !== 6 || metrics.currentFooterRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: footer must show all six directly-accessible routes with the current route marked`);
+              if (route === "app") {
+                await page.locator("#marketSearch").fill("Ethereum");
+                await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+                const searchMode = await page.locator("#explorerStatus").getAttribute("data-status");
+                if (searchMode === "live") {
+                  const pagerPresent = await page.locator("#pageStatus").count() === 1 && await page.locator("#nextMarkets").count() === 1;
+                  if (!pagerPresent) report.failures.push(viewport.name+"/"+theme+"/app: live search has no pagination controls");
+                  const nextButton = page.locator("#nextMarkets");
+                  if (await nextButton.count() && await nextButton.isEnabled()) {
+                    await nextButton.click();
+                    await page.waitForFunction(() => document.querySelector("#explorerStatus")?.dataset.status === "live" && document.querySelector("#pageStatus")?.innerText.trim().startsWith("2"), null, { timeout: 20000 }).catch(() => {});
+                    const pageTwo = (await page.locator("#pageStatus").innerText().catch(() => "")).trim().startsWith("2");
+                    if (!pageTwo) report.failures.push(viewport.name+"/"+theme+"/app: next-page control did not advance the live index");
+                  }
+                } else {
+                  report.warnings.push(viewport.name+"/"+theme+"/app: full-index search fell back ("+(searchMode || "no final status")+")");
+                }
+              }
               const nextRoute = routes[(routes.indexOf(route) + 1) % routes.length];
               const nextLink = page.locator(`#siteFooter .interface-link[data-suite-page="${nextRoute}"]`);
               await nextLink.click();
@@ -160,7 +185,7 @@ jobs:
           }
 
           fs.writeFileSync("artifacts/report.json", JSON.stringify(report, null, 2));
-          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, horizontalOverflow, marketFeedStatus}) => ({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, horizontalOverflow, marketFeedStatus})) }, null, 2));
+          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, horizontalOverflow, marketFeedStatus}) => ({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, horizontalOverflow, marketFeedStatus})) }, null, 2));
           await browser.close();
           if (report.failures.length) process.exit(1);
           NODE
