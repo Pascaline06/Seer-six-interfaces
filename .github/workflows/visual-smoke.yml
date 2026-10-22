@@ -87,7 +87,7 @@ jobs:
               await page.waitForSelector("#main h1", { timeout: 15000 });
               pageErrors.length = 0;
               await page.evaluate(async () => { await document.fonts.ready; return true; });
-              await page.waitForFunction(() => /Live Seer record|live records|Demo fallback|live endpoint unavailable|Data status\\s*(Connected|Fallback)/.test(document.body.innerText), null, { timeout: 12000 }).catch(() => {});
+              await page.waitForFunction(() => /Live Seer record|live records|Demo fallback|live endpoint unavailable|Data status\s*(Connected|Fallback)/.test(document.body.innerText), null, { timeout: 12000 }).catch(() => {});
               await page.waitForTimeout(500);
 
               const metrics = await page.evaluate(() => {
@@ -107,7 +107,7 @@ jobs:
                   documentWidth: Math.max(root.scrollWidth, body.scrollWidth),
                   horizontalOverflow: Math.max(root.scrollWidth, body.scrollWidth) > window.innerWidth + 1,
                   activeRoute: active,
-                  marketFeedStatus: /Live Seer record|live records|Data status\\s*Connected/.test(document.body.innerText) ? "live" : /Demo fallback|live endpoint unavailable|Data status\\s*Fallback/.test(document.body.innerText) ? "fallback" : "not-visible",
+                  marketFeedStatus: /Live Seer record|live records|Data status\s*Connected/.test(document.body.innerText) ? "live" : /Demo fallback|live endpoint unavailable|Data status\s*Fallback/.test(document.body.innerText) ? "fallback" : "not-visible",
                   mainWidth: Math.round(main?.getBoundingClientRect().width || 0),
                 };
               });
