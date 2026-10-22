@@ -530,10 +530,11 @@ function renderHome(){
   ${evidenceRail()}
  </div>`;
 }function renderApp(){
- const sourceList=state.watchlistOnly?state.watchlist:(explorerFeed.status==="live"?explorerMarkets:markets);
- const categories=["All markets","DeFi","Governance","Ecosystem","Grants","Research","Futarchy","Prediction market",...new Set([...markets,...explorerMarkets].map(m=>m.type).filter(Boolean))].filter((v,i,a)=>a.indexOf(v)===i);
- const list=sourceList.filter(m=>(state.filter==="All markets"||m.type===state.filter)&&m.title.toLowerCase().includes(state.search.toLowerCase())&&(state.network==="all"||String(m.chainId||"")===state.network));
  const live=!state.watchlistOnly&&explorerFeed.status==="live",loading=!state.watchlistOnly&&(explorerFeed.status==="loading"||explorerFeed.status==="idle");
+ const sourceList=state.watchlistOnly?state.watchlist:(live?explorerMarkets:markets);
+ const categories=["All markets","DeFi","Governance","Ecosystem","Grants","Research","Futarchy","Prediction market",...new Set([...markets,...explorerMarkets].map(m=>m.type).filter(Boolean))].filter((v,i,a)=>a.indexOf(v)===i);
+ // Server-side query results are already filtered. Apply these filters locally only to the saved watchlist or fallback sample.
+ const list=live?sourceList:sourceList.filter(m=>(state.filter==="All markets"||m.type===state.filter)&&m.title.toLowerCase().includes(state.search.toLowerCase())&&(state.network==="all"||String(m.chainId||"")===state.network));
  // Never display the previous sample as if it answers an in-flight server query.
  const displayList=loading?[]:list;
  const highest=displayList.reduce((best,m)=>m.p!==null&&m.p!==undefined&&(best===null||m.p>best)?m.p:best,null);
