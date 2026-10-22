@@ -439,7 +439,7 @@ function normalizeLiveMarket(m){
  const time=deadline?new Date(deadline*1000).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}):"Not specified";
  const rawCategory=Array.isArray(m.categories)&&m.categories.length?m.categories[0]:"";
  const category=rawCategory&&String(rawCategory).toUpperCase()!=="MISC"?rawCategory:(m.type==="Futarchy"?"Futarchy":"Prediction market");
- return {id:String(m.id||"").slice(0,10)+"…",fullId:String(m.id||""),type:category,title:String(m.marketName||"Untitled market"),p:probability,volume:compactUSD(m.volumeUSD),depth:compactUSD(m.liquidityUSD),change:null,time,status:m.payoutReported?"Resolved":"Listed",chainId:Number(m.chainId||0),chain:chainLabel(m.chainId),url:String(m.url||""),liquidityUSD:numberValue(m.liquidityUSD),volumeUSD:numberValue(m.volumeUSD),outcomes:Array.isArray(m.outcomes)?m.outcomes:[],verification:m.verification?.status||"not_verified",isLive:true};
+ return {id:String(m.id||"").slice(0,10)+"…",fullId:String(m.id||""),type:category,title:String(m.marketName||"Untitled market"),p:probability,volume:compactUSD(m.volumeUSD),depth:compactUSD(m.liquidityUSD),change:null,time,status:m.payoutReported?"Resolved":"Listed",chainId:Number(m.chainId||0),chain:chainLabel(m.chainId),url:String(m.url||""),liquidityUSD:numberValue(m.liquidityUSD),volumeUSD:numberValue(m.volumeUSD),outcomes:Array.isArray(m.outcomes)?m.outcomes:[],verification:({verified:"Verified",verifying:"Verifying",challenged:"Challenged",not_verified:"Not verified"}[m.verification?.status]||"Not verified"),isLive:true};
 }
 async function loadLiveMarkets(){
  try{
