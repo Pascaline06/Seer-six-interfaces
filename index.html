@@ -758,6 +758,7 @@ let futarchyMarkets=[];
 let explorerSearchTimer=null;
 const htmlEscape=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const numberValue=value=>Number.isFinite(Number(value))?Number(value):0;
+const reportedNumber=value=>value===null||value===undefined||(typeof value==="string"&&value.trim()==="")?null:(Number.isFinite(Number(value))?Number(value):null);
 const compactUSD=value=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",notation:"compact",maximumFractionDigits:1}).format(numberValue(value));
 const chainLabel=id=>({100:"Gnosis",10:"Optimism",8453:"Base",1:"Ethereum"}[Number(id)]||("Chain "+id));
 const seerMarketHref=m=>m&&m.chainId&&((m.url||m.fullId))?"https://app.seer.pm/markets/"+encodeURIComponent(m.chainId)+"/"+encodeURIComponent(m.url||m.fullId):"";
@@ -774,7 +775,7 @@ function normalizeLiveMarket(m){
  const outcomes=Array.isArray(m.outcomes)?m.outcomes:[];
  const outcomePrices=outcomes.map((o,i)=>({name:outcomeName(o),p:i<odds.length?normalizeOutcomeProbability(odds[i]):null})).filter(o=>o.name);
  const parent=m.parentMarket||m.parentMarketId||m.parent?.id||m.conditionalParentMarket||"";
- return {id:String(m.id||"").slice(0,10)+"…",fullId:String(m.id||""),type:category,title:String(m.marketName||"Untitled market"),p:probability,volume:compactUSD(m.volumeUSD),depth:compactUSD(m.liquidityUSD),change:null,time,status:m.payoutReported?"Resolved":"Listed",chainId:Number(m.chainId||0),chain:chainLabel(m.chainId),url:String(m.url||""),liquidityUSD:numberValue(m.liquidityUSD),volumeUSD:numberValue(m.volumeUSD),outcomes,outcomePrices,verification:({verified:"Verified",verifying:"Verifying",challenged:"Challenged",not_verified:"Not verified"}[m.verification?.status]||"Not verified"),parentMarket:String(parent||""),parentOutcome:String(m.parentOutcome??m.parentOutcomeIndex??m.parent?.outcome??""),isConditional:Boolean(parent),isLive:true};
+ return {id:String(m.id||"").slice(0,10)+"…",fullId:String(m.id||""),type:category,title:String(m.marketName||"Untitled market"),p:probability,volume:compactUSD(m.volumeUSD),depth:reportedNumber(m.liquidityUSD)===null?"Not reported":compactUSD(m.liquidityUSD),change:null,time,status:m.payoutReported?"Resolved":"Listed",chainId:Number(m.chainId||0),chain:chainLabel(m.chainId),url:String(m.url||""),liquidityUSD:reportedNumber(m.liquidityUSD),volumeUSD:numberValue(m.volumeUSD),outcomes,outcomePrices,verification:({verified:"Verified",verifying:"Verifying",challenged:"Challenged",not_verified:"Not verified"}[m.verification?.status]||"Not verified"),parentMarket:String(parent||""),parentOutcome:String(m.parentOutcome??m.parentOutcomeIndex??m.parent?.outcome??""),isConditional:Boolean(parent),isLive:true};
 }
 
 function marketWireTime(date){return date?date.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"WAITING FOR FIRST SNAPSHOT"}
