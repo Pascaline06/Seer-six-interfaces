@@ -352,7 +352,7 @@ jobs:
                 if (await lab.count() !== 1) {
                   report.failures.push(viewport.name+"/"+theme+"/opportunity: Decision Lab is missing");
                 } else {
-                  const marketPriceText = await page.locator("#oppMarketPrice").innerText();
+                  const marketPriceText = await page.locator("#oppMarketPrice").innerText({ timeout: 5000 }).catch(() => "Not available");
                   const marketPrice = Number.parseFloat(marketPriceText);
                   if (!Number.isFinite(marketPrice)) {
                     report.failures.push(viewport.name+"/"+theme+"/opportunity: Decision Lab does not show a usable market price");
@@ -391,12 +391,28 @@ jobs:
                     }
                     const selector = page.locator("#oppMarketSelect");
                     if (await selector.locator("option").count() > 1) {
-                      const before = await page.locator("#oppMarketPrice").innerText();
+                      const targetValue = await selector.locator("option").nth(1).getAttribute("value");
                       await selector.selectOption({ index: 1 });
-                      await page.waitForTimeout(80);
-                      const after = await page.locator("#oppMarketPrice").innerText();
-                      if (!after || await page.locator("#oppScenarioContext").count() !== 1) {
-                        report.failures.push(viewport.name+"/"+theme+"/opportunity: changing the source market broke the decision scenario");
+                      const recovered = await page.waitForFunction(() => {
+                        const lab = document.querySelector("#opportunityLab");
+                        return !!lab && !!lab.querySelector("#oppMarketSelect") &&
+                          !!lab.querySelector("#oppMarketPrice") &&
+                          !!lab.querySelector("#oppScenarioContext");
+                      }, null, { timeout: 5000 }).then(() => true).catch(() => false);
+                      if (!recovered) {
+                        report.failures.push(viewport.name+"/"+theme+"/opportunity: changing the source market removed or stranded the Decision Lab");
+                      } else {
+                        const activeValue = await page.locator("#oppMarketSelect").inputValue().catch(() => "");
+                        const after = await page.locator("#oppMarketPrice").innerText().catch(() => "");
+                        const contextCount = await page.locator("#oppScenarioContext").count();
+                        if (!activeValue || !after || contextCount !== 1) {
+                          report.failures.push(viewport.name+"/"+theme+"/opportunity: selected source market did not recover to a coherent scenario");
+                        }
+                        // If the available source set changed during the test, the UI may choose a valid fallback;
+                        // the active selection must still exist in the rendered option list.
+                        const activeOptionCount = await page.locator("#oppMarketSelect option").evaluateAll((opts, value) =>
+                          opts.filter(option => option.value === value).length, activeValue).catch(() => 0);
+                        if (activeOptionCount !== 1) report.failures.push(viewport.name+"/"+theme+"/opportunity: selected market has no matching option after the refresh");
                       }
                     }
                   }
