@@ -28,6 +28,10 @@ Public demo base URL (after Pages is enabled): https://pascaline06.github.io/See
 
 Every interface emphasizes source status, what a signal means, what can distort it, and who retains decision authority. The design avoids presenting a forecast as certainty or using market popularity as a proxy for merit.
 
+## Market exploration interactions
+
+The overview includes a compact pulse strip built from the currently available market records. The Market Explorer supports server-side keyword search, category/network filters, sorting and pagination, plus a record inspector for the returned market ID, network, verification state, outcome labels, volume and liquidity. Market records can be saved to a device-local watchlist using browser storage; this list is not account-synced and is not shared across devices. Saved values are snapshots, not a live subscription.
+
 ## Data and implementation status
 
 **This remains a front-end prototype, now with a read-only live market feed.** The market explorer requests market records from Seer's public `markets-search` endpoint (`https://app.seer.pm/.netlify/functions/markets-search`) across Gnosis, Optimism, Base, and Ethereum. The UI shows the last successful fetch time, reports the source state, and labels demo fallback records when the endpoint is unavailable. Market cards display API-reported outcome prices, lifetime swap volume and liquidity; these fields are not executable quotes and can be stale or thinly traded.
