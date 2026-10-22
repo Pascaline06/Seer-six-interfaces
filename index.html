@@ -47,19 +47,11 @@ body{
 }
 .brand{font-size:22px;letter-spacing:-1.1px;gap:11px}
 .logo{
- width:32px;height:32px;border-radius:10px;background:transparent;
- border:1px solid rgba(167,139,250,.42);color:transparent;
- position:relative;overflow:hidden;
+ width:32px;height:32px;border-radius:0;background:transparent;color:#EDEDF2;
+ display:grid;place-items:center;flex:0 0 32px;overflow:visible;border:0;
 }
-.logo:before{
- content:"";position:absolute;inset:5px;
- background:repeating-conic-gradient(from 230deg at 50% 100%,transparent 0deg 9deg,rgba(167,139,250,.95) 9.5deg 11deg,transparent 11.5deg 19deg);
- clip-path:polygon(0 0,100% 0,50% 100%);
-}
-.logo:after{
- content:"";position:absolute;width:5px;height:5px;left:calc(50% - 2.5px);bottom:4px;
- background:#EDEDF2;border-radius:50%;box-shadow:0 0 12px rgba(167,139,250,.9);
-}
+.logo svg{display:block;width:30px;height:30px}
+.logo svg path:last-child{display:none}
 .topright{gap:18px;font-size:11px}
 .topright .chain{letter-spacing:.04em}
 .topright .pill{border-color:rgba(167,139,250,.32);background:rgba(108,43,217,.08);color:#C4B5FD}
@@ -92,24 +84,14 @@ body{
 .crumb{font-size:10px;margin-bottom:22px;color:#85818F}
 .eyebrow{font-size:10px;color:#BFA7FF}
 .heading{
- font-family:"Space Grotesk","Inter Tight",Inter,ui-sans-serif,system-ui,sans-serif;
- font-size:clamp(36px,4.5vw,64px);line-height:1.02;letter-spacing:-.055em;
+ font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;
+ font-size:clamp(34px,3.8vw,52px);line-height:1.08;letter-spacing:-.045em;
  font-weight:650;margin:13px 0 18px;max-width:850px;
 }
 .intro{max-width:610px;font-size:14px;line-height:1.85;color:var(--muted)}
 .headrow{position:relative;align-items:center;gap:28px;margin-bottom:34px}
 #main:not([data-page="home"]) .headrow:after{display:none}
-#main[data-page="home"] .headrow:after{
- content:"";flex:0 0 clamp(145px,20vw,270px);height:clamp(145px,20vw,270px);
- border-radius:50%;
- background:
-  radial-gradient(circle at 50% 84%,#EDEDF2 0 2px,transparent 3px),
-  repeating-conic-gradient(from 224deg at 50% 84%,transparent 0deg 7.5deg,rgba(167,139,250,.68) 7.8deg 8.4deg,transparent 8.7deg 15deg),
-  radial-gradient(circle at 50% 84%,rgba(108,43,217,.3),transparent 64%);
- -webkit-mask-image:radial-gradient(ellipse,black 34%,transparent 73%);
- mask-image:radial-gradient(ellipse,black 34%,transparent 73%);
- opacity:.88;
-}
+#main[data-page="home"] .headrow:after{display:none}
 .headrow>div{min-width:0}
 .headrow .button{flex-shrink:0;align-self:flex-start;margin-top:7px}
 .button{
@@ -125,7 +107,7 @@ body{
 .pill.violet{color:#D6C7FF;border-color:rgba(167,139,250,.36);background:rgba(108,43,217,.13)}
 .grid{gap:16px}
 .panel{
- background:linear-gradient(155deg,rgba(31,31,36,.98),rgba(26,26,30,.98));
+ background:#1A1A1E;
  border:1px solid rgba(171,171,179,.14);border-radius:15px;padding:21px;
  box-shadow:0 8px 30px rgba(0,0,0,.08);
 }
@@ -206,7 +188,7 @@ td{font-size:12px}
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="shell">
 <header class="top">
-<a class="brand" href="#/home" aria-label="Seer Six home" onclick="go('home');return false"><span class="logo" aria-hidden="true"></span> seer<span style="color:var(--dim);font-weight:450">/ six interfaces</span></a>
+<a class="brand" href="#/home" aria-label="Seer Six home" onclick="go('home');return false"><span class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" role="img" aria-label="Seer symbol"><path d="M22.7 3.5 12.3 13.8c-1.1 1.1-1.1 2.8 0 3.9l3.2 3.2h8.2l-4.2-4.2 7.7-7.7h-4.5l4.5-4.5c-1.3-.9-2.9-.9-4.5-1z" fill="currentColor"/><path d="M17.3 36.5 27.7 26.2c1.1-1.1 1.1-2.8 0-3.9l-3.2-3.2h-8.2l4.2 4.2-7.7 7.7h4.5l-4.5 4.5c1.3.9 2.9.9 4.5 1z" fill="currentColor"/><path d="M23.1 3.5 8.2 18.4c-1.1 1.1-1.1 2.8 0 3.9l3.2 3.2h8.1l-4.2-4.2 12.3-12.3c.9-.9.9-2.3 0-3.2l-1.4-1.4c-.8-.8-1.9-1.2-3.1-.9z" fill="currentColor" opacity=".0"/></svg></span> seer<span style="color:var(--dim);font-weight:450">/ six interfaces</span></a>
 <div class="topright"><span class="chain">Every opinion has a price</span><span class="pill"><i class="live"></i>Preview environment</span></div>
 </header>
 <div class="layout">
