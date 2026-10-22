@@ -1,12 +1,6 @@
 name: Seer Six browser smoke and visual capture
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "index.html"
-      - "preview.svg"
-      - ".github/workflows/visual-smoke.yml"
   workflow_run:
     workflows: ["pages build and deployment"]
     types: [completed]
