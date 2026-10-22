@@ -1177,6 +1177,29 @@ body[data-theme="light"] .nav button.active{background:linear-gradient(100deg,#e
 }
 /* Premium art direction refresh end. */
 
+
+/* Mobile information hierarchy: navigation always follows the header, with the market wire below it. */
+@media(max-width:850px){
+  .shell{display:flex;flex-direction:column;min-width:0}
+  .layout{display:contents}
+  .side{order:1;position:sticky;top:68px;width:100%;min-width:0;flex:0 0 auto}
+  #marketWire{order:2;position:relative;top:auto;width:100%;min-width:0;flex:0 0 auto}
+  .main{order:3;width:100%;min-width:0;flex:0 0 auto;align-self:stretch}
+  .site-footer{order:4}
+  .side::after{
+    content:"";position:absolute;z-index:9;top:0;right:0;bottom:0;width:25px;
+    background:linear-gradient(90deg,rgba(13,16,32,0),rgba(13,16,32,.98));
+    pointer-events:none;
+  }
+  body[data-theme="light"] .side::after{
+    background:linear-gradient(90deg,rgba(247,248,254,0),rgba(247,248,254,.97));
+  }
+}
+@media(max-width:600px){
+  .side{top:62px}
+  .nav{padding-right:22px;scroll-padding-inline:10px}
+}
+
 </style>
 </head>
 <body>
