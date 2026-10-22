@@ -1015,9 +1015,10 @@ function opportunityOutcomePrice(m,index){
  if(index===1&&isBinaryOpportunityMarket(m)){const first=opportunityOutcomePrice(m,0);return Number.isFinite(first)?100-first:NaN;}
  return NaN;
 }
-function opportunityScenarioMarket(records=sortedSpecialistMarkets(markets)){
+function opportunityScenarioMarket(records){
  const source=Array.isArray(records)?records:sortedSpecialistMarkets(markets);
- const list=source.filter(isBinaryOpportunityMarket);
+ let list=source.filter(isBinaryOpportunityMarket);
+ if(!list.length)list=demoMarkets.filter(isBinaryOpportunityMarket);
  return list.find(m=>marketKey(m)===String(state.opportunityMarketId))||list.find(m=>Number.isFinite(opportunityOutcomePrice(m,0))&&opportunityOutcomePrice(m,0)>0)||list[0]||null;
 }
 function opportunityScenarioMetrics(m){
