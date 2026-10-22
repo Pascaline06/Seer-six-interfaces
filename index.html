@@ -456,6 +456,33 @@ body[data-theme="light"] .wire-ledger-empty{background:#ffffff80}
 .wire-tools-actions button:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
 .wire-tools-actions .wire-refresh{color:var(--violet);border-color:#a18aff40}
 .wire-refresh:disabled{opacity:.5;cursor:wait}
+.signal-desk{margin:22px 0 28px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(115deg,rgba(125,51,255,.09),rgba(27,26,43,.82) 46%,rgba(119,221,176,.035));box-shadow:inset 0 1px rgba(255,255,255,.035),0 16px 35px rgba(0,0,0,.08)}
+.signal-desk-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:19px 21px 16px;border-bottom:1px solid var(--line)}
+.signal-desk-kicker{display:flex;align-items:center;gap:8px;color:var(--violet);font:700 9px "JetBrains Mono",monospace;letter-spacing:.15em;text-transform:uppercase}
+.signal-desk-head h2{margin:7px 0 0;font:600 clamp(20px,2.2vw,27px)/1.22 "Bricolage Grotesque",sans-serif;letter-spacing:-.02em;color:var(--text)}
+.signal-desk-stamp{flex:0 0 auto;color:var(--dim);font:500 8px "JetBrains Mono",monospace;letter-spacing:.07em;text-align:right}
+.signal-desk-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:0}
+.signal-story{position:relative;min-width:0;padding:18px 20px 20px;border-right:1px solid var(--line);animation:signalStoryReveal .42s ease both}
+.signal-story:nth-child(2){animation-delay:.06s}.signal-story:nth-child(3){animation-delay:.12s}.signal-story:last-child{border-right:0}
+.signal-story-lead{background:linear-gradient(145deg,rgba(125,51,255,.095),transparent 76%);border-top:2px solid var(--violet-strong);padding-top:16px}
+.signal-story:not(.signal-story-lead){border-top:2px solid #ffffff08}
+.signal-story-kicker{display:flex;align-items:center;gap:7px;min-height:18px;color:var(--dim);font:600 8px "JetBrains Mono",monospace;letter-spacing:.11em;text-transform:uppercase}
+.signal-story-kicker .dot{width:5px;height:5px;margin:0}
+.signal-story-value{margin:12px 0 10px;color:var(--text);font:600 clamp(25px,2.4vw,34px)/1.08 "JetBrains Mono",monospace;letter-spacing:-.07em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.signal-story-value.up{color:var(--green)}.signal-story-value.down{color:var(--red)}
+.signal-story h3{margin:0;color:var(--text);font:600 15px/1.45 "DM Sans",sans-serif;letter-spacing:-.015em;overflow-wrap:anywhere}
+.signal-story p{margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.7}
+.signal-story-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px;padding-top:10px;border-top:1px solid var(--line);color:var(--dim);font:500 8px "JetBrains Mono",monospace;letter-spacing:.045em;text-transform:uppercase}
+.signal-desk-action{display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:7px 0;border:0;background:transparent;color:var(--violet);font:700 10px "DM Sans",sans-serif}
+.signal-desk-action:hover{color:var(--text)}
+.signal-desk-action:focus-visible{outline:2px solid var(--violet);outline-offset:3px}
+.signal-story-empty .signal-story-value{color:var(--dim);letter-spacing:-.02em;font-size:20px}
+body[data-theme="light"] .signal-desk{background:linear-gradient(115deg,#f1eaff,#fff 48%,#f1fbf7);border-color:#dcd1ef;box-shadow:0 12px 28px rgba(55,30,90,.06)}
+body[data-theme="light"] .signal-story-lead{background:linear-gradient(145deg,#eee4ff,transparent 78%)}
+@keyframes signalStoryReveal{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:820px){.signal-desk-grid{grid-template-columns:1fr 1fr}.signal-story-lead{grid-column:1/-1;border-right:0;border-bottom:1px solid var(--line)}.signal-story:nth-child(2){border-right:0}.signal-story:nth-child(3){grid-column:1/-1;border-top:1px solid var(--line)}}
+@media(max-width:560px){.signal-desk-head{align-items:flex-start;flex-direction:column;gap:9px;padding:17px 16px 14px}.signal-desk-stamp{text-align:left}.signal-desk-grid{grid-template-columns:1fr}.signal-story,.signal-story-lead,.signal-story:nth-child(2),.signal-story:nth-child(3){grid-column:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px}.signal-story:last-child{border-bottom:0}.signal-story-value{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.signal-story{animation:none!important;transform:none!important;opacity:1!important}}
 @keyframes marketWireRun{to{transform:translateX(-50%)}}
 @keyframes wireLed{to{opacity:.52;box-shadow:0 0 0 3px #77ddb00e,0 0 4px #77ddb033}}
 @keyframes wireReprice{0%{background:rgba(192,167,255,.19)}100%{background:transparent}}
@@ -639,6 +666,27 @@ function interfaceArt(page){
 function renderPageVisual(page,kicker,title,copy){
  return `<section class="page-visual page-visual-${page}" aria-label="${htmlEscape(title)}"><div class="page-visual-copy"><div class="eyebrow">${htmlEscape(kicker)}</div><h2>${htmlEscape(title)}</h2><p>${htmlEscape(copy)}</p></div><div class="page-visual-art" aria-hidden="true">${interfaceArt(page)}</div></section>`;
 }
+function renderSignalDesk(){
+ const records=markets.filter(m=>m&&m.title);
+ const live=marketFeed.status==="live";
+ const liquidityLeader=[...records].sort((a,b)=>marketMoneyMetric(b,"liquidity")-marketMoneyMetric(a,"liquidity"))[0]||null;
+ const volumeLeader=[...records].sort((a,b)=>marketMoneyMetric(b,"volume")-marketMoneyMetric(a,"volume"))[0]||null;
+ const latest=live&&wireState.history.length?wireState.history[0]:null;
+ const observedDelta=latest?Number(latest.toP)-Number(latest.fromP):0;
+ const moveClass=observedDelta>=0?"up":"down";
+ const movement=latest
+  ?'<article class="signal-story signal-story-lead"><div class="signal-story-kicker"><i class="dot pulse-live-dot"></i>Observed repricing</div><div class="signal-story-value '+moveClass+'">'+(observedDelta>0?"+":"")+observedDelta.toFixed(1)+' pp</div><h3>'+htmlEscape(latest.title)+'</h3><p>Returned price changed from '+Number(latest.fromP).toFixed(1)+'% to '+Number(latest.toP).toFixed(1)+'% across successful snapshots. This is an observed quote difference, not a trade or an explanation for the move.</p><div class="signal-story-foot"><span>'+htmlEscape(latest.chain||"Seer market")+'</span><span>'+htmlEscape(marketWireTime(new Date(latest.observedAt)))+'</span></div><button class="signal-desk-action" type="button" onclick="go(\'app\')">Open market explorer <span aria-hidden="true">→</span></button></article>'
+  :'<article class="signal-story signal-story-lead signal-story-empty"><div class="signal-story-kicker"><i class="dot pulse-live-dot"></i>Watching the tape</div><div class="signal-story-value">Awaiting a move</div><h3>No repricing has been observed yet.</h3><p>This browser needs two successful live snapshots with a price difference of at least 0.2 percentage points. The desk leaves the story empty rather than inventing news.</p><div class="signal-story-foot"><span>'+(live?"Snapshot comparison":"Source pending")+'</span><span>'+(marketFeed.updatedAt?htmlEscape(marketWireTime(marketFeed.updatedAt)):"Awaiting first sync")+'</span></div><button class="signal-desk-action" type="button" onclick="go(\'app\')">Explore current records <span aria-hidden="true">→</span></button></article>';
+ const liquidityCard=liquidityLeader
+  ?'<article class="signal-story"><div class="signal-story-kicker">Reported liquidity leader</div><div class="signal-story-value">'+htmlEscape(liquidityLeader.depth||"—")+'</div><h3>'+htmlEscape(liquidityLeader.title)+'</h3><p>Highest reported liquidity in the currently loaded sample. Depth helps explain how fragile a displayed quote may be; it is not proof of executable size.</p><div class="signal-story-foot"><span>'+htmlEscape(liquidityLeader.chain||"Unknown network")+'</span><span>'+(live?"API record":"Preview sample")+'</span></div><button class="signal-desk-action" type="button" onclick="go(\'app\')">Inspect market records <span aria-hidden="true">→</span></button></article>'
+  :'<article class="signal-story"><div class="signal-story-kicker">Reported liquidity leader</div><div class="signal-story-value">—</div><h3>No priced sample available.</h3><p>A headline will appear when the source returns market records.</p></article>';
+ const volumeCard=volumeLeader
+  ?'<article class="signal-story"><div class="signal-story-kicker">Highest reported volume</div><div class="signal-story-value">'+htmlEscape(volumeLeader.volume||"—")+'</div><h3>'+htmlEscape(volumeLeader.title)+'</h3><p>Largest volume figure in the current returned sample. The source field is not labelled as a 24-hour trade tape, so no intraday claim is inferred.</p><div class="signal-story-foot"><span>'+htmlEscape(volumeLeader.chain||"Unknown network")+'</span><span>'+(live?"API record":"Preview sample")+'</span></div><button class="signal-desk-action" type="button" onclick="go(\'app\')">Open market explorer <span aria-hidden="true">→</span></button></article>'
+  :'<article class="signal-story"><div class="signal-story-kicker">Highest reported volume</div><div class="signal-story-value">—</div><h3>No volume record available.</h3><p>The source has not returned enough information to rank activity.</p></article>';
+ const stamp=marketFeed.updatedAt?marketWireTime(marketFeed.updatedAt):"WAITING FOR SOURCE";
+ return '<section class="signal-desk" aria-label="Signal Desk market briefing"><div class="signal-desk-head"><div><div class="signal-desk-kicker"><i class="dot pulse-live-dot"></i>Signal Desk / Source-backed briefing</div><h2>What the market is saying right now.</h2></div><div class="signal-desk-stamp">'+(live?"LIVE SNAPSHOT":"PREVIEW DATA")+' · UPDATED '+htmlEscape(stamp)+'</div></div><div class="signal-desk-grid">'+movement+liquidityCard+volumeCard+'</div></section>';
+}
+
 function renderHome(){
  const top=markets[0]||demoMarkets[0],live=marketFeed.status==="live";
  const signalValue=top.p===null||top.p===undefined?0:Math.round(top.p);
@@ -672,7 +720,7 @@ function renderHome(){
   </aside>
  </section>
  <div class="market-pulse" aria-label="Current market pulse"><div class="market-pulse-label"><span class="pulse-live-dot"></span><span>MARKET PULSE</span><small>${live?"LIVE INDEX":"PREVIEW"}</small></div><div class="market-pulse-track">${markets.slice(0,4).map((m,i)=>`<div class="pulse-item"><span class="pulse-index">0${i+1}</span><span class="pulse-title">${htmlEscape((m.title||"Market signal").slice(0,54))}${(m.title||"").length>54?"…":""}</span><strong>${m.p===null||m.p===undefined?"—":Math.round(m.p)+"%"}</strong><span class="pulse-bar"><i style="width:${m.p===null||m.p===undefined?0:m.p}%"></i></span></div>`).join("")}</div></div>
- <div class="grid stats home-stats">${stat("Markets indexed",live?marketFeed.count.toLocaleString():"—",live?"Seer API · supported networks":"Awaiting live source")}${stat("Live sample",live?markets.length:"—",live?"Highest-liquidity returned records":"No live records confirmed")}${stat("Data connection",live?"Connected":marketFeed.status==="loading"?"Connecting":"Fallback",live?"Fetched "+marketFeed.updatedAt.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}):"Demo records clearly labelled")}</div>
+ ${renderSignalDesk()}\n <div class="grid stats home-stats">${stat("Markets indexed",live?marketFeed.count.toLocaleString():"—",live?"Seer API · supported networks":"Awaiting live source")}${stat("Live sample",live?markets.length:"—",live?"Highest-liquidity returned records":"No live records confirmed")}${stat("Data connection",live?"Connected":marketFeed.status==="loading"?"Connecting":"Fallback",live?"Fetched "+marketFeed.updatedAt.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}):"Demo records clearly labelled")}</div>
  <div class="notice home-notice">${live?"Connected to Seer's market-search endpoint. The signal graphic above uses a returned record; history and specialist forecast, futarchy and risk scenarios are still illustrative.":"The live market connection is "+(marketFeed.status==="loading"?"being established":"unavailable")+". Demo records are labelled and are not presented as current Seer prices."}</div>
  ${section("Six interfaces, one protocol","Each view answers a different question. Move from discovering a market to examining a decision.") }
  <div class="grid markets interface-preview-grid">${interfaces.map(x=>`<article class="panel market interface-preview interface-${x[3]}"><div class="interface-art art-${x[3]}" aria-hidden="true">${interfaceArt(x[3])}<span>${x[4]}</span></div><div class="markettop"><span class="category">${x[0]} / ${x[1].toUpperCase()}</span><span class="interface-card-arrow" aria-hidden="true">↗</span></div><h3>${x[1]}</h3><p class="muted interface-preview-copy">${x[2]}</p><button class="interface-open" onclick="go('${x[3]}')">Open interface <span aria-hidden="true">→</span></button></article>`).join("")}</div>
