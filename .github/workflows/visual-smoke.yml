@@ -40,12 +40,12 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           const url = "https://pascaline06.github.io/Seer-six-interfaces/";
-          const marker = "markets-search";
+          const marker = 'statlabel">Opened</div>';
           for (let attempt = 1; attempt <= 18; attempt++) {
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes("Roboto:wght@400..900")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Roboto:wght@400..900")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
