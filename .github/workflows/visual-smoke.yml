@@ -140,7 +140,7 @@ jobs:
               if (!metrics.bodyFontLoaded || !metrics.displayFontLoaded || !metrics.monoFontLoaded) report.warnings.push(`${viewport.name}/${theme}/${route}: one or more requested font families did not confirm as loaded`);
               if (metrics.interfaceNavCount !== 6 || metrics.interfaceNavTargets.length !== 6 || metrics.currentFooterRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: footer must show all six directly-accessible routes with the current route marked`);
               const nextRoute = routes[(routes.indexOf(route) + 1) % routes.length];
-              const nextLink = page.locator(`.interface-nav-link[data-suite-page="${nextRoute}"]`);
+              const nextLink = page.locator(`.interface-link[data-suite-page="${nextRoute}"]`);
               await nextLink.click();
               const footerNavigationWorks = await page.locator("#main").getAttribute("data-page") === nextRoute;
               if (!footerNavigationWorks) report.failures.push(`${viewport.name}/${theme}/${route}: footer link did not navigate to ${nextRoute}`);
