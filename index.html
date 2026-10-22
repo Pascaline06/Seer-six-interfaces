@@ -6,7 +6,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#101013">
 <meta name="description" content="Seer Six: six decision interfaces for exploring market signals, conditional forecasts, opportunity selection and comparative risk.">
 <meta property="og:title" content="Seer Six — Markets for better decisions">
@@ -38,7 +43,7 @@
 html{scroll-behavior:smooth}
 body{
   margin:0;background:var(--bg);color:var(--text);
-  font-family:"Instrument Sans",sans-serif;font-size:16px;line-height:1.7;
+  font-family:"Satoshi",sans-serif;font-size:16px;line-height:1.7;
   font-synthesis:none;text-rendering:optimizeLegibility;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
@@ -59,7 +64,7 @@ a{color:inherit;text-decoration:none}
 .brand{min-width:0;display:flex;align-items:center;gap:10px;font-size:0}
 .logo{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;overflow:hidden}
 .logo img{display:block;width:30px;height:30px;object-fit:contain}
-.wordmark{font-family:"Sora",sans-serif;font-size:24px;font-weight:700;letter-spacing:-1.6px;line-height:1;color:var(--text)}
+.wordmark{font-family:"Clash Display",sans-serif;font-size:24px;font-weight:700;letter-spacing:-1.6px;line-height:1;color:var(--text)}
 .brand-note{margin-left:3px;color:var(--dim);font-size:11px;letter-spacing:.02em;font-weight:500}
 .topright{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:12px}
 .chain{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:-.03em;color:var(--muted)}
@@ -95,7 +100,7 @@ a{color:inherit;text-decoration:none}
 .headrow>.pill{margin-top:7px}
 .headrow .button{flex:0 0 auto;margin-top:9px;align-self:flex-start}
 .heading,h1,h2,h3,.sectionhead h2,.market h3,.interface-nav-title{
-  font-family:"Sora",sans-serif;font-synthesis:none;
+  font-family:"Clash Display",sans-serif;font-synthesis:none;
 }
 .heading{
   max-width:900px;margin:14px 0 21px;color:var(--text);
@@ -179,7 +184,7 @@ input[type="range"]{padding:0!important;border:0!important;background:transparen
 .interface-link{display:inline-flex;align-items:baseline;gap:8px;min-height:38px;padding:9px 0;color:var(--muted);white-space:nowrap;transition:color .16s}
 .interface-link:hover{color:var(--text)}
 .interface-link-num{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--dim);letter-spacing:.02em}
-.interface-link-label{font-family:"Instrument Sans",sans-serif;font-size:13px;font-weight:650;letter-spacing:-.01em}
+.interface-link-label{font-family:"Satoshi",sans-serif;font-size:13px;font-weight:650;letter-spacing:-.01em}
 .interface-link-arrow{font-size:11px;color:var(--dim);transition:transform .16s,color .16s}
 .interface-link:hover .interface-link-arrow{transform:translate(2px,-2px);color:var(--violet)}
 .interface-link.current{color:var(--text)}
