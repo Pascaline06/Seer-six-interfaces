@@ -1,0 +1,140 @@
+name: Seer Six browser smoke and visual capture
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "preview.svg"
+      - ".github/workflows/visual-smoke.yml"
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seer-six-visual-smoke
+  cancel-in-progress: true
+
+jobs:
+  browser-check:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Wait for the deployed revision
+        run: |
+          node <<'NODE'
+          const url = "https://pascaline06.github.io/Seer-six-interfaces/";
+          const marker = "markets-search";
+          for (let attempt = 1; attempt <= 18; attempt++) {
+            try {
+              const response = await fetch(url, { cache: "no-store" });
+              const html = await response.text();
+              if (response.ok && html.includes(marker) && html.includes("Roboto:wght@400..900")) {
+                console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
+                process.exit(0);
+              }
+              console.log(`Attempt ${attempt}: waiting for latest build (HTTP ${response.status})`);
+            } catch (error) {
+              console.log(`Attempt ${attempt}: ${error.message}`);
+            }
+            await new Promise(resolve => setTimeout(resolve, 10000));
+          }
+          console.error("Latest build marker was not found on the deployed site.");
+          process.exit(1);
+          NODE
+
+      - name: Verify desktop and mobile routes; capture screenshots
+        run: |
+          mkdir -p artifacts
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import { chromium } from "playwright";
+
+          const base = "https://pascaline06.github.io/Seer-six-interfaces/";
+          const routes = ["home", "app", "deep", "futarchy", "opportunity", "risk"];
+          const viewports = [
+            { name: "desktop", width: 1440, height: 1000 },
+            { name: "mobile", width: 390, height: 844 },
+          ];
+          const browser = await chromium.launch({ headless: true });
+          const report = { testedAt: new Date().toISOString(), base, results: [], failures: [], warnings: [] };
+
+          for (const viewport of viewports) {
+            const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: viewport.name === "mobile" ? 2 : 1, isMobile: viewport.name === "mobile", hasTouch: viewport.name === "mobile" });
+            const page = await context.newPage();
+            const pageErrors = [];
+            page.on("pageerror", error => pageErrors.push(error.message));
+            await page.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
+
+            for (const route of routes) {
+              await page.goto(base + "#/" + route, { waitUntil: "domcontentloaded", timeout: 45000 });
+              await page.waitForSelector("#main h1", { timeout: 15000 });
+              await page.evaluate(() => document.fonts.ready);
+              await page.waitForTimeout(700);
+
+              const metrics = await page.evaluate(() => {
+                const main = document.querySelector("#main");
+                const heading = main?.querySelector("h1");
+                const nav = document.querySelector("#nav");
+                const body = document.body;
+                const root = document.documentElement;
+                const font = heading ? getComputedStyle(heading).fontFamily : "";
+                const active = nav?.querySelector("button.active")?.dataset.page || null;
+                return {
+                  title: document.title,
+                  heading: heading?.innerText || null,
+                  headingFontFamily: font,
+                  robotoLoaded: document.fonts.check("16px Roboto"),
+                  viewportWidth: window.innerWidth,
+                  documentWidth: Math.max(root.scrollWidth, body.scrollWidth),
+                  horizontalOverflow: Math.max(root.scrollWidth, body.scrollWidth) > window.innerWidth + 1,
+                  activeRoute: active,
+                  marketFeedStatus: document.body.innerText.includes("Live Seer record") ? "live" : document.body.innerText.includes("Demo fallback") ? "fallback" : "not-visible",
+                  mainWidth: Math.round(main?.getBoundingClientRect().width || 0),
+                };
+              });
+
+              const screenshot = `artifacts/${viewport.name}-${route}.png`;
+              await page.screenshot({ path: screenshot, fullPage: true, animations: "disabled" });
+              const result = { viewport: viewport.name, route, screenshot, ...metrics, pageErrors: [...pageErrors] };
+              report.results.push(result);
+              if (metrics.horizontalOverflow) report.failures.push(`${viewport.name}/${route}: horizontal overflow at ${metrics.viewportWidth}px (document ${metrics.documentWidth}px)`);
+              if (metrics.activeRoute !== route) report.failures.push(`${viewport.name}/${route}: active navigation route was ${metrics.activeRoute}`);
+              if (!metrics.heading) report.failures.push(`${viewport.name}/${route}: missing page heading`);
+              if (pageErrors.length) report.failures.push(`${viewport.name}/${route}: browser errors: ${pageErrors.join("; ")}`);
+              if (!metrics.robotoLoaded) report.warnings.push(`${viewport.name}/${route}: Roboto font not confirmed as loaded (external font/network may be unavailable)`);
+              if (metrics.marketFeedStatus !== "live") report.warnings.push(`${viewport.name}/${route}: live API status was ${metrics.marketFeedStatus}; check CORS/API availability`);
+            }
+            await context.close();
+          }
+
+          fs.writeFileSync("artifacts/report.json", JSON.stringify(report, null, 2));
+          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, route, heading, headingFontFamily, robotoLoaded, horizontalOverflow, marketFeedStatus}) => ({viewport, route, heading, headingFontFamily, robotoLoaded, horizontalOverflow, marketFeedStatus})) }, null, 2));
+          await browser.close();
+          if (report.failures.length) process.exit(1);
+          NODE
+
+      - name: Upload desktop/mobile screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seer-six-browser-visual-check
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
