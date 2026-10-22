@@ -517,6 +517,33 @@ body[data-theme="light"] .wire-tools-actions button{background:#fff8}
 @media(max-width:820px){.signal-ticker{grid-template-columns:1fr}.signal-ticker-label{padding:9px 14px;border-right:0;border-bottom:1px solid var(--line)}.signal-ticker-label small{margin-left:auto}}
 @media(prefers-reduced-motion:reduce){.signal-ticker-track,.signal-ticker-live-dot{animation:none!important;transform:none!important;will-change:auto}.signal-story{transition:none!important}}
 
+
+/* Evidence trace — compact chart of observations actually captured in this browser. */
+.market-trace{margin-top:15px;padding:16px 17px 14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(120deg,rgba(125,51,255,.075),rgba(27,26,43,.24) 60%,rgba(119,221,176,.025))}
+.market-trace-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.market-trace-head h3{margin:5px 0 0;color:var(--text);font:600 15px/1.25 "Bricolage Grotesque",sans-serif;letter-spacing:-.015em}
+.market-trace-count{padding:5px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted);font:600 8px "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+.market-trace-chart{margin-top:11px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(183,160,255,.04),transparent)}
+.market-trace-chart svg{display:block;width:100%;height:auto;max-height:108px}
+.market-trace-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+.market-trace-meta>span{display:flex;flex-direction:column;gap:4px;color:var(--dim);font:600 8px "JetBrains Mono",monospace;letter-spacing:.07em}
+.market-trace-meta b{font-size:12px;color:var(--text);font-weight:700;letter-spacing:0}
+.market-trace-meta small{color:var(--dim);font-size:8px;font-weight:400;letter-spacing:0}
+.market-trace-meta .up{color:var(--green)}.market-trace-meta .down{color:var(--red)}
+.market-trace-empty{margin-top:12px;padding:16px;border:1px dashed var(--line);border-radius:9px;background:rgba(255,255,255,.012)}
+.market-trace-empty strong{display:block;color:var(--green);font:600 19px "JetBrains Mono",monospace;letter-spacing:-.04em}
+.market-trace-empty p{margin:6px 0 13px;color:var(--muted);font-size:11px;line-height:1.6}
+.market-trace-rail{display:flex;align-items:center;gap:5px;height:12px}
+.market-trace-rail span{height:3px;flex:1;border-radius:4px;background:var(--line)}
+.market-trace-rail span:first-child{background:var(--violet);opacity:.45}
+.market-trace-rail span:last-child{background:var(--green);opacity:.85;animation:signalTickerPulse 1.7s ease-in-out infinite}
+.market-trace-empty small{display:block;margin-top:8px;color:var(--dim);font:500 8px "JetBrains Mono",monospace}
+.market-trace-note{margin:10px 0 0;color:var(--dim);font-size:9px;line-height:1.55}
+body[data-theme="light"] .market-trace{background:linear-gradient(120deg,#f5f0ff,#fff 60%,#f2fbf6);border-color:#dcd1ef}
+body[data-theme="light"] .market-trace-empty{background:#ffffff7a}
+@media(max-width:560px){.market-trace{padding:13px}.market-trace-meta{gap:7px}.market-trace-meta>span{font-size:7px}.market-trace-meta b{font-size:11px}.market-trace-empty strong{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.market-trace-rail span:last-child{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -559,6 +586,33 @@ let markets=demoMarkets;
 const marketFeed={status:"loading",count:0,updatedAt:null,lastAttemptAt:null,error:"",errorDetail:"",refreshing:false,chains:[100,10,8453,1]};
 function readMarketWireHistory(){try{const v=JSON.parse(localStorage.getItem("seer-six-wire-history-v1")||"[]");return Array.isArray(v)?v.filter(x=>x&&x.key&&Number.isFinite(Number(x.fromP))&&Number.isFinite(Number(x.toP))&&x.observedAt).slice(0,40):[]}catch{return []}}
 const wireState={paused:false,ledgerOpen:false,history:readMarketWireHistory(),changedIds:new Set(),hasComparedSnapshot:false,lastSweep:null,refreshTimer:null};
+function readMarketPriceTrace(){
+ try{
+  const saved=JSON.parse(localStorage.getItem("seer-six-price-trace-v1")||"[]");
+  return Array.isArray(saved)?saved.filter(x=>x&&typeof x.key==="string"&&x.key&&x.observedAt&&!Number.isNaN(Date.parse(x.observedAt))&&Number.isFinite(Number(x.p))&&Number(x.p)>=0&&Number(x.p)<=100).slice(-1200):[];
+ }catch{return []}
+}
+const marketTrace={samples:readMarketPriceTrace(),perMarketLimit:40};
+function recordMarketPriceSnapshots(records){
+ const observedAt=new Date().toISOString();
+ for(const m of records||[]){
+  const p=Number(m&&m.p),key=marketKey(m);
+  if(!key||!Number.isFinite(p)||p<0||p>100)continue;
+  let previous=null;
+  for(let i=marketTrace.samples.length-1;i>=0;i--){if(marketTrace.samples[i].key===key){previous=marketTrace.samples[i];break;}}
+  const elapsed=previous?Date.parse(observedAt)-Date.parse(previous.observedAt):Infinity;
+  if(previous&&elapsed<45000&&Math.abs(p-Number(previous.p))<0.05)continue;
+  marketTrace.samples.push({key,title:String(m.title||"Untitled market"),chain:String(m.chain||m.type||"Market"),p,observedAt});
+ }
+ const counts=new Map(),kept=[];
+ for(const sample of [...marketTrace.samples].reverse()){
+  const count=counts.get(sample.key)||0;
+  if(count<marketTrace.perMarketLimit){kept.push(sample);counts.set(sample.key,count+1);}
+ }
+ marketTrace.samples=kept.reverse().slice(-1200);
+ try{localStorage.setItem("seer-six-price-trace-v1",JSON.stringify(marketTrace.samples))}catch{}
+}
+
 const explorerFeed={status:"idle",count:0,pages:1,updatedAt:null,error:"",requestId:0};
 let explorerMarkets=[];
 const futarchyFeed={status:"idle",count:0,updatedAt:null,error:""};
@@ -632,6 +686,7 @@ async function loadLiveMarkets(){
    wireState.history=[...events,...wireState.history].slice(0,40);
    try{localStorage.setItem("seer-six-wire-history-v1",JSON.stringify(wireState.history))}catch{}
   }
+  recordMarketPriceSnapshots(live);
   markets=live;marketFeed.status="live";marketFeed.count=Number(payload.count)||live.length;marketFeed.updatedAt=new Date();marketFeed.error="";marketFeed.errorDetail="";
   if(changed.length){window.setTimeout(()=>{wireState.changedIds.clear();renderMarketWire()},1500);}
  }catch(error){
@@ -671,7 +726,29 @@ function toggleMarketDetail(key){state.selectedMarketId=state.selectedMarketId==
 function marketIsCompared(m){return state.compareMarkets.some(x=>marketKey(x)===marketKey(m))}
 function toggleMarketCompare(key){const pool=[...explorerMarkets,...markets,...state.watchlist,...state.compareMarkets];const found=pool.find(m=>marketKey(m)===String(key));if(!found)return;if(marketIsCompared(found)){state.compareMarkets=state.compareMarkets.filter(m=>marketKey(m)!==String(key));state.compareNotice="";}else if(state.compareMarkets.length>=3){state.compareNotice="Compare up to three markets at once. Remove one before adding another.";}else{state.compareMarkets.push(compactSavedMarket(found));state.compareNotice="";}render()}
 function renderComparisonWorkbench(){const ms=state.compareMarkets;if(!ms.length)return "";if(ms.length===1)return '<section class="panel compare-workbench" id="marketCompare"><div class="compare-heading"><div><div class="category">COMPARISON WORKBENCH / 01 OF 03</div><h2>Add one more market to compare</h2><p class="muted">The selected record is held as a snapshot. Choose a second or third market to compare price, liquidity and resolution context.</p></div><button class="button secondary" type="button" data-market-action="clear-compare">Clear</button></div><div class="compare-picked"><span>'+htmlEscape(ms[0].chain)+' · '+htmlEscape(ms[0].type)+'</span><strong>'+htmlEscape(ms[0].title)+'</strong><b>'+(ms[0].p===null||ms[0].p===undefined?'—':Math.round(ms[0].p)+'%')+'</b><button class="market-compare selected" type="button" data-market-action="remove-compare" data-market-id="'+htmlEscape(marketKey(ms[0]))+'">Remove</button></div></section>';const labels=[["Indicative price",m=>m.p===null||m.p===undefined?"—":Math.round(m.p)+"%"],["Lifetime volume",m=>m.volume||"—"],["Reported liquidity",m=>m.depth||"—"],["Network",m=>m.chain||"Unknown"],["Category",m=>m.type||"Prediction market"],["Verification",m=>m.verification||"Not verified"],["Opened",m=>m.time||"Not specified"],["Outcomes",m=>(m.outcomes||[]).map(v=>typeof v==="object"?(v.name||v.title||v.outcome||"Outcome"):String(v)).slice(0,4).join(" · ")||"Not included"]];let out='<section class="panel compare-workbench" id="marketCompare"><div class="compare-heading"><div><div class="category">COMPARISON WORKBENCH / '+String(ms.length).padStart(2,"0")+' OF 03</div><h2>Different signals. Same decision.</h2><p class="muted">Compare returned snapshots side by side. Values can change; this is not an execution quote or a security assessment.</p></div><button class="button secondary" type="button" data-market-action="clear-compare">Clear comparison</button></div><div class="compare-matrix"><div class="compare-label-column"><div class="compare-column-spacer">METRIC</div>'+labels.map(x=>'<div class="compare-row-label">'+x[0]+'</div>').join("")+'</div>';for(const m of ms){out+='<div class="compare-market-column"><header><span class="category">'+htmlEscape(m.chain||"Unknown network")+' / '+htmlEscape(m.type||"Market")+'</span><strong>'+htmlEscape(m.title)+'</strong><button class="market-compare selected" type="button" data-market-action="remove-compare" data-market-id="'+htmlEscape(marketKey(m))+'">− Remove</button></header>'+labels.map((x,i)=>'<div class="compare-cell '+(i===0?"compare-price-cell":"")+'">'+htmlEscape(x[1](m))+'</div>').join("")+'</div>';}out+='</div><div class="compare-footnote"><span>SNAPSHOT COMPARISON</span><span>Review resolution criteria before relying on any market signal.</span></div>'+(state.compareNotice?'<p class="compare-notice">'+htmlEscape(state.compareNotice)+'</p>':'')+'</section>';return out.replace('class="compare-matrix"','class="compare-matrix compare-count-'+ms.length+'"')}
-function renderMarketDetail(m){const outcomes=Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean).slice(0,8):[];const href=seerMarketHref(m);return `<section class="panel market-detail" id="marketDetail" aria-live="polite"><div class="market-detail-top"><div><div class="category">RECORD INSPECTOR / ${m.isLive?"LIVE RECORD":"SAVED SNAPSHOT"}</div><h2>${htmlEscape(m.title)}</h2><p class="muted">Inspect the returned record and source context before treating its price as evidence.</p></div><button class="icon-close" type="button" data-market-action="close-detail" aria-label="Close market inspector">×</button></div><div class="market-detail-grid"><div class="market-detail-price"><span>Indicative price</span><strong>${m.p===null||m.p===undefined?"—":Math.round(m.p)+"%"}</strong><div class="bar"><span style="width:${m.p===null||m.p===undefined?0:m.p}%"></span></div><small>${htmlEscape(m.type||"Prediction market")} · ${htmlEscape(m.chain||"Unknown network")}</small></div><div class="market-detail-facts"><div><span>Lifetime volume</span><strong>${htmlEscape(m.volume||"—")}</strong></div><div><span>Reported liquidity</span><strong>${htmlEscape(m.depth||"—")}</strong></div><div><span>Record status</span><strong>${htmlEscape(m.status||"Listed")}</strong></div><div><span>Verification</span><strong>${htmlEscape(m.verification||"Not verified")}</strong></div><div><span>Opened</span><strong>${htmlEscape(m.time||"Not specified")}</strong></div><div><span>Market ID</span><strong class="market-id">${htmlEscape(m.fullId||m.id||"Unavailable")}</strong></div></div></div>${outcomes.length?`<div class="market-outcomes"><div class="category">RETURNED OUTCOMES</div><div class="outcome-chips">${outcomes.map(o=>`<span>${htmlEscape(o)}</span>`).join("")}</div></div>`:""}<div class="market-detail-actions"><button class="button secondary" data-market-action="save" data-market-id="${htmlEscape(marketKey(m))}" type="button">${isWatched(m)?"★ Saved to watchlist":"☆ Save to watchlist"}</button>${href?`<a class="button primary" href="${htmlEscape(href)}" target="_blank" rel="noopener noreferrer">Open original market ↗</a>`:""}</div><p class="market-detail-disclaimer">API fields can be stale or thinly traded. Reported liquidity is not guaranteed executable depth; this prototype does not execute trades.</p></section>`}
+function renderObservedPriceTrace(m){
+ const rows=marketTrace.samples.filter(x=>x.key===marketKey(m)).slice(-40);
+ const count=rows.length;
+ const current=m.p===null||m.p===undefined?null:Number(m.p);
+ const first=count?rows[0]:null,last=count?rows[count-1]:null;
+ const formatTime=value=>value?new Date(value).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}):"—";
+ if(count<2){
+  const value=count?Number(first.p).toFixed(1)+"%":"No samples yet";
+  const detail=count?"One successful snapshot is stored. A later successful observation is needed before a line can be drawn.":"The trace starts from real successful Seer responses observed in this browser; no historical prices are fabricated.";
+  return '<div class="market-trace" role="region" aria-label="Observed market price trace"><div class="market-trace-head"><div><div class="category">OBSERVED PRICE TRACE</div><h3>History captured here</h3></div><span class="market-trace-count">'+count+' / 2+ snapshots</span></div><div class="market-trace-empty"><strong>'+htmlEscape(value)+'</strong><p>'+htmlEscape(detail)+'</p><div class="market-trace-rail"><span></span><span></span><span></span><span></span><span></span></div><small>'+(first?'First seen '+htmlEscape(formatTime(first.observedAt)):'Waiting for a successful source snapshot')+'</small></div><p class="market-trace-note">Snapshot times reflect when this browser received the source response, not exchange trade timestamps.</p></div>';
+ }
+ const values=rows.map(x=>Number(x.p));
+ const lowValue=Math.min.apply(null,values),highValue=Math.max.apply(null,values),spread=highValue-lowValue;
+ let low=Math.max(0,lowValue-Math.max(.5,spread*.16)),high=Math.min(100,highValue+Math.max(.5,spread*.16));
+ if(high-low<1){low=Math.max(0,Math.min(lowValue,highValue)-.5);high=Math.min(100,Math.max(lowValue,highValue)+.5);}
+ const points=values.map((p,i)=>({x:18+i*(604/(values.length-1)),y:76-((p-low)/(high-low||1))*56}));
+ const pointString=points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+ const areaPath='M'+points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L')+' L622,88 L18,88 Z';
+ const delta=Number(last.p)-Number(first.p),sign=delta>0?'+':'';
+ const deltaClass=delta>=0?'up':'down';
+ return '<div class="market-trace" role="region" aria-label="Observed market price trace"><div class="market-trace-head"><div><div class="category">OBSERVED PRICE TRACE</div><h3>History captured here</h3></div><span class="market-trace-count">'+count+' snapshots</span></div><div class="market-trace-chart"><svg viewBox="0 0 640 96" role="img" aria-label="Observed market prices from '+count+' successful snapshots, not fabricated historical prices"><defs><linearGradient id="marketTraceFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7a0ff" stop-opacity=".28"/><stop offset="100%" stop-color="#b7a0ff" stop-opacity="0"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#marketTraceFill)"/><path d="M18,88 H622" stroke="var(--line)" stroke-width="1" fill="none"/><polyline points="'+pointString+'" stroke="var(--violet)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" fill="none"/><circle cx="'+points[points.length-1].x.toFixed(1)+'" cy="'+points[points.length-1].y.toFixed(1)+'" r="3.4" fill="var(--green)" stroke="var(--panel)" stroke-width="1.5"/></svg></div><div class="market-trace-meta"><span>FIRST <b>'+Number(first.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(first.observedAt))+'</small></span><span>LAST <b>'+Number(last.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(last.observedAt))+'</small></span><span>OBSERVED CHANGE <b class="'+deltaClass+'">'+sign+delta.toFixed(1)+' pp</b><small>Across captured snapshots</small></span></div><p class="market-trace-note">This browser-local trace connects actual successful source snapshots only. It is not exchange history, a trade tape, or an executable quote. '+(current===null?'The current record has no returned price.':'Current returned price: '+current.toFixed(1)+'%.')+'</p></div>';
+}
+function renderMarketDetail(m){const outcomes=Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean).slice(0,8):[];const href=seerMarketHref(m);return `<section class="panel market-detail" id="marketDetail" aria-live="polite"><div class="market-detail-top"><div><div class="category">RECORD INSPECTOR / ${m.isLive?"LIVE RECORD":"SAVED SNAPSHOT"}</div><h2>${htmlEscape(m.title)}</h2><p class="muted">Inspect the returned record and source context before treating its price as evidence.</p></div><button class="icon-close" type="button" data-market-action="close-detail" aria-label="Close market inspector">×</button></div><div class="market-detail-grid"><div class="market-detail-price"><span>Indicative price</span><strong>${m.p===null||m.p===undefined?"—":Math.round(m.p)+"%"}</strong><div class="bar"><span style="width:${m.p===null||m.p===undefined?0:m.p}%"></span></div><small>${htmlEscape(m.type||"Prediction market")} · ${htmlEscape(m.chain||"Unknown network")}</small></div><div class="market-detail-facts"><div><span>Lifetime volume</span><strong>${htmlEscape(m.volume||"—")}</strong></div><div><span>Reported liquidity</span><strong>${htmlEscape(m.depth||"—")}</strong></div><div><span>Record status</span><strong>${htmlEscape(m.status||"Listed")}</strong></div><div><span>Verification</span><strong>${htmlEscape(m.verification||"Not verified")}</strong></div><div><span>Opened</span><strong>${htmlEscape(m.time||"Not specified")}</strong></div><div><span>Market ID</span><strong class="market-id">${htmlEscape(m.fullId||m.id||"Unavailable")}</strong></div></div></div>${renderObservedPriceTrace(m)}${outcomes.length?`<div class="market-outcomes"><div class="category">RETURNED OUTCOMES</div><div class="outcome-chips">${outcomes.map(o=>`<span>${htmlEscape(o)}</span>`).join("")}</div></div>`:""}<div class="market-detail-actions"><button class="button secondary" data-market-action="save" data-market-id="${htmlEscape(marketKey(m))}" type="button">${isWatched(m)?"★ Saved to watchlist":"☆ Save to watchlist"}</button>${href?`<a class="button primary" href="${htmlEscape(href)}" target="_blank" rel="noopener noreferrer">Open original market ↗</a>`:""}</div><p class="market-detail-disclaimer">API fields can be stale or thinly traded. Reported liquidity is not guaranteed executable depth; this prototype does not execute trades.</p></section>`}
 function marketCard(m){const p=m.p===null||m.p===undefined?"—":Math.round(m.p)+"%";const pct=m.p===null||m.p===undefined?0:m.p;const href=seerMarketHref(m),key=marketKey(m),saved=isWatched(m);return `<article class="panel market market-record ${saved?"is-saved":""}"><div class="markettop"><span class="category">${htmlEscape(m.type)}</span><span class="pill">${htmlEscape(m.chain||"Preview")}</span></div><h3>${htmlEscape(m.title)}</h3><div><div class="probrow"><span class="prob">${p}</span><span class="muted" style="font-size:11px">${m.p===null||m.p===undefined?"Price unavailable":"Indicative outcome price"}</span></div><div class="bar"><span style="width:${pct}%"></span></div><div class="muted" style="font-size:11px;margin-top:7px">${m.outcomes?.length?htmlEscape(m.outcomes.slice(0,3).map(v=>typeof v==="object"?(v.name||v.title||v.outcome||"Outcome"):String(v)).join(" · ")):"Outcome details in market"}</div></div><div class="marketfoot"><span>Volume ${htmlEscape(m.volume||"—")}</span><span>Liquidity ${htmlEscape(m.depth||"—")}</span></div><div class="marketfoot"><span>${m.isLive?"Live Seer record":m.isSnapshot?"Saved snapshot":"Demo fallback"}</span><span>Opened ${htmlEscape(m.time||"date unavailable")}</span></div>${href?`<div class="marketfoot"><a href="${htmlEscape(href)}" target="_blank" rel="noopener noreferrer" style="color:var(--violet)">Open on Seer ↗</a><span>${htmlEscape(m.verification||"")}</span></div>`:""}<div class="market-actions"><button class="market-action-link" type="button" data-market-action="inspect" data-market-id="${htmlEscape(key)}">${state.selectedMarketId===key?"Close details":"Inspect record"} <span>↗</span></button><button class="market-compare ${marketIsCompared(m)?"selected":""}" type="button" data-market-action="compare" data-market-id="${htmlEscape(key)}" aria-pressed="${marketIsCompared(m)}">${marketIsCompared(m)?"✓ Comparing":"⇄ Compare"}</button><button class="market-save ${saved?"saved":""}" type="button" data-market-action="save" data-market-id="${htmlEscape(key)}" aria-pressed="${saved}">${saved?"★ Saved":"☆ Save market"}</button></div></article>`}
 function section(title,sub="",right=""){return `<div class="sectionhead"><div><h2>${title}</h2>${sub?`<p>${sub}</p>`:""}</div>${right}</div>`}
 function stat(label,value,foot){return `<div class="panel"><div class="statlabel">${label}</div><div class="statvalue">${value}</div><div class="statfoot">${foot}</div></div>`}
@@ -840,6 +917,7 @@ async function loadExplorerMarkets(){
   if(!Array.isArray(payload.markets))throw new Error("Unexpected market-search response");
   if(requestId!==explorerFeed.requestId)return;
   explorerMarkets=payload.markets.map(normalizeLiveMarket).filter(m=>m.fullId&&m.title);
+  recordMarketPriceSnapshots(explorerMarkets);
   explorerFeed.status="live";explorerFeed.count=Number(payload.count)||0;explorerFeed.pages=Math.max(1,Number(payload.pages)||Math.ceil(explorerFeed.count/12)||1);explorerFeed.updatedAt=new Date();explorerFeed.error="";
   if(state.explorerPage>explorerFeed.pages){state.explorerPage=explorerFeed.pages;loadExplorerMarkets();return;}
  }catch(error){
