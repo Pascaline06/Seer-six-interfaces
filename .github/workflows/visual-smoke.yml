@@ -39,7 +39,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -134,6 +134,9 @@ jobs:
                   marketPulseItemCount: main?.querySelectorAll(".market-pulse .pulse-item").length || 0,
                   signalDeskCount: main?.querySelectorAll(".signal-desk").length || 0,
                   signalStoryCount: main?.querySelectorAll(".signal-desk .signal-story").length || 0,
+                  signalTickerCount: main?.querySelectorAll('.signal-ticker').length || 0,
+                  signalTickerItemCount: main?.querySelectorAll('.signal-ticker-set:not([aria-hidden="true"]) .signal-ticker-item').length || 0,
+                  signalTickerAnimation: getComputedStyle(main?.querySelector('.signal-ticker-track') || body).animationName,
                   marketWireVisible: !!document.querySelector("#marketWire"),
                   marketWireItemCount: document.querySelectorAll("#marketWire .market-wire-set:not([aria-hidden='true']) .wire-item").length,
                   marketWireAnimation: getComputedStyle(document.querySelector("#marketWire .market-wire-track") || body).animationName,
@@ -169,6 +172,22 @@ jobs:
                 const historyClosed = await page.locator("#marketWire .wire-ledger").count() === 0;
                 const historyCollapsed = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
                 if (!historyClosed || historyCollapsed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not close");
+              }
+              // The homepage briefing ticker must be data-backed, moving, and reduced-motion aware.
+              if (route === "home") {
+                const briefTicker = page.locator("#main .signal-ticker");
+                if (await briefTicker.count() !== 1) {
+                  report.failures.push(viewport.name+"/"+theme+"/home: ON AIR market briefing ticker is missing");
+                } else {
+                  const briefText = await briefTicker.innerText();
+                  const briefAnimation = await briefTicker.locator(".signal-ticker-track").evaluate(el => getComputedStyle(el).animationName);
+                  if (briefAnimation !== "signalTickerRun") report.failures.push(viewport.name+"/"+theme+"/home: ON AIR briefing ticker is not moving");
+                  if (!briefText.includes("SOURCE SNAPSHOT") || !briefText.includes("LIQUIDITY LEADER") || !briefText.includes("VOLUME LEADER")) report.failures.push(viewport.name+"/"+theme+"/home: briefing ticker is missing source-derived headlines");
+                  await page.emulateMedia({ reducedMotion: "reduce" });
+                  const reducedAnimation = await briefTicker.locator(".signal-ticker-track").evaluate(el => getComputedStyle(el).animationName);
+                  if (reducedAnimation !== "none") report.failures.push(viewport.name+"/"+theme+"/home: briefing ticker ignores reduced-motion preference");
+                  await page.emulateMedia({ reducedMotion: "no-preference" });
+                }
               }
               // Validate the motion control, then restore the default moving wire before capture.
               const wireToggle = page.locator('#marketWire button[data-wire-action="pause"]');
