@@ -230,6 +230,7 @@ jobs:
                   report.failures.push(viewport.name+"/"+theme+"/app: no Save market action was rendered");
                 }
               }
+              if (route === "app") {
                 const compareButtons = page.locator('#main button[data-market-action="compare"]');
                 if (await compareButtons.count() >= 2) {
                   await compareButtons.nth(0).click();
