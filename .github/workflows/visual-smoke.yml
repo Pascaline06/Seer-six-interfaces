@@ -195,6 +195,41 @@ jobs:
                   report.warnings.push(viewport.name+"/"+theme+"/app: full-index search fell back ("+(searchMode || "no final status")+")");
                 }
               }
+              if (route === "app") {
+                // Exercise the actual record inspector and device-local watchlist, not just their markup.
+                await page.evaluate(() => localStorage.removeItem("seer-six-watchlist-v1"));
+                await page.reload({ waitUntil: "domcontentloaded" });
+                await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+                const inspect = page.locator('#main button[data-market-action="inspect"]').first();
+                if (await inspect.count()) {
+                  await inspect.click();
+                  const detailVisible = await page.locator("#marketDetail").count() === 1;
+                  if (!detailVisible) report.failures.push(viewport.name+"/"+theme+"/app: Inspect record did not open the market inspector");
+                  if (detailVisible) {
+                    const hasPrice = await page.locator("#marketDetail .market-detail-price").count() === 1;
+                    const hasSourceFacts = await page.locator("#marketDetail .market-detail-facts").count() === 1;
+                    if (!hasPrice || !hasSourceFacts) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing price or source facts");
+                    await page.locator('#marketDetail button[data-market-action="close-detail"]').click();
+                  }
+                } else {
+                  report.failures.push(viewport.name+"/"+theme+"/app: no Inspect record action was rendered");
+                }
+                const save = page.locator('#main button.market-save[data-market-action="save"]').first();
+                if (await save.count()) {
+                  await save.click();
+                  const isSaved = await page.locator('#main button.market-save[data-market-action="save"]').first().getAttribute("aria-pressed");
+                  if (isSaved !== "true") report.failures.push(viewport.name+"/"+theme+"/app: saving a market did not update the save control");
+                  await page.locator("#main .watchlist-toggle").click();
+                  await page.waitForFunction(() => document.querySelector("#explorerStatus")?.dataset.status === "saved", null, { timeout: 5000 }).catch(() => {});
+                  const watchlistStatus = await page.locator("#explorerStatus").getAttribute("data-status");
+                  const savedCards = await page.locator(".explorer-market-grid .market").count();
+                  if (watchlistStatus !== "saved" || savedCards !== 1) report.failures.push(viewport.name+"/"+theme+"/app: the local watchlist did not show the saved market");
+                  await page.locator("#main .watchlist-toggle").click();
+                  await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+                } else {
+                  report.failures.push(viewport.name+"/"+theme+"/app: no Save market action was rendered");
+                }
+              }
               const nextRoute = routes[(routes.indexOf(route) + 1) % routes.length];
               const nextLink = page.locator(`#siteFooter .interface-link[data-suite-page="${nextRoute}"]`);
               await nextLink.click();
