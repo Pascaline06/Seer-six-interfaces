@@ -103,6 +103,13 @@ jobs:
               await page.waitForFunction(() => window.scrollY === 0);
               pageErrors.length = 0;
               await page.waitForFunction(() => /Live Seer record|live records|Demo fallback|live endpoint unavailable|Data status\s*(Connected|Fallback)/.test(document.body.innerText), null, { timeout: 12000 }).catch(() => {});
+              // Do not capture the hero or explorer while their live-data requests are still in flight.
+              if (route === "home") {
+                await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#main .hero-signal")?.dataset.marketStatus || ""), null, { timeout: 20000 }).catch(() => {});
+              }
+              if (route === "app") {
+                await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+              }
               await page.waitForTimeout(500);
 
               const metrics = await page.evaluate(() => {
@@ -128,6 +135,9 @@ jobs:
                   heroSignalCount: main?.querySelectorAll(".hero-signal").length || 0,
                   interfaceArtCount: main?.querySelectorAll(".interface-art svg").length || 0,
                   explorerControlCount: ["#marketSearch","#marketFilter","#marketNetwork","#marketSort"].filter(selector => document.querySelector(selector)).length,
+                  explorerIndexStatus: main?.querySelector("#explorerStatus")?.dataset.status || "not-app",
+                  explorerPageLabel: main?.querySelector("#pageStatus")?.innerText?.trim() || null,
+                  heroMarketStatus: main?.querySelector(".hero-signal")?.dataset.marketStatus || "not-home",
                   headingAlign: heading ? getComputedStyle(heading).textAlign : "missing",
                   introAlign: main?.querySelector(".intro") ? getComputedStyle(main.querySelector(".intro")).textAlign : "missing",
                   nonLeftAlignedCopy: [...(main?.querySelectorAll(".sectionhead h2,.sectionhead p,.panel p,.evidenceitem,.crumb,.market h3,.notice") || [])].filter(el => !["left","start"].includes(getComputedStyle(el).textAlign)).map(el => ({selector:el.tagName.toLowerCase()+"."+el.className,text:(el.innerText||"").slice(0,60),align:getComputedStyle(el).textAlign})),
@@ -154,6 +164,9 @@ jobs:
               if (!metrics.footerOutsideWorkspace) report.failures.push(viewport.name+"/"+theme+"/"+route+": footer is inside the sidebar/content workspace");
               if (route === "home" && (metrics.heroSignalCount !== 1 || metrics.interfaceArtCount !== 6)) report.failures.push(viewport.name+"/"+theme+"/home: expected hero signal artwork and six interface illustrations");
               if (route === "app" && metrics.explorerControlCount !== 4) report.failures.push(viewport.name+"/"+theme+"/app: expected search, category, network and sort controls");
+              if (route === "home" && !["live","fallback"].includes(metrics.heroMarketStatus)) report.failures.push(viewport.name+"/"+theme+"/home: hero signal never left its loading state");
+              if (route === "app" && !["live","fallback"].includes(metrics.explorerIndexStatus)) report.failures.push(viewport.name+"/"+theme+"/app: full-index explorer never left its loading state before screenshot");
+              if (route === "app" && metrics.explorerIndexStatus === "live" && !metrics.explorerPageLabel) report.failures.push(viewport.name+"/"+theme+"/app: live results loaded without pagination state");
               if (metrics.interfaceNavCount !== 6 || metrics.interfaceNavTargets.length !== 6 || metrics.currentFooterRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: footer must show all six directly-accessible routes with the current route marked`);
               if (route === "app") {
                 await page.locator("#marketSearch").fill("Ethereum");
@@ -185,7 +198,7 @@ jobs:
           }
 
           fs.writeFileSync("artifacts/report.json", JSON.stringify(report, null, 2));
-          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, horizontalOverflow, marketFeedStatus}) => ({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, horizontalOverflow, marketFeedStatus})) }, null, 2));
+          console.log(JSON.stringify({ testedAt: report.testedAt, checks: report.results.length, failures: report.failures, warnings: report.warnings, routes: report.results.map(({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus}) => ({viewport, theme, route, heading, headingFontFamily, bodyFontLoaded, displayFontLoaded, monoFontLoaded, interfaceNavCount, currentFooterRoute, footerOutsideWorkspace, heroSignalCount, interfaceArtCount, explorerControlCount, explorerIndexStatus, explorerPageLabel, heroMarketStatus, horizontalOverflow, marketFeedStatus})) }, null, 2));
           await browser.close();
           if (report.failures.length) process.exit(1);
           NODE
