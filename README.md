@@ -30,9 +30,9 @@ Every interface emphasizes source status, what a signal means, what can distort 
 
 ## Data and implementation status
 
-**This is a front-end prototype.** Market probabilities, volume, depth, changes, forecasts, risk scores, scenario outcomes and chart points are illustrative. There is currently no live Seer API/subgraph integration, wallet connection, trade execution, or on-chain action. Do not use the sample figures for financial, security, funding, or governance decisions.
+**This remains a front-end prototype, now with a read-only live market feed.** The market explorer requests market records from Seer's public `markets-search` endpoint (`https://app.seer.pm/.netlify/functions/markets-search`) across Gnosis, Optimism, Base, and Ethereum. The UI shows the last successful fetch time, reports the source state, and labels demo fallback records when the endpoint is unavailable. Market cards display API-reported outcome prices, lifetime swap volume and liquidity; these fields are not executable quotes and can be stale or thinly traded.
 
-The market subgraph and pool/liquidity data must be queried and validated independently before displaying live price/depth values. A market record alone should not be treated as a live price or liquidity source.
+Deep forecasts, futarchy scenarios, opportunity-selection estimates, risk scores, and the plotted historical line remain illustrative. No wallet connection, trade execution, or on-chain action is implemented. Do not use illustrative values for financial, security, funding, or governance decisions.
 
 ## Run locally
 
