@@ -42,7 +42,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-opportunity-field=\"belief\"")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("data-opportunity-field=\"belief\"")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -366,21 +366,20 @@ jobs:
                     const yesEdge = Number.parseFloat((await page.locator("#oppEdgeValue").innerText()).replace(" pp", ""));
                     await page.locator("#oppSideNoBtn").click();
                     const noEdge = Number.parseFloat((await page.locator("#oppEdgeValue").innerText()).replace(" pp", ""));
-                    const secondEntryText = await page.locator("#oppEntryPrice").innerText();
-                    const secondEntryPrice = Number.parseFloat(secondEntryText.replace(/[^0-9.]/g, ""))*100;
-                    const expectedYesEdge = belief - marketPrice;
-                    const expectedNoEdge = (100-belief) - secondEntryPrice;
-                    if (!Number.isFinite(yesEdge) || !Number.isFinite(noEdge) || !Number.isFinite(secondEntryPrice) || Math.abs(yesEdge-expectedYesEdge)>1.1 || Math.abs(noEdge-expectedNoEdge)>1.1) {
+                    const yesQuote = Number.parseFloat(await page.locator("#oppSideYesBtn").getAttribute("data-entry-price") || "");
+                    const noQuote = Number.parseFloat(await page.locator("#oppSideNoBtn").getAttribute("data-entry-price") || "");
+                    const expectedYesEdge = belief - yesQuote;
+                    const expectedNoEdge = (100-belief) - noQuote;
+                    if (!Number.isFinite(yesEdge) || !Number.isFinite(noEdge) || !Number.isFinite(yesQuote) || !Number.isFinite(noQuote) || Math.abs(yesEdge-expectedYesEdge)>0.15 || Math.abs(noEdge-expectedNoEdge)>0.15) {
                       report.failures.push(viewport.name+"/"+theme+"/opportunity: chosen-outcome edge did not match the independent estimate and selected outcome quote");
                     }
-                    // For sizing assertions, select a side with a strictly positive entry quote.
-                    // A zero-cent outcome is valid source data but cannot be sized using stake / price.
-                    if (marketPrice > 0) {
+                    // Select with exact source quotes: display rounding can show a positive sub-cent quote as 0%.
+                    if (Number.isFinite(yesQuote) && yesQuote > 0) {
                       await page.locator("#oppSideYesBtn").click();
-                    } else if (Number.isFinite(secondEntryPrice) && secondEntryPrice > 0) {
+                    } else if (Number.isFinite(noQuote) && noQuote > 0) {
                       await page.locator("#oppSideNoBtn").click();
                     } else {
-                      report.failures.push(viewport.name+"/"+theme+"/opportunity: neither side has a positive quoted entry for the sizing assertion");
+                      report.failures.push(viewport.name+"/"+theme+"/opportunity: neither side has a positive exact source quote for the sizing assertion");
                     }
                     await page.locator("#oppStakeInput").fill("250");
                     const sharesText = await page.locator("#oppSharesValue").innerText();
