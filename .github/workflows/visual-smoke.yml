@@ -168,7 +168,7 @@ jobs:
               if (route === "home" && (metrics.heroSignalCount !== 1 || metrics.interfaceArtCount !== 6)) report.failures.push(viewport.name+"/"+theme+"/home: expected hero signal artwork and six interface illustrations");
               if (route === "app" && metrics.explorerControlCount !== 4) report.failures.push(viewport.name+"/"+theme+"/app: expected search, category, network and sort controls");
               if (route === "app" && metrics.explorerIndexStatus === "live" && metrics.explorerPageLabel) {
-                const pageParts = metrics.explorerPageLabel.match(/(\\d+)\\s*\\/\\s*(\\d+)/);
+                const pageParts = metrics.explorerPageLabel.match(/(\d+)\s*\/\s*(\d+)/);
                 if (pageParts && Number(pageParts[1]) < Number(pageParts[2]) && metrics.explorerVisibleCardCount !== 12) report.failures.push(viewport.name+"/"+theme+"/app: a full live page should show 12 server-returned records, found "+metrics.explorerVisibleCardCount);
                 if (metrics.explorerVisibleCardCount !== metrics.explorerWatchlistButtonCount) report.failures.push(viewport.name+"/"+theme+"/app: each market card needs its own save-to-watchlist control");
               }
