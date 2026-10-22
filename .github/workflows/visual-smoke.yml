@@ -478,7 +478,7 @@ jobs:
                 } else {
                   const destination = await getApp.getAttribute("href");
                   const target = await getApp.getAttribute("target");
-                  const label = (await getApp.innerText()).trim();
+                  const label = (await getApp.innerText()).replace(/\s+/g, " ").trim();
                   if (label !== "Visit Seer ↗") report.failures.push(viewport.name+"/"+theme+"/home: top-right CTA label should differ from the competitor's Open App label");
                   if (destination !== "https://app.seer.pm/" || target !== "_blank") {
                     report.failures.push(viewport.name+"/"+theme+"/home: Visit Seer CTA must open the official Seer app in a new tab");
