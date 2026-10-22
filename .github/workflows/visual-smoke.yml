@@ -276,6 +276,38 @@ jobs:
                     const traceLabel = await page.locator("#marketDetail .market-trace-chart svg").getAttribute("aria-label").catch(() => null);
                     if (traceChart === 1 && !traceLabel?.includes("successful snapshots")) report.failures.push(viewport.name+"/"+theme+"/app: observed price chart is missing its provenance label");
                     await page.locator('#marketDetail button[data-market-action="close-detail"]').click();
+
+                    // Seed QA-only prior observations and verify the chart branch using a clean browser reload.
+                    const traceKeys = await page.locator('#main button[data-market-action="inspect"]').evaluateAll(buttons => buttons.map(button => button.getAttribute("data-market-id")).filter(Boolean));
+                    if (traceKeys.length) {
+                      await page.evaluate(keys => {
+                        const now = Date.now();
+                        const samples = [];
+                        for (const key of keys) {
+                          samples.push({ key, title: "QA observation fixture", chain: "QA fixture", p: 37, observedAt: new Date(now - 120000).toISOString() });
+                          samples.push({ key, title: "QA observation fixture", chain: "QA fixture", p: 42.5, observedAt: new Date(now - 60000).toISOString() });
+                        }
+                        localStorage.setItem("seer-six-price-trace-v1", JSON.stringify(samples));
+                      }, traceKeys);
+                      await page.reload({ waitUntil: "domcontentloaded" });
+                      await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+                      const chartInspect = page.locator('#main button[data-market-action="inspect"]').first();
+                      if (await chartInspect.count()) {
+                        await chartInspect.click();
+                        const chartCount = await page.locator("#marketDetail .market-trace-chart").count();
+                        const emptyCount = await page.locator("#marketDetail .market-trace-empty").count();
+                        const chartPolyline = await page.locator("#marketDetail .market-trace-chart svg polyline").count();
+                        const chartLabel = await page.locator("#marketDetail .market-trace-chart svg").getAttribute("aria-label").catch(() => null);
+                        const chartMeta = await page.locator("#marketDetail .market-trace-meta").innerText().catch(() => "");
+                        if (chartCount !== 1 || emptyCount !== 0) report.failures.push(viewport.name+"/"+theme+"/app: two-snapshot trace fixture did not render the chart branch");
+                        if (chartPolyline !== 1 || !chartLabel?.includes("successful snapshots") || !chartMeta.includes("OBSERVED CHANGE")) report.failures.push(viewport.name+"/"+theme+"/app: observed price chart is missing its line, provenance, or change metadata");
+                        await page.locator('#marketDetail button[data-market-action="close-detail"]').click();
+                      } else {
+                        report.failures.push(viewport.name+"/"+theme+"/app: could not reopen inspector for chart-path test");
+                      }
+                    } else {
+                      report.failures.push(viewport.name+"/"+theme+"/app: no market keys were available for observed-trace chart fixture");
+                    }
                   }
                 } else {
                   report.failures.push(viewport.name+"/"+theme+"/app: no Inspect record action was rendered");
