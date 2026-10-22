@@ -344,7 +344,9 @@ function render(){
 }
 document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-page]");if(b)go(b.dataset.page)});
 
-function toggleTheme(){const next=document.body.dataset.theme==="light"?"dark":"light";document.body.dataset.theme=next;const b=document.getElementById("themeToggle");if(b){b.innerHTML=next==="light"?"☾ <span>Dark</span>":"☼ <span>Light</span>";b.setAttribute("aria-label","Switch to "+(next==="light"?"dark":"light")+" theme");b.title="Switch to "+(next==="light"?"dark":"light")+" theme";}}\n\nfunction syncRoute() {
+function toggleTheme(){const next=document.body.dataset.theme==="light"?"dark":"light";document.body.dataset.theme=next;const b=document.getElementById("themeToggle");if(b){b.innerHTML=next==="light"?"☾ <span>Dark</span>":"☼ <span>Light</span>";b.setAttribute("aria-label","Switch to "+(next==="light"?"dark":"light")+" theme");b.title="Switch to "+(next==="light"?"dark":"light")+" theme";}}
+
+function syncRoute() {
   const page = location.hash.replace(/^#\/?/, "");
   const validPages = [
     "home", "app", "deep",
