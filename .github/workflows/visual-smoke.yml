@@ -158,6 +158,22 @@ jobs:
                 };
               });
 
+              // The movement log opens and closes, and its empty state must be honest on an unchanged source snapshot.
+              const historyToggle = page.locator('#marketWire button[data-wire-action="history"]');
+              if (await historyToggle.count() !== 1) {
+                report.failures.push(viewport.name+"/"+theme+"/"+route+": observed movement-log control is missing");
+              } else {
+                await historyToggle.click();
+                const historyPanelVisible = await page.locator("#marketWire .wire-ledger").count() === 1;
+                const historyExpanded = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
+                const historyHasState = await page.locator("#marketWire .wire-ledger").innerText().catch(() => "");
+                if (!historyPanelVisible || historyExpanded !== "true") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not open accessibly");
+                if (!historyHasState.includes("OBSERVED REPRICING") || (!historyHasState.includes("No repricing observed yet.") && !historyHasState.includes("pp"))) report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log has neither an honest empty state nor observed price changes");
+                await page.locator('#marketWire button[data-wire-action="history"]').click();
+                const historyClosed = await page.locator("#marketWire .wire-ledger").count() === 0;
+                const historyCollapsed = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
+                if (!historyClosed || historyCollapsed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not close");
+              }
               // Validate the motion control, then restore the default moving wire before capture.
               const wireToggle = page.locator('#marketWire button[data-wire-action="pause"]');
               if (await wireToggle.count() !== 1) {
