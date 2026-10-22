@@ -42,7 +42,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:hover .market-wire-track") && html.includes("data-opportunity-field=\"belief\"")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:hover .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -255,6 +255,29 @@ jobs:
                 }
               }
               if (route === "app") {
+                // Exercise both density modes and make sure terminal-row actions resolve the exact source record.
+                const terminalToggle = page.locator('#main button[data-explorer-view="table"]');
+                if (await terminalToggle.count() !== 1) {
+                  report.failures.push(viewport.name+"/"+theme+"/app: terminal-table view toggle is missing");
+                } else {
+                  await terminalToggle.click();
+                  const terminalRows = page.locator(".explorer-ledger tbody tr");
+                  const terminalCount = await terminalRows.count();
+                  if (terminalCount < 1) report.failures.push(viewport.name+"/"+theme+"/app: terminal-table view rendered no market rows");
+                  const terminalInspect = page.locator('.explorer-ledger button[data-market-action="inspect"]').first();
+                  if (await terminalInspect.count() === 1) {
+                    const terminalTitle = (await terminalInspect.locator("xpath=ancestor::tr").locator(".explorer-ledger-market strong").innerText()).trim();
+                    await terminalInspect.click();
+                    const terminalDetail = await page.waitForFunction((wanted) => document.querySelector("#marketDetail h2")?.innerText.trim() === wanted, terminalTitle, {timeout:10000}).then(()=>true).catch(()=>false);
+                    if (!terminalDetail) report.failures.push(viewport.name+"/"+theme+"/app: terminal-row Inspect did not open the matching market record");
+                    const closeTerminal = page.locator('#marketDetail button[data-market-action="close-detail"]');
+                    if (await closeTerminal.count()) await closeTerminal.click();
+                  } else if (terminalCount > 0) {
+                    report.failures.push(viewport.name+"/"+theme+"/app: terminal rows are missing Inspect actions");
+                  }
+                  await page.locator("#explorerView-cards").click();
+                  if (await page.locator(".explorer-market-grid .market").count() < 1) report.failures.push(viewport.name+"/"+theme+"/app: switching back from terminal table did not restore market cards");
+                }
                 // Exercise the actual record inspector and device-local watchlist, not just their markup.
                 await page.evaluate(() => localStorage.removeItem("seer-six-watchlist-v1"));
                 await page.reload({ waitUntil: "domcontentloaded" });
