@@ -42,7 +42,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("ON AIR") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes('id="getAppButton"') && html.includes("top-app-cta") && html.includes("const reportedNumber=") && html.includes("liquidityUSD:reportedNumber(m.liquidityUSD)") && html.includes("function renderLiquidityLandscape") && html.includes("Liquidity landscape") && html.includes("landscape-rail is-unreported") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:hover .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("marketAvatarHTML(m,42)") && html.includes("market-tape") && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes('id="getAppButton"') && html.includes("top-app-cta") && html.includes("const reportedNumber=") && html.includes("liquidityUSD:reportedNumber(m.liquidityUSD)") && html.includes("function renderLiquidityLandscape") && html.includes("Liquidity landscape") && html.includes("landscape-rail is-unreported") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:hover .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -180,19 +180,26 @@ jobs:
                 const historyCollapsed = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
                 if (!historyClosed || historyCollapsed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not close");
               }
-              // The homepage briefing ticker must be data-backed, moving, and reduced-motion aware.
+              // The homepage market tape must show real market records, move continuously, and respect reduced motion.
               if (route === "home") {
-                const briefTicker = page.locator("#main .signal-ticker");
+                const briefTicker = page.locator("#main .signal-ticker.market-tape");
                 if (await briefTicker.count() !== 1) {
-                  report.failures.push(viewport.name+"/"+theme+"/home: ON AIR market briefing ticker is missing");
+                  report.failures.push(viewport.name+"/"+theme+"/home: scrolling Market Tape is missing");
                 } else {
                   const briefText = await briefTicker.innerText();
                   const briefAnimation = await briefTicker.locator(".signal-ticker-track").evaluate(el => getComputedStyle(el).animationName);
-                  if (briefAnimation !== "signalTickerRun") report.failures.push(viewport.name+"/"+theme+"/home: ON AIR briefing ticker is not moving");
-                  if (!briefText.includes("SOURCE SNAPSHOT") || !briefText.includes("LIQUIDITY LEADER") || !briefText.includes("VOLUME LEADER")) report.failures.push(viewport.name+"/"+theme+"/home: briefing ticker is missing source-derived headlines");
+                  const tapeItems = briefTicker.locator(".signal-ticker-set:not([aria-hidden=\"true\"]) .market-tape-item");
+                  const tapeCount = await tapeItems.count();
+                  const avatarCount = await tapeItems.locator(".market-avatar").count();
+                  if (briefAnimation !== "signalTickerRun") report.failures.push(viewport.name+"/"+theme+"/home: Market Tape is not moving");
+                  if (!briefText.includes("MARKET TAPE") || tapeCount < 1 || avatarCount !== tapeCount) report.failures.push(viewport.name+"/"+theme+"/home: tape is missing per-market artwork or market rows");
+                  if (tapeCount > 0) {
+                    const firstItem = tapeItems.first();
+                    if (!(await firstItem.locator(".signal-ticker-copy strong").count()) || !(await firstItem.locator(".signal-ticker-detail").innerText()).includes("VOL")) report.failures.push(viewport.name+"/"+theme+"/home: tape item is missing a market title or volume");
+                  }
                   await page.emulateMedia({ reducedMotion: "reduce" });
                   const reducedAnimation = await briefTicker.locator(".signal-ticker-track").evaluate(el => getComputedStyle(el).animationName);
-                  if (reducedAnimation !== "none") report.failures.push(viewport.name+"/"+theme+"/home: briefing ticker ignores reduced-motion preference");
+                  if (reducedAnimation !== "none") report.failures.push(viewport.name+"/"+theme+"/home: Market Tape ignores reduced-motion preference");
                   await page.emulateMedia({ reducedMotion: "no-preference" });
                 }
               }
