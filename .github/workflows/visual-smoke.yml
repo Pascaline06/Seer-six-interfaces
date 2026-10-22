@@ -22,10 +22,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Playwright
+      - name: Install Playwright and detect system Chrome
         run: |
           npm install --no-save playwright
-          npx playwright install --with-deps chromium
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME_BIN" ]; then
+            echo "No system Chromium/Chrome binary is available on this runner."
+            exit 1
+          fi
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
 
       - name: Wait for the deployed revision
         run: |
@@ -63,7 +69,7 @@ jobs:
             { name: "desktop", width: 1440, height: 1000 },
             { name: "mobile", width: 390, height: 844 },
           ];
-          const browser = await chromium.launch({ headless: true });
+          const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_BIN });
           const themes = ["dark", "light"];
           const report = { testedAt: new Date().toISOString(), base, results: [], failures: [], warnings: [] };
 
