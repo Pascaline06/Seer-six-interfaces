@@ -165,7 +165,7 @@ jobs:
                   marketTapeAccentBorder: getComputedStyle(document.querySelector("#main .signal-ticker.market-tape") || body).borderTopColor,
                   mobileNavRowCount: [...new Set([...document.querySelectorAll("#nav button")].map(el=>Math.round(el.getBoundingClientRect().top)))].length,
                   mobileNavFlexWrap: getComputedStyle(nav).flexWrap,
-                  mobileHeadrowFlexDirection: getComputedStyle(main?.querySelector(".headrow") || body).flexDirection,
+                  mobileHeadrowFlexDirection: main?.querySelector(".headrow") ? getComputedStyle(main.querySelector(".headrow")).flexDirection : "not-applicable",
                 };
               });
 
@@ -238,7 +238,7 @@ jobs:
               if (route === "home" && (!/linear-gradient/i.test(metrics.marketTapeGradient) || !metrics.marketTapeAccentBorder)) report.failures.push(viewport.name+"/"+theme+"/home: the Market Tape must retain its distinct premium gradient and accent border");
               if (viewport.name === "mobile" && metrics.mobileNavRowCount > 1) report.failures.push("mobile/"+theme+"/"+route+": navigation wrapped into multiple rows instead of remaining a horizontally scrollable tab rail");
               if (viewport.name === "mobile" && metrics.mobileNavFlexWrap !== "nowrap") report.failures.push("mobile/"+theme+"/"+route+": navigation rail is not configured for a single aligned row");
-              if (viewport.name === "mobile" && metrics.mobileHeadrowFlexDirection !== "column" && metrics.mobileHeadrowFlexDirection !== "row") report.failures.push("mobile/"+theme+"/"+route+": responsive header alignment has an invalid layout mode");
+              if (viewport.name === "mobile" && metrics.mobileHeadrowFlexDirection !== "not-applicable" && metrics.mobileHeadrowFlexDirection !== "column") report.failures.push("mobile/"+theme+"/"+route+": page title and status/CTA are not stacked cleanly");
               if (metrics.activeRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: active navigation route was ${metrics.activeRoute}`);
               if (metrics.theme !== theme) report.failures.push(`${viewport.name}/${theme}/${route}: theme state mismatch (${metrics.theme})`);
               if (!metrics.heading) report.failures.push(`${viewport.name}/${theme}/${route}: missing page heading`);
