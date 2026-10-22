@@ -411,6 +411,7 @@ body[data-theme="light"] .market-save{background:#fff}
 .market-wire-brand{display:flex;align-items:center;gap:8px;font:700 10px "JetBrains Mono",monospace;letter-spacing:.13em;color:var(--text)}
 .wire-status-led{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--dim);box-shadow:0 0 0 4px #8d86a310}
 .market-wire.is-live .wire-status-led{background:var(--green);box-shadow:0 0 0 4px #77ddb014,0 0 12px #77ddb055;animation:wireLed 1.9s ease-in-out infinite alternate}
+.market-wire.is-stale .wire-status-led{background:var(--amber,#f4c477);box-shadow:0 0 0 4px #f4c47718}.market-wire.is-stale .wire-tools-meta span:last-child{color:var(--amber,#f4c477)}
 .market-wire.is-loading .wire-status-led{background:var(--violet);animation:explorerPulse 1s ease-in-out infinite alternate}
 .market-wire-head small{font:500 9px "JetBrains Mono",monospace;letter-spacing:.08em;color:var(--dim);white-space:nowrap}
 .market-wire-viewport{align-self:center;min-width:0;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 3%,black 97%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 3%,black 97%,transparent)}
@@ -514,7 +515,7 @@ function renderMarketWire(){
  const records=markets.filter(m=>m&&m.title).slice(0,12);
  const live=marketFeed.status==="live";
  const status=marketFeed.refreshing?"SYNCING":live?(marketFeed.error?"LAST GOOD SNAPSHOT":"CONNECTED"):marketFeed.status==="loading"?"CONNECTING":"PREVIEW DATA";
- const statusClass=marketFeed.refreshing||marketFeed.status==="loading"?"is-loading":live?"is-live":"is-preview";
+ const statusClass=marketFeed.refreshing||marketFeed.status==="loading"?"is-loading":live?(marketFeed.error?"is-stale":"is-live"):"is-preview";
  const items=records.length?records.map(m=>{
   const key=marketKey(m),price=m.p===null||m.p===undefined?"—":Math.round(m.p)+"%";
   return '<span class="wire-item '+(wireState.changedIds.has(key)?"wire-item-updated":"")+'"><span class="wire-chain">'+htmlEscape(m.chain||m.type||"Market")+'</span><span class="wire-title" title="'+htmlEscape(m.title)+'">'+htmlEscape(m.title)+'</span><strong class="wire-price">'+price+'</strong><span class="wire-metric">VOL '+htmlEscape(m.volume||"—")+'</span><span class="wire-metric">LIQ '+htmlEscape(m.depth||"—")+'</span></span>';
@@ -523,8 +524,8 @@ function renderMarketWire(){
  const sweep=wireState.lastSweep?(wireState.hasComparedSnapshot?wireState.lastSweep.checked+" checked · "+(wireState.lastSweep.changed?wireState.lastSweep.changed+" repriced":"no repricing"):""+wireState.lastSweep.checked+" records · first comparison pending"):"Awaiting first sync";
  const pausedLabel=wireState.paused?"▶ Resume ticker":"Ⅱ Pause ticker";
  host.className="market-wire "+statusClass+(wireState.paused?" is-paused":"");
- host.setAttribute("aria-label","Seer market wire. "+status+". "+sweep+".");
- host.innerHTML='<div class="market-wire-head"><div class="market-wire-brand"><i class="wire-status-led"></i><span>SEER WIRE</span></div><small>'+status+' · AUTO-REFRESH 60S</small></div><div class="market-wire-viewport" aria-label="Market snapshot tape"><div class="market-wire-track"><div class="market-wire-set">'+items+'</div><div class="market-wire-set" aria-hidden="true">'+items+'</div></div></div><div class="market-wire-tools"><div class="wire-tools-meta"><span>'+snapshot+'</span><span>'+htmlEscape(sweep)+'</span></div><div class="wire-tools-actions"><button class="wire-refresh" type="button" data-wire-action="refresh" '+(marketFeed.refreshing?"disabled":"")+' aria-label="Refresh market snapshot now">'+(marketFeed.refreshing?"↻ Syncing…":"↻ Refresh")+'</button><button type="button" data-wire-action="pause" aria-pressed="'+wireState.paused+'">'+pausedLabel+'</button></div></div>'+(marketFeed.error?'<span class="sr-only" role="status">'+htmlEscape(marketFeed.error)+'</span>':"");
+ host.setAttribute("aria-label","Seer market wire. "+status+". "+sweep+"."+(marketFeed.error?" Refresh warning: "+marketFeed.error+".":""));
+ host.innerHTML='<div class="market-wire-head"><div class="market-wire-brand"><i class="wire-status-led"></i><span>SEER WIRE</span></div><small>'+status+' · AUTO-REFRESH 60S</small></div><div class="market-wire-viewport" aria-label="Market snapshot tape"><div class="market-wire-track"><div class="market-wire-set">'+items+'</div><div class="market-wire-set" aria-hidden="true">'+items+'</div></div></div><div class="market-wire-tools"><div class="wire-tools-meta"><span>'+snapshot+'</span><span title="'+htmlEscape(marketFeed.error||sweep)+'">'+htmlEscape(marketFeed.error?"REFRESH WARNING":sweep)+'</span></div><div class="wire-tools-actions"><button class="wire-refresh" type="button" data-wire-action="refresh" '+(marketFeed.refreshing?"disabled":"")+' aria-label="Refresh market snapshot now">'+(marketFeed.refreshing?"↻ Syncing…":"↻ Refresh")+'</button><button type="button" data-wire-action="pause" aria-pressed="'+wireState.paused+'">'+pausedLabel+'</button></div></div>';
 }
 async function loadLiveMarkets(){
  if(marketFeed.refreshing)return;
