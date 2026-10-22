@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#101013">
 <meta name="description" content="Seer Six: six decision interfaces for exploring market signals, conditional forecasts, opportunity selection and comparative risk.">
 <meta property="og:title" content="Seer Six — Markets for better decisions">
@@ -388,6 +388,63 @@ body[data-theme="light"] .field select:hover,body[data-theme="light"] .field inp
  .intro{max-width:58ch}
  .market h3{overflow-wrap:anywhere}
 }
+
+/* Final readability and alignment pass: grotesk display type, readable Inter body copy, monospaced data. */
+:root{--text:#f0f0f5;--muted:#c0c0cb;--dim:#9999a5;--bg:#101013;--panel:#1a1a1e;--panel2:#202025;--line:#34343c;--violet:#b39aff;--purple:#7d33ff}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;font-weight:450;line-height:1.65;letter-spacing:0;background:var(--bg);color:var(--text);font-synthesis:none;text-rendering:optimizeLegibility}
+button,input,select,textarea{font:inherit}
+.heading,h1,h2,h3,.sectionhead h2,.market h3{font-family:"Space Grotesk",Inter,ui-sans-serif,sans-serif;font-synthesis:none}
+.heading{font-weight:700;letter-spacing:-.038em;line-height:1.08;font-size:clamp(35px,4.05vw,54px);max-width:820px;color:var(--text)}
+.sectionhead h2{font-size:18px;font-weight:700;letter-spacing:-.025em;line-height:1.3}
+.market h3{font-size:16px;font-weight:650;letter-spacing:-.018em;line-height:1.45}
+.intro{font-size:15px;font-weight:450;line-height:1.75;letter-spacing:0;color:var(--muted);max-width:62ch}
+.panel p,.market .muted,.evidenceitem span,.notice,.side-note{font-size:13px;line-height:1.7}
+.muted,.intro,.statfoot,.marketfoot,.crumb,.sectionhead p,.evidenceitem span,.foot{color:var(--muted)}
+.crumb,.eyebrow,.category,.side-label,.statlabel,th,.pill,.brand-note,.num,.field label{font-size:11px;font-weight:650;letter-spacing:.09em}
+.statlabel,.field label,th{color:var(--muted)}
+.statvalue,.prob,.outcome,.optionprob,td.num,.num,.mono,.chain{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.statvalue{font-size:clamp(24px,2vw,31px);font-weight:600;letter-spacing:-.045em;line-height:1.2}
+.prob,.outcome,.optionprob{font-weight:600;letter-spacing:-.035em}
+.marketfoot,.statfoot{font-size:11px;line-height:1.55;color:var(--muted)}
+.button,.nav button,.theme-toggle{font-family:Inter,ui-sans-serif,sans-serif;font-weight:650;letter-spacing:0}
+.button{font-size:13px;min-height:40px}
+.nav button{font-size:13px}
+.nav button.active{font-weight:700}
+.pill{font-size:10px;letter-spacing:.045em;font-weight:650}
+.evidenceitem strong{font-size:13px;font-weight:700;line-height:1.5}
+.evidenceitem span{display:block;font-size:12px;line-height:1.7;color:var(--muted)}
+.notice{font-size:12px;line-height:1.7}
+.field label{font-size:12px;letter-spacing:0;font-weight:650;margin-bottom:7px}
+.field input,.field select{font-size:14px;min-height:42px}
+th{font-size:10px;letter-spacing:.08em;font-weight:700}
+td{font-size:13px;line-height:1.55}
+.heading,.intro,.sectionhead,.sectionhead h2,.sectionhead p,.market h3,.panel p,.evidenceitem,.crumb{text-align:left}
+.headrow{align-items:flex-start}
+.sectionhead{align-items:center}
+.optionprob{text-align:right}
+body[data-theme="light"]{color-scheme:light;--bg:#f7f7f9;--panel:#fff;--panel2:#f1f1f5;--line:#dedee6;--text:#17171b;--muted:#51515d;--dim:#62626e;--violet:#6531c9;--purple:#6c2bd9;background:var(--bg);color:var(--text)}
+body[data-theme="light"] .top{background:rgba(255,255,255,.96);border-color:#dedee6}
+body[data-theme="light"] .side{background:#f7f7f9;border-color:#dedee6}
+body[data-theme="light"] .panel,body[data-theme="light"] .market{background:#fff;border-color:#dedee6}
+body[data-theme="light"] .heading,body[data-theme="light"] .sectionhead h2,body[data-theme="light"] .market h3,body[data-theme="light"] .evidenceitem strong{color:#17171b}
+body[data-theme="light"] .intro,body[data-theme="light"] .muted,body[data-theme="light"] .sectionhead p,body[data-theme="light"] .statlabel,body[data-theme="light"] .field label,body[data-theme="light"] .evidenceitem span,body[data-theme="light"] .marketfoot,body[data-theme="light"] .statfoot,body[data-theme="light"] .foot{color:#51515d}
+body[data-theme="light"] .crumb,body[data-theme="light"] .brand-note{color:#62626e}
+body[data-theme="light"] .pill{background:#f4f1fb;border-color:#e1d8f6;color:#4e3a78}
+body[data-theme="light"] .pill.violet{background:#eee6ff;border-color:#d4c2ff;color:#4f249f}
+body[data-theme="light"] .button{background:#fff;border-color:#d8d8e1;color:#24242a}
+body[data-theme="light"] .button.primary{background:#6c2bd9;border-color:#6c2bd9;color:#fff}
+body[data-theme="light"] .nav button{color:#51515d}
+body[data-theme="light"] .nav button.active{background:#eee6ff;color:#4f249f;border-color:#d4c2ff}
+body[data-theme="light"] .field input,body[data-theme="light"] .field select{background:#fff;border-color:#d5d5df;color:#17171b}
+body[data-theme="light"] .bar{background:#e4e1eb}
+body[data-theme="light"] th{background:#f7f7f9;color:#51515d}
+body[data-theme="light"] td{color:#292930}
+body[data-theme="light"] .notice{background:#fff8e9;border-color:#ead6a8;color:#6d5120}
+body[data-theme="light"] .theme-toggle{background:#fff;border-color:#d8d8e1;color:#24242a}
+body[data-theme="light"] .logo img{filter:brightness(0)}
+@media(max-width:850px){.headrow{align-items:flex-start}.sectionhead{align-items:flex-start;flex-direction:column;gap:6px}.sectionhead>.pill{align-self:flex-start}.intro{font-size:14px;line-height:1.7}}
+@media(max-width:540px){body{font-size:14px;line-height:1.65}.heading{font-size:clamp(34px,8.8vw,42px);line-height:1.1;letter-spacing:-.035em}.sectionhead h2{font-size:17px}.market h3{font-size:15px}.panel p,.market .muted{font-size:13px}.statvalue{font-size:25px}.optionrow{grid-template-columns:minmax(0,1fr) auto;gap:10px}.optionrow strong{font-size:13px;line-height:1.5}.optionrow small{font-size:12px;line-height:1.6;display:block}.optionprob{font-size:19px}}
+
 </style>
 </head>
 <body>
