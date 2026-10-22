@@ -793,6 +793,12 @@ body:has(#main[data-page="home"]) .market-pulse{display:none}
 @media(max-width:820px){.signal-ticker.market-tape{grid-template-columns:1fr}.market-tape-item{min-width:245px;max-width:300px}.signal-ticker-copy{max-width:215px}.signal-ticker-copy strong{max-width:215px}}
 @media(prefers-reduced-motion:reduce){.market-wire-track{animation:none!important;transform:none!important;will-change:auto}}
 
+
+.market-card-title{display:block;margin:4px 0 8px!important;font:650 16px/1.32 "DM Sans",sans-serif!important;letter-spacing:-.012em!important;overflow-wrap:anywhere;color:var(--text)}
+.market-card-heading-copy{flex:1;min-width:0}
+.market-card-heading .market-card-meta{margin-top:2px}
+.market-avatar img{background:var(--panel-raised)}
+
 </style>
 </head>
 <body>
@@ -1016,8 +1022,10 @@ function marketImageUrl(m){
  const candidates=[
   m&&m.images&&m.images.market,
   m&&m.market&&m.market.images&&m.market.images.market,
-  m&&m.imageUrl,m&&m.imageURL,m&&m.marketImage,m&&m.marketImageUrl,
-  m&&m.imageURI,m&&m.imageUri,m&&m.image,m&&m.logoUrl,
+  m&&m.marketImages&&m.marketImages.market,
+  m&&m.imageUrl,m&&m.imageURL,m&&m.marketImage,m&&m.marketImageUrl,m&&m.marketImageURL,
+  m&&m.imageURI,m&&m.imageUri,m&&m.image,m&&m.logoUrl,m&&m.thumbnailUrl,m&&m.thumbnail,m&&m.iconUrl,
+  m&&m.media&&m.media.image,m&&m.question&&m.question.image,
   m&&m.metadata&&m.metadata.image
  ];
  const raw=candidates.find(value=>typeof value==="string"&&value.trim());
@@ -1036,7 +1044,7 @@ function marketImageUrl(m){
 function marketAvatarHTML(m,size){
  const dimension=Number(size)||40,url=marketImageUrl(m);
  const fallback='<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="15.5" fill="none" stroke="currentColor" stroke-opacity=".36" stroke-width="1.2"/><path d="M8.5 20a11.5 11.5 0 0 1 23 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 27.8 17.2 22.5M28 27.8 22.8 22.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="20" cy="20" r="4.2" fill="currentColor"/></svg>';
- return '<span class="market-avatar '+(url?'has-image':'market-avatar-fallback')+'" style="--avatar-size:'+dimension+'px" aria-hidden="true">'+(url?'<img src="'+htmlEscape(url)+'" alt="" loading="lazy" decoding="async" onerror="this.remove();this.parentElement.classList.add(\'market-avatar-fallback\')">':'')+fallback+'</span>';
+ return '<span class="market-avatar '+(url?'has-image':'market-avatar-fallback')+'" style="--avatar-size:'+dimension+'px" aria-hidden="true">'+(url?'<img src="'+htmlEscape(url)+'" alt="" loading="lazy" decoding="async" onerror="this.remove();this.parentElement.classList.add(&quot;market-avatar-fallback&quot;)">':'')+fallback+'</span>';
 }
 function marketCard(m){
  const p=m.p===null||m.p===undefined?null:Number(m.p),validP=p!==null&&Number.isFinite(p)&&p>=0&&p<=100;
@@ -1044,7 +1052,7 @@ function marketCard(m){
  const href=seerMarketHref(m),key=marketKey(m),saved=isWatched(m);
  const outcomes=Array.isArray(m.outcomes)?m.outcomes.slice(0,3).map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean):[];
  const probability=validP?'<div class="market-probability-block"><div><div class="market-probability-value">'+price+'</div><div class="market-probability-label">Indicative outcome price · not a guarantee</div></div><div class="market-probability-mark" aria-hidden="true">↗</div><div class="market-probability-track" role="img" aria-label="Indicative price '+Math.round(p)+' percent"><span style="width:'+pct+'%"></span></div></div>':'<div class="market-probability-block market-probability-unavailable"><div><div class="market-probability-value">—</div><div class="market-probability-label">No reliable price returned for this record</div></div></div>';
- return '<article class="panel market market-record '+(saved?"is-saved":"")+'"><div class="market-card-heading">'+marketAvatarHTML(m,42)+'<div class="market-card-heading-copy"><div class="market-card-kicker">'+htmlEscape(m.type||"Seer market")+'</div><div class="market-card-meta"><span class="pill">'+htmlEscape(m.chain||"Preview")+'</span><span class="market-record-state"><i class="explorer-status-dot '+(m.isLive?"live":"fallback")+'"></i>'+(m.isLive?"Live record":m.isSnapshot?"Saved snapshot":"Preview record")+'</span></div></div></div><h3>'+htmlEscape(m.title)+'</h3>'+probability+'<div class="market-outcome-preview">'+(outcomes.length?'<span class="market-outcome-label">OUTCOMES</span><span>'+htmlEscape(outcomes.join(" · "))+'</span>':'<span class="market-outcome-label">OUTCOME DETAIL</span><span>Inspect the returned market record</span>')+'</div><div class="market-card-metrics"><div><span>Volume</span><strong>'+htmlEscape(m.volume||"—")+'</strong></div><div><span>Liquidity</span><strong>'+htmlEscape(m.depth||"—")+'</strong></div><div><span>Opened</span><strong>'+htmlEscape(m.time||"Date unavailable")+'</strong></div></div><div class="market-card-source">'+htmlEscape(m.verification||"Verification not reported")+'<span>Prices are indicative</span></div><div class="market-actions"><button class="market-action-link" type="button" data-market-action="inspect" data-market-id="'+htmlEscape(key)+'">'+(state.selectedMarketId===key?"Close details":"Inspect record")+' <span>↗</span></button><button class="market-compare '+(marketIsCompared(m)?"selected":"")+'" type="button" data-market-action="compare" data-market-id="'+htmlEscape(key)+'" aria-pressed="'+marketIsCompared(m)+'">'+(marketIsCompared(m)?"✓ Comparing":"⇄ Compare")+'</button><button class="market-save '+(saved?"saved":"")+'" type="button" data-market-action="save" data-market-id="'+htmlEscape(key)+'" aria-pressed="'+saved+'">'+(saved?"★ Saved":"☆ Save")+'</button>'+(href?'<a class="market-open-link" href="'+htmlEscape(href)+'" target="_blank" rel="noopener noreferrer" aria-label="Open original market on Seer">Open market ↗</a>':"")+'</div></article>';
+ return '<article class="panel market market-record '+(saved?"is-saved":"")+'"><div class="market-card-heading">'+marketAvatarHTML(m,44)+'<div class="market-card-heading-copy"><div class="market-card-kicker">'+htmlEscape(m.type||"Seer market")+'</div><h3 class="market-card-title">'+htmlEscape(m.title)+'</h3><div class="market-card-meta"><span class="pill">'+htmlEscape(m.chain||"Preview")+'</span><span class="market-record-state"><i class="explorer-status-dot '+(m.isLive?"live":"fallback")+'"></i>'+(m.isLive?"Live record":m.isSnapshot?"Saved snapshot":"Preview record")+'</span></div></div></div>'+probability+'<div class="market-outcome-preview">'+(outcomes.length?'<span class="market-outcome-label">OUTCOMES</span><span>'+htmlEscape(outcomes.join(" · "))+'</span>':'<span class="market-outcome-label">OUTCOME DETAIL</span><span>Inspect the returned market record</span>')+'</div><div class="market-card-metrics"><div><span>Volume</span><strong>'+htmlEscape(m.volume||"—")+'</strong></div><div><span>Liquidity</span><strong>'+htmlEscape(m.depth||"—")+'</strong></div><div><span>Opened</span><strong>'+htmlEscape(m.time||"Date unavailable")+'</strong></div></div><div class="market-card-source">'+htmlEscape(m.verification||"Verification not reported")+'<span>Prices are indicative</span></div><div class="market-actions"><button class="market-action-link" type="button" data-market-action="inspect" data-market-id="'+htmlEscape(key)+'">'+(state.selectedMarketId===key?"Close details":"Inspect record")+' <span>↗</span></button><button class="market-compare '+(marketIsCompared(m)?"selected":"")+'" type="button" data-market-action="compare" data-market-id="'+htmlEscape(key)+'" aria-pressed="'+marketIsCompared(m)+'">'+(marketIsCompared(m)?"✓ Comparing":"⇄ Compare")+'</button><button class="market-save '+(saved?"saved":"")+'" type="button" data-market-action="save" data-market-id="'+htmlEscape(key)+'" aria-pressed="'+saved+'">'+(saved?"★ Saved":"☆ Save")+'</button>'+(href?'<a class="market-open-link" href="'+htmlEscape(href)+'" target="_blank" rel="noopener noreferrer" aria-label="Open original market on Seer">Open market ↗</a>':"")+'</div></article>';
 }
 function renderExplorerLedger(items){
  const rows=items.map(m=>{
