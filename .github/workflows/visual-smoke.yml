@@ -366,8 +366,12 @@ jobs:
                     const yesEdge = Number.parseFloat((await page.locator("#oppEdgeValue").innerText()).replace(" pp", ""));
                     await page.locator("#oppSideNoBtn").click();
                     const noEdge = Number.parseFloat((await page.locator("#oppEdgeValue").innerText()).replace(" pp", ""));
-                    if (!Number.isFinite(yesEdge) || !Number.isFinite(noEdge) || Math.abs(yesEdge + noEdge) > 1.1) {
-                      report.failures.push(viewport.name+"/"+theme+"/opportunity: choosing NO did not correctly invert the user-vs-market edge");
+                    const secondEntryText = await page.locator("#oppEntryPrice").innerText();
+                    const secondEntryPrice = Number.parseFloat(secondEntryText.replace(/[^0-9.]/g, ""))*100;
+                    const expectedYesEdge = belief - marketPrice;
+                    const expectedNoEdge = (100-belief) - secondEntryPrice;
+                    if (!Number.isFinite(yesEdge) || !Number.isFinite(noEdge) || !Number.isFinite(secondEntryPrice) || Math.abs(yesEdge-expectedYesEdge)>1.1 || Math.abs(noEdge-expectedNoEdge)>1.1) {
+                      report.failures.push(viewport.name+"/"+theme+"/opportunity: chosen-outcome edge did not match the independent estimate and selected outcome quote");
                     }
                     await page.locator("#oppStakeInput").fill("250");
                     const sharesText = await page.locator("#oppSharesValue").innerText();
