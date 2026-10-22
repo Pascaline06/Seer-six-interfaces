@@ -728,6 +728,46 @@ body:has(#main[data-page="home"]) .market-pulse{display:none}
 .market-card-icon[data-kind="risk"],.market-type-icon[data-kind="risk"]{color:#d2a15c;background:color-mix(in srgb,#d2a15c 8%,var(--panel))}
 .market-card-icon[data-kind="opportunity"],.market-type-icon[data-kind="opportunity"]{color:var(--green);background:color-mix(in srgb,var(--green) 8%,var(--panel))}
 .market-card-icon[data-kind="deep"],.market-type-icon[data-kind="deep"]{color:#78a8ff;background:color-mix(in srgb,#78a8ff 8%,var(--panel))}
+
+/* Market explorer: compact identity, probability and evidence hierarchy */
+.market-card-heading{display:flex;align-items:center;gap:11px;margin-bottom:15px;min-width:0}
+.market-card-heading-copy{min-width:0;flex:1}
+.market-card-kicker{font:600 10px "DM Sans",sans-serif;letter-spacing:.055em;text-transform:uppercase;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.market-card-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:6px}
+.market-record-state{display:inline-flex;align-items:center;gap:5px;color:var(--dim);font:500 9px "DM Sans",sans-serif}
+.market-card-icon{font-size:18px;line-height:1}
+.market-card-icon[data-kind="prediction"]{color:#83c9a5;background:color-mix(in srgb,#83c9a5 9%,var(--panel))}
+.market-card-icon[data-kind="market"]{color:var(--muted);background:color-mix(in srgb,var(--muted) 7%,var(--panel))}
+.market-record h3{margin:0 0 2px;font:600 17px/1.4 "Bricolage Grotesque",sans-serif;letter-spacing:-.025em}
+.market-probability-block{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 12px;margin:15px 0 12px;padding:14px;border-radius:10px}
+.market-probability-value{font-size:31px;letter-spacing:-.045em}
+.market-probability-label{font-size:10px;line-height:1.5}
+.market-probability-mark{grid-column:2;grid-row:1;color:var(--green);font-size:18px}
+.market-probability-track{grid-column:1/-1;width:100%;margin-top:12px}
+.market-probability-track>span{background:linear-gradient(90deg,var(--green),color-mix(in srgb,var(--green) 62%,var(--violet)))}
+.market-probability-unavailable{display:block}
+.market-probability-unavailable .market-probability-value{color:var(--dim)}
+.market-outcome-preview{display:flex;align-items:flex-start;gap:9px;min-height:34px;padding:10px 0;border-bottom:1px solid var(--line);color:var(--muted);font-size:10px;line-height:1.55;overflow-wrap:anywhere}
+.market-outcome-label{flex:0 0 auto;color:var(--dim);font:600 8px "JetBrains Mono",monospace;letter-spacing:.08em;padding-top:2px}
+.market-card-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:13px 0 11px}
+.market-card-metrics>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.market-card-metrics span{color:var(--dim);font-size:9px}
+.market-card-metrics strong{color:var(--text);font:600 12px "DM Sans",sans-serif;overflow-wrap:anywhere}
+.market-card-source{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-top:1px solid var(--line);color:var(--dim);font-size:9px}
+.market-card-source span{white-space:nowrap}
+.market-actions{flex-wrap:wrap}
+.market-open-link{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:6px 9px;border:1px solid var(--line);border-radius:7px;color:var(--text);font:600 10px "DM Sans",sans-serif;text-decoration:none}
+.market-open-link:hover{border-color:var(--green);color:var(--green)}
+/* A quieter, editorial market wire: readable type and understated motion */
+.wire-item{gap:11px;min-height:62px;padding:10px 18px;transition:background .2s ease}
+.wire-item:hover{background:color-mix(in srgb,var(--green) 6%,transparent)}
+.wire-chain{font:600 9px "DM Sans",sans-serif;letter-spacing:.07em;color:var(--green)}
+.wire-title{font:500 11px/1.45 "DM Sans",sans-serif;color:var(--muted)}
+.wire-price{font:600 13px "JetBrains Mono",monospace;letter-spacing:-.025em;color:var(--text)}
+.wire-metric{font:500 9px "DM Sans",sans-serif;letter-spacing:.025em;color:var(--dim)}
+.wire-item.wire-item-updated{animation:wireReprice 1.35s ease-out}
+@media(max-width:640px){.market-card-metrics{gap:6px}.market-card-metrics strong{font-size:11px}.market-card-source{font-size:8px}.market-open-link{flex:1}}
+
 </style>
 </head>
 <body>
@@ -947,7 +987,26 @@ function renderObservedPriceTrace(m){
  return '<div class="market-trace" role="region" aria-label="Observed market price trace"><div class="market-trace-head"><div><div class="category">OBSERVED PRICE TRACE</div><h3>History captured here</h3></div><span class="market-trace-count">'+count+' snapshots</span></div><div class="market-trace-chart"><svg viewBox="0 0 640 96" role="img" aria-label="Observed market prices from '+count+' successful snapshots, not fabricated historical prices"><defs><linearGradient id="marketTraceFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7a0ff" stop-opacity=".28"/><stop offset="100%" stop-color="#b7a0ff" stop-opacity="0"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#marketTraceFill)"/><path d="M18,88 H622" stroke="var(--line)" stroke-width="1" fill="none"/><polyline points="'+pointString+'" stroke="var(--violet)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" fill="none"/><circle cx="'+points[points.length-1].x.toFixed(1)+'" cy="'+points[points.length-1].y.toFixed(1)+'" r="3.4" fill="var(--green)" stroke="var(--panel)" stroke-width="1.5"/></svg></div><div class="market-trace-meta"><span>FIRST <b>'+Number(first.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(first.observedAt))+'</small></span><span>LAST <b>'+Number(last.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(last.observedAt))+'</small></span><span>OBSERVED CHANGE <b class="'+deltaClass+'">'+sign+delta.toFixed(1)+' pp</b><small>Across captured snapshots</small></span></div><p class="market-trace-note">This browser-local trace connects actual successful source snapshots only. It is not exchange history, a trade tape, or an executable quote. '+(current===null?'The current record has no returned price.':'Current returned price: '+current.toFixed(1)+'%.')+'</p></div>';
 }
 function renderMarketDetail(m){const outcomes=Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean).slice(0,8):[];const href=seerMarketHref(m);return `<section class="panel market-detail" id="marketDetail" aria-live="polite"><div class="market-detail-top"><div><div class="category">RECORD INSPECTOR / ${m.isLive?"LIVE RECORD":"SAVED SNAPSHOT"}</div><h2>${htmlEscape(m.title)}</h2><p class="muted">Inspect the returned record and source context before treating its price as evidence.</p></div><button class="icon-close" type="button" data-market-action="close-detail" aria-label="Close market inspector">×</button></div><div class="market-detail-grid"><div class="market-detail-price"><span>Indicative price</span><strong>${m.p===null||m.p===undefined?"—":Math.round(m.p)+"%"}</strong><div class="bar"><span style="width:${m.p===null||m.p===undefined?0:m.p}%"></span></div><small>${htmlEscape(m.type||"Prediction market")} · ${htmlEscape(m.chain||"Unknown network")}</small></div><div class="market-detail-facts"><div><span>Lifetime volume</span><strong>${htmlEscape(m.volume||"—")}</strong></div><div><span>Reported liquidity</span><strong>${htmlEscape(m.depth||"—")}</strong></div><div><span>Record status</span><strong>${htmlEscape(m.status||"Listed")}</strong></div><div><span>Verification</span><strong>${htmlEscape(m.verification||"Not verified")}</strong></div><div><span>Opened</span><strong>${htmlEscape(m.time||"Not specified")}</strong></div><div><span>Market ID</span><strong class="market-id">${htmlEscape(m.fullId||m.id||"Unavailable")}</strong></div></div></div>${renderObservedPriceTrace(m)}${outcomes.length?`<div class="market-outcomes"><div class="category">RETURNED OUTCOMES</div><div class="outcome-chips">${outcomes.map(o=>`<span>${htmlEscape(o)}</span>`).join("")}</div></div>`:""}<div class="market-detail-actions"><button class="button secondary" data-market-action="save" data-market-id="${htmlEscape(marketKey(m))}" type="button">${isWatched(m)?"★ Saved to watchlist":"☆ Save to watchlist"}</button>${href?`<a class="button primary" href="${htmlEscape(href)}" target="_blank" rel="noopener noreferrer">Open original market ↗</a>`:""}</div><p class="market-detail-disclaimer">API fields can be stale or thinly traded. Reported liquidity is not guaranteed executable depth; this prototype does not execute trades.</p></section>`}
-function marketCard(m){const p=m.p===null||m.p===undefined?"—":Math.round(m.p)+"%";const pct=m.p===null||m.p===undefined?0:m.p;const href=seerMarketHref(m),key=marketKey(m),saved=isWatched(m);return `<article class="panel market market-record ${saved?"is-saved":""}"><div class="markettop"><span class="category">${htmlEscape(m.type)}</span><span class="pill">${htmlEscape(m.chain||"Preview")}</span></div><h3>${htmlEscape(m.title)}</h3><div><div class="probrow"><span class="prob">${p}</span><span class="muted" style="font-size:11px">${m.p===null||m.p===undefined?"Price unavailable":"Indicative outcome price"}</span></div><div class="bar"><span style="width:${pct}%"></span></div><div class="muted" style="font-size:11px;margin-top:7px">${m.outcomes?.length?htmlEscape(m.outcomes.slice(0,3).map(v=>typeof v==="object"?(v.name||v.title||v.outcome||"Outcome"):String(v)).join(" · ")):"Outcome details in market"}</div></div><div class="marketfoot"><span>Volume ${htmlEscape(m.volume||"—")}</span><span>Liquidity ${htmlEscape(m.depth||"—")}</span></div><div class="marketfoot"><span>${m.isLive?"Live Seer record":m.isSnapshot?"Saved snapshot":"Demo fallback"}</span><span>Opened ${htmlEscape(m.time||"date unavailable")}</span></div>${href?`<div class="marketfoot"><a href="${htmlEscape(href)}" target="_blank" rel="noopener noreferrer" style="color:var(--violet)">Open on Seer ↗</a><span>${htmlEscape(m.verification||"")}</span></div>`:""}<div class="market-actions"><button class="market-action-link" type="button" data-market-action="inspect" data-market-id="${htmlEscape(key)}">${state.selectedMarketId===key?"Close details":"Inspect record"} <span>↗</span></button><button class="market-compare ${marketIsCompared(m)?"selected":""}" type="button" data-market-action="compare" data-market-id="${htmlEscape(key)}" aria-pressed="${marketIsCompared(m)}">${marketIsCompared(m)?"✓ Comparing":"⇄ Compare"}</button><button class="market-save ${saved?"saved":""}" type="button" data-market-action="save" data-market-id="${htmlEscape(key)}" aria-pressed="${saved}">${saved?"★ Saved":"☆ Save market"}</button></div></article>`}
+function marketKind(m){
+ const label=String(m.type||"").toLowerCase()+" "+String(m.title||"").toLowerCase();
+ if(label.includes("futarchy"))return "futarchy";
+ if(label.includes("risk"))return "risk";
+ if(label.includes("opportunity"))return "opportunity";
+ if(label.includes("deepquestion")||label.includes("deep question"))return "deep";
+ if(label.includes("prediction"))return "prediction";
+ return "market";
+}
+function marketKindIcon(kind){
+ return ({futarchy:"⇄",risk:"◇",opportunity:"↗",deep:"⌕",prediction:"◉",market:"◎"})[kind]||"◎";
+}
+function marketCard(m){
+ const p=m.p===null||m.p===undefined?null:Number(m.p),validP=p!==null&&Number.isFinite(p)&&p>=0&&p<=100;
+ const price=validP?Math.round(p)+"%":"—",pct=validP?p:0;
+ const href=seerMarketHref(m),key=marketKey(m),saved=isWatched(m),kind=marketKind(m);
+ const outcomes=Array.isArray(m.outcomes)?m.outcomes.slice(0,3).map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean):[];
+ const probability=validP?'<div class="market-probability-block"><div><div class="market-probability-value">'+price+'</div><div class="market-probability-label">Indicative outcome price · not a guarantee</div></div><div class="market-probability-mark" aria-hidden="true">↗</div><div class="market-probability-track" role="img" aria-label="Indicative price '+Math.round(p)+' percent"><span style="width:'+pct+'%"></span></div></div>':'<div class="market-probability-block market-probability-unavailable"><div><div class="market-probability-value">—</div><div class="market-probability-label">No reliable price returned for this record</div></div></div>';
+ return '<article class="panel market market-record '+(saved?"is-saved":"")+'"><div class="market-card-heading"><span class="market-card-icon" data-kind="'+kind+'" aria-hidden="true">'+marketKindIcon(kind)+'</span><div class="market-card-heading-copy"><div class="market-card-kicker">'+htmlEscape(m.type||"Seer market")+'</div><div class="market-card-meta"><span class="pill">'+htmlEscape(m.chain||"Preview")+'</span><span class="market-record-state"><i class="explorer-status-dot '+(m.isLive?"live":"fallback")+'"></i>'+(m.isLive?"Live record":m.isSnapshot?"Saved snapshot":"Preview record")+'</span></div></div></div><h3>'+htmlEscape(m.title)+'</h3>'+probability+'<div class="market-outcome-preview">'+(outcomes.length?'<span class="market-outcome-label">OUTCOMES</span><span>'+htmlEscape(outcomes.join(" · "))+'</span>':'<span class="market-outcome-label">OUTCOME DETAIL</span><span>Inspect the returned market record</span>')+'</div><div class="market-card-metrics"><div><span>Volume</span><strong>'+htmlEscape(m.volume||"—")+'</strong></div><div><span>Liquidity</span><strong>'+htmlEscape(m.depth||"—")+'</strong></div><div><span>Opened</span><strong>'+htmlEscape(m.time||"Date unavailable")+'</strong></div></div><div class="market-card-source">'+htmlEscape(m.verification||"Verification not reported")+'<span>Prices are indicative</span></div><div class="market-actions"><button class="market-action-link" type="button" data-market-action="inspect" data-market-id="'+htmlEscape(key)+'">'+(state.selectedMarketId===key?"Close details":"Inspect record")+' <span>↗</span></button><button class="market-compare '+(marketIsCompared(m)?"selected":"")+'" type="button" data-market-action="compare" data-market-id="'+htmlEscape(key)+'" aria-pressed="'+marketIsCompared(m)+'">'+(marketIsCompared(m)?"✓ Comparing":"⇄ Compare")+'</button><button class="market-save '+(saved?"saved":"")+'" type="button" data-market-action="save" data-market-id="'+htmlEscape(key)+'" aria-pressed="'+saved+'">'+(saved?"★ Saved":"☆ Save")+'</button>'+(href?'<a class="market-open-link" href="'+htmlEscape(href)+'" target="_blank" rel="noopener noreferrer" aria-label="Open original market on Seer">Open market ↗</a>':"")+'</div></article>';
+}
 function renderExplorerLedger(items){
  const rows=items.map(m=>{
   const key=htmlEscape(marketKey(m)),p=m.p===null||m.p===undefined?null:Number(m.p);
