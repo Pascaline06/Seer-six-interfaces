@@ -19,10 +19,10 @@ Public demo base URL (after Pages is enabled): https://pascaline06.github.io/See
 
 1. **Overview** — the shared signal and evidence philosophy.
 2. **Market explorer** — searchable market records, probabilities, expiry and interpretation guidance.
-3. **Deep forecasts** — multi-outcome comparisons, uncertainty ranges and evaluator evidence.
+3. **Deep forecasts** — inspect returned outcome prices, available source depth, volume and evidence limits. It does not invent uncertainty ranges when the source payload cannot support them.
 4. **Futarchy** — pass/fail scenario comparison around a measurable metric.
 5. **Opportunity markets** — forecast estimates separated from human grant review and final decisions.
-6. **Risk pricing** — multidimensional risk assumptions, loss severity and liquidity comparison.
+6. **Risk pricing** — compare observed price, reported liquidity and volume alongside clearly labelled user-defined assumptions; no synthetic security score is presented as fact.
 
 ## Evidence-first design
 
@@ -30,13 +30,15 @@ Every interface emphasizes source status, what a signal means, what can distort 
 
 ## Market exploration interactions
 
-The overview includes a compact pulse strip built from the currently available market records. The Market Explorer supports server-side keyword search, category/network filters, sorting and pagination, plus a record inspector for the returned market ID, network, verification state, outcome labels, volume and liquidity. Market records can be saved to a device-local watchlist using browser storage; this list is not account-synced and is not shared across devices. Saved values are snapshots, not a live subscription. Select up to three markets to open a side-by-side comparison of indicative price, volume, reported liquidity, network, verification state, opening time, and returned outcomes. Comparison items are snapshots; the UI explicitly warns that the displayed fields are not execution quotes.
+The overview includes a moving Market Wire ticker built from the currently available market records. It provides a manual refresh control and polls the Seer market endpoint every 60 seconds while the page is visible. When two successful snapshots differ, repriced records are briefly highlighted and the wire reports the number of changes observed; it never fabricates trade events or claims to be a WebSocket trade tape. The last successful live snapshot is retained when a later refresh fails.
+
+The Market Explorer supports server-side keyword search, category/network filters, sorting and pagination, plus a record inspector for the returned market ID, network, verification state, outcome labels, volume and liquidity. Market records can be saved to a device-local watchlist using browser storage; this list is not account-synced and is not shared across devices. Saved values are snapshots, not a live subscription. Select up to three markets to open a side-by-side comparison of indicative price, volume, reported liquidity, network, verification state, opening time, and returned outcomes. Comparison items are snapshots; the UI explicitly warns that the displayed fields are not execution quotes.
 
 ## Data and implementation status
 
-**This remains a front-end prototype, now with a read-only live market feed.** The market explorer requests market records from Seer's public `markets-search` endpoint (`https://app.seer.pm/.netlify/functions/markets-search`) across Gnosis, Optimism, Base, and Ethereum. The UI shows the last successful fetch time, reports the source state, and labels demo fallback records when the endpoint is unavailable. Market cards display API-reported outcome prices, lifetime swap volume and liquidity; these fields are not executable quotes and can be stale or thinly traded.
+**This remains a front-end prototype with a read-only live market feed.** The overview wire and Market Explorer request market records from Seer's public `markets-search` endpoint (`https://app.seer.pm/.netlify/functions/markets-search`) across Gnosis, Optimism, Base, and Ethereum. The UI shows the last successful fetch time, reports connection/refresh state, retains the last successful snapshot after a transient refresh failure, and labels demo fallback records if no live snapshot has been obtained. Market cards display API-reported outcome prices, lifetime swap volume and liquidity; these fields are not executable quotes and can be stale or thinly traded. The wire is a refresh-based snapshot ticker, not a real-time trade stream.
 
-Deep forecasts, futarchy scenarios, opportunity-selection estimates, risk scores, and the plotted historical line remain illustrative. No wallet connection, trade execution, or on-chain action is implemented. Do not use illustrative values for financial, security, funding, or governance decisions.
+The Deep page lists returned market records and prices, while any missing outcome range remains undisplayed. Futarchy uses an API-returned market price as a baseline with a user-defined hypothetical shift; it does not claim to estimate a causal effect. The Opportunity page reports market activity in the current response, not the probability that a person or grant should be selected. Risk sliders are user-defined assumptions, not security scores. The plotted historical-style line remains illustrative. No wallet connection, trade execution, or on-chain action is implemented. Do not use illustrative values for financial, security, funding, or governance decisions.
 
 ## Run locally
 
