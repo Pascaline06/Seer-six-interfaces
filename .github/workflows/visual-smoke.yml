@@ -373,12 +373,21 @@ jobs:
                     if (!Number.isFinite(yesEdge) || !Number.isFinite(noEdge) || !Number.isFinite(secondEntryPrice) || Math.abs(yesEdge-expectedYesEdge)>1.1 || Math.abs(noEdge-expectedNoEdge)>1.1) {
                       report.failures.push(viewport.name+"/"+theme+"/opportunity: chosen-outcome edge did not match the independent estimate and selected outcome quote");
                     }
+                    // For sizing assertions, select a side with a strictly positive entry quote.
+                    // A zero-cent outcome is valid source data but cannot be sized using stake / price.
+                    if (marketPrice > 0) {
+                      await page.locator("#oppSideYesBtn").click();
+                    } else if (Number.isFinite(secondEntryPrice) && secondEntryPrice > 0) {
+                      await page.locator("#oppSideNoBtn").click();
+                    } else {
+                      report.failures.push(viewport.name+"/"+theme+"/opportunity: neither side has a positive quoted entry for the sizing assertion");
+                    }
                     await page.locator("#oppStakeInput").fill("250");
                     const sharesText = await page.locator("#oppSharesValue").innerText();
                     const payoutText = await page.locator("#oppPayoutValue").innerText();
                     const pnlText = await page.locator("#oppExpectedValue").innerText();
                     if (sharesText === "—" || payoutText === "—" || !pnlText.startsWith("$")) {
-                      report.failures.push(viewport.name+"/"+theme+"/opportunity: position sizing outputs did not update after input");
+                      report.failures.push(viewport.name+"/"+theme+"/opportunity: position sizing outputs did not update after input on a positive-priced side");
                     }
                     const selector = page.locator("#oppMarketSelect");
                     if (await selector.locator("option").count() > 1) {
