@@ -230,6 +230,23 @@ jobs:
                   report.failures.push(viewport.name+"/"+theme+"/app: no Save market action was rendered");
                 }
               }
+                const compareButtons = page.locator('#main button[data-market-action="compare"]');
+                if (await compareButtons.count() >= 2) {
+                  await compareButtons.nth(0).click();
+                  const comparePrompt = await page.locator("#marketCompare").count() === 1;
+                  if (!comparePrompt) report.failures.push(viewport.name+"/"+theme+"/app: selecting a market did not open the compare workbench");
+                  await page.locator('#main button[data-market-action="compare"]').nth(1).click();
+                  const comparedCount = await page.locator("#marketCompare .compare-market-column").count();
+                  if (comparedCount !== 2) report.failures.push(viewport.name+"/"+theme+"/app: selecting two markets did not render two comparison columns (found "+comparedCount+")");
+                  await page.locator('#marketCompare button[data-market-action="remove-compare"]').first().click();
+                  const oneLeftPrompt = await page.locator("#marketCompare").innerText().catch(() => "");
+                  if (!oneLeftPrompt.includes("Add one more market to compare")) report.failures.push(viewport.name+"/"+theme+"/app: removing one comparison did not return to the one-market prompt");
+                  await page.locator('#marketCompare button[data-market-action="clear-compare"]').click();
+                  if (await page.locator("#marketCompare").count() !== 0) report.failures.push(viewport.name+"/"+theme+"/app: Clear comparison did not close the workbench");
+                } else {
+                  report.failures.push(viewport.name+"/"+theme+"/app: fewer than two compare actions were rendered");
+                }
+              }
               const nextRoute = routes[(routes.indexOf(route) + 1) % routes.length];
               const nextLink = page.locator(`#siteFooter .interface-link[data-suite-page="${nextRoute}"]`);
               await nextLink.click();
