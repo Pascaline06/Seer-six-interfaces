@@ -30,7 +30,7 @@ Every interface emphasizes source status, what a signal means, what can distort 
 
 ## Market exploration interactions
 
-The overview includes a compact pulse strip built from the currently available market records. The Market Explorer supports server-side keyword search, category/network filters, sorting and pagination, plus a record inspector for the returned market ID, network, verification state, outcome labels, volume and liquidity. Market records can be saved to a device-local watchlist using browser storage; this list is not account-synced and is not shared across devices. Saved values are snapshots, not a live subscription.
+The overview includes a compact pulse strip built from the currently available market records. The Market Explorer supports server-side keyword search, category/network filters, sorting and pagination, plus a record inspector for the returned market ID, network, verification state, outcome labels, volume and liquidity. Market records can be saved to a device-local watchlist using browser storage; this list is not account-synced and is not shared across devices. Saved values are snapshots, not a live subscription. Select up to three markets to open a side-by-side comparison of indicative price, volume, reported liquidity, network, verification state, opening time, and returned outcomes. Comparison items are snapshots; the UI explicitly warns that the displayed fields are not execution quotes.
 
 ## Data and implementation status
 
