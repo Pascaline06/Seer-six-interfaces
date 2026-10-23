@@ -165,6 +165,7 @@ jobs:
                   marketTapeAccentBorder: getComputedStyle(document.querySelector("#main .signal-ticker.market-tape") || body).borderTopColor,
                   paletteBase: getComputedStyle(body).getPropertyValue("--bg").trim().toLowerCase(),
                   paletteAccent: getComputedStyle(body).getPropertyValue("--violet").trim().toLowerCase(),
+                  browserThemeColor: document.querySelector('meta[name="theme-color"]')?.content || null,
                   siteBackgroundImage: getComputedStyle(body).backgroundImage,
                   mainPanelBackgroundImage: getComputedStyle(main?.querySelector(".panel") || body).backgroundImage,
                   themeToggleLabel: (document.querySelector("#themeToggle span")?.textContent || "").trim(),
@@ -331,6 +332,8 @@ jobs:
               const expectedPaletteBase = theme === "light" ? "#f7f7f9" : "#101013";
               const expectedPaletteAccent = theme === "light" ? "#6c2bd9" : "#b7a0ff";
               const expectedToggleLabel = theme === "light" ? "Dark" : "Light";
+              const expectedBrowserThemeColor = theme === "light" ? "#f7f7f9" : "#101013";
+              if (metrics.browserThemeColor !== expectedBrowserThemeColor) report.failures.push(viewport.name+"/"+theme+"/"+route+": browser theme color does not match the active brand surface ("+metrics.browserThemeColor+")");
               if (metrics.paletteBase !== expectedPaletteBase) report.failures.push(viewport.name+"/"+theme+"/"+route+": wrong brand palette base "+metrics.paletteBase+" (expected "+expectedPaletteBase+")");
               if (metrics.paletteAccent !== expectedPaletteAccent) report.failures.push(viewport.name+"/"+theme+"/"+route+": wrong contrast accent "+metrics.paletteAccent+" (expected "+expectedPaletteAccent+")");
               const contrastMetrics = await page.evaluate(() => {
