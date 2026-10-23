@@ -63,6 +63,14 @@ The collector now writes schema-v2 scheduled observations with the market's retu
 
 A “not comparable” result is distinct from “unchanged”: the UI will not treat a missing source field in either capture as proof of a change or as proof the rules stayed the same. The fingerprint is a reproducible diff aid—not a digital signature, on-chain attestation, or proof that the upstream source itself is trustworthy. Co-occurring field and price changes are reported side by side; the interface does not claim that one caused the other. Legacy schema-v1 observations remain available for charting but do not contain enough metadata for forensic field comparisons. The expanded CSV contains chain, snapshot ID, schema version, source-reported metadata, criteria field/text, endpoint, URL, and fingerprint alongside the observed price.
 
+
+## Cross-network identity and per-outcome history
+
+Seer market IDs are not assumed to be globally unique. Where the source returns a usable chain ID, the interface scopes market identity to the combination of **network + market ID**. This identity is carried through selected-market inspectors, comparison state, market watchlist actions, Futarchy and Opportunity selectors, paper-analysis actions, forecast records, Decision Desk annotations, and Market Wire navigation. It prevents an action on one network from silently resolving to a same-ID record on another network.
+
+Price history is tracked per market identity and named outcome. History normalization includes the chain-qualified identity and capture timestamp, so observations that share a market ID and timestamp on different networks remain separate. Source-change forensics compares only metadata-enriched captures for the same market on the same network; missing or incompatible fields are marked not comparable rather than being treated as unchanged. These safeguards improve consistency, but they do not replace validation of the upstream source or turn snapshot history into executed-trade history.
+
+
 ## Data and implementation status
 
 **This remains a front-end prototype with a read-only live market feed.** The overview wire and Market Explorer request market records from Seer's public `markets-search` endpoint (`https://app.seer.pm/.netlify/functions/markets-search`) across Gnosis, Optimism, Base, and Ethereum. The UI shows the last successful fetch time, reports connection/refresh state, retains the last successful snapshot after a transient refresh failure, and labels demo fallback records if no live snapshot has been obtained. Market cards display API-reported outcome prices, lifetime swap volume and liquidity; these fields are not executable quotes and can be stale or thinly traded. The wire is a refresh-based snapshot ticker, not a real-time trade stream.
@@ -77,9 +85,11 @@ Open `index.html` in a modern browser. No build step or package installation is 
 
 In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main` and `/(root)`, then save. The entry file must be named lowercase `index.html` for the default GitHub Pages route. Wait for the Pages deployment to finish before sharing the demo links.
 
-## Submission preview image
+## Poidh submission preview
 
-The repository includes [`preview.svg`](./preview.svg), a 1200×630 concept image for the submission card/social preview. Capture a real browser screenshot of the deployed interface as the primary visual if the submission specifically requires an in-product screenshot.
+The Seer bounty asks for **one claim covering all six interfaces** with a preview image attached. The six public interface URLs must still be listed individually in the claim description; the preview image does not replace those links. The native Poidh image uploader accepts JPG/JPEG, PNG, GIF, and WebP, so use the separate `seer-six-claim-preview.png` file supplied with the submission handoff (1200×630 PNG, composed from actual desktop browser captures of the six routes). Upload that PNG through Poidh's normal claim form so Poidh generates the media metadata itself.
+
+The repository's [`preview.svg`](./preview.svg) remains an additional designed concept/social-preview asset; do not assume the claim uploader accepts SVG. Required claim details and the latest claim-ready copy are documented in [`SUBMISSION.md`](./SUBMISSION.md).
 
 ## Accessibility and responsive behavior
 
