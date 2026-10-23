@@ -2456,7 +2456,8 @@ function opportunityOutcomePrice(m,index){
  return NaN;
 }
 function opportunityScenarioMarket(records){
- const source=Array.isArray(records)?records:sortedSpecialistMarkets(markets);
+ const rawSource=Array.isArray(records)?records:[...sortedSpecialistMarkets(markets),...explorerMarkets,...(state.opportunityMarketSnapshot?[state.opportunityMarketSnapshot]:[])];
+ const source=[...new Map(rawSource.filter(m=>m&&m.title).map(m=>[marketIdentity(m),m])).values()];
  let list=source.filter(isBinaryOpportunityMarket);
  if(!list.length)list=demoMarkets.filter(isBinaryOpportunityMarket);
  const wantedIdentity=marketIdentity({id:state.opportunityMarketId,chainId:state.opportunityMarketChainId});
@@ -2974,7 +2975,7 @@ seerLoadSharedArchive();
    All personal forecasts and reviewer annotations stay in this browser. Signals are heuristics, not recommendations. */
 const SEER_F34_FORECAST_KEY="seer-six-forecast-journal-v1";
 const SEER_F34_DECISION_KEY="seer-six-decision-desk-v1";
-const seerF34Draft={marketKey:"",outcomeIndex:0,belief:50,rationale:"",evidenceNote:""};
+const seerF34Draft={marketKey:"",chainId:null,outcomeIndex:0,belief:50,rationale:"",evidenceNote:""};
 const seerF34Feedback={forecast:"",decision:""};
 let seerF34Sequence=0;
 
@@ -2989,7 +2990,7 @@ function seerF34Records(){
  const map=new Map();
  for(const m of pool){
   if(!m||!m.title||m.isLive!==true||!m.fullId)continue;
-  const key=marketKey(m),old=map.get(key);
+  const key=marketIdentity(m),old=map.get(key);
   if(!old||(!old.evidence&&m.evidence))map.set(key,m);
  }
  return [...map.values()];
@@ -3014,10 +3015,12 @@ function seerF34ForecastRecords(){
 }
 function seerF34SelectedMarket(){
  const records=seerF34ForecastRecords();
- let selected=records.find(m=>marketKey(m)===seerF34Draft.marketKey);
+ const wantedIdentity=marketIdentity({id:seerF34Draft.marketKey,chainId:seerF34Draft.chainId});
+ let selected=records.find(m=>marketKey(m)===seerF34Draft.marketKey&&marketIdentity(m)===wantedIdentity);
  if(!selected)selected=records[0]||null;
- if(selected&&marketKey(selected)!==seerF34Draft.marketKey){
+ if(selected&&(marketKey(selected)!==seerF34Draft.marketKey||marketIdentity(selected)!==wantedIdentity)){
   seerF34Draft.marketKey=marketKey(selected);
+  seerF34Draft.chainId=parseMarketChainId(selected.chainId);
   const first=seerF34Outcomes(selected).find(o=>o.p!==null)||seerF34Outcomes(selected)[0];
   seerF34Draft.outcomeIndex=first?first.index:0;
   seerF34Draft.belief=first&&first.p!==null?first.p:50;
@@ -3110,7 +3113,7 @@ function seerF34RenderForecastPanel(){
  const records=seerF34ForecastRecords(),m=seerF34SelectedMarket(),outcomes=seerF34Outcomes(m),selected=seerF34SelectedOutcome(m);
  const price=seerF34SourcePrice(m,selected),belief=Math.max(0,Math.min(100,Number(seerF34Draft.belief)||0));
  const edge=price===null?null:belief-price;
- const marketOptions=records.map(row=>'<option value="'+htmlEscape(marketKey(row))+'" '+(m&&marketKey(row)===marketKey(m)?"selected":"")+'>'+htmlEscape(row.title)+' · '+htmlEscape(row.chain||"Chain not returned")+'</option>').join("");
+ const marketOptions=records.map(row=>'<option value="'+htmlEscape(marketIdentity(row))+'" data-market-id="'+htmlEscape(marketKey(row))+'" data-chain-id="'+htmlEscape(String(row.chainId??""))+'" '+(m&&marketIdentity(row)===marketIdentity(m)?"selected":"")+'>'+htmlEscape(row.title)+' · '+htmlEscape(row.chain||"Chain not returned")+'</option>').join("");
  const outcomeOptions=outcomes.map(row=>'<option value="'+row.index+'" '+(selected&&row.index===selected.index?"selected":"")+'>'+htmlEscape(row.name)+(row.p===null?" · price not returned":" · "+Number(row.p).toFixed(1)+"%")+'</option>').join("");
  const signal=seerF34SignalMarkup(m,selected,belief);
  const detail=m?'<div class="seer-f34-stats"><div class="seer-f34-stat"><span>Source price</span><strong>'+(price===null?"—":price.toFixed(1)+"%")+'</strong><small>Returned event price</small></div><div class="seer-f34-stat"><span>Your forecast</span><strong>'+belief.toFixed(1)+'%</strong><small>Personal probability estimate</small></div><div class="seer-f34-stat"><span>Difference</span><strong>'+(edge===null?"—":(edge>0?"+":"")+edge.toFixed(1)+" pp")+'</strong><small>Estimate minus source price</small></div></div><p class="seer-f34-note">Source observation: '+htmlEscape(seerF34Freshness(m).at?new Date(seerF34Freshness(m).at).toLocaleString():"time not returned")+'. This compares your probability with the price returned for the selected outcome. It is not a recommendation or a claim that the market is mispriced.</p>':'<div class="notice">No live, probability-bearing outcome is available yet. Refresh the Market Explorer to load source records. Scalar records are excluded from the probability journal unless represented as discrete outcome probabilities.</div>';
@@ -3161,18 +3164,18 @@ function seerF34DecisionDeskMarkup(){
  const candidates=records.map(m=>({m:m,triage:seerF34ScoreCandidate(m,history)})).sort((a,b)=>b.triage.score-a.triage.score||marketActivityScore(b.m,records)-marketActivityScore(a.m,records)).slice(0,8);
  const reviews=Object.values(decisions),reviewed=reviews.filter(x=>x&&x.updatedAt).length;
  const cards=candidates.map((row,i)=>{
-  const m=row.m,t=row.triage,key=marketKey(m),saved=decisions[key]||{},score=t.score;
+  const m=row.m,t=row.triage,key=marketKey(m),identity=marketIdentity(m),saved=decisions[identity]||(records.filter(x=>marketKey(x)===key).length===1?decisions[key]:{})||{},score=t.score;
   const reasons=t.reasons.slice(0,5).map(reason=>'<span class="seer-f34-reason">'+htmlEscape(reason)+'</span>').join("");
   const opts=["Unreviewed","Investigate","Monitor","Reviewed","Dismissed"].map(v=>'<option value="'+v+'" '+(String(saved.status||"Unreviewed")===v?"selected":"")+'>'+v+'</option>').join("");
   const last=saved.updatedAt?'Last review '+htmlEscape(new Date(saved.updatedAt).toLocaleString())+' · '+htmlEscape(String((saved.events||[]).length))+' logged action(s)':'No reviewer action recorded yet';
   const href=seerMarketHref(m);
-  return '<article class="seer-f34-review-card"><div class="seer-f34-review-top"><div class="seer-f34-review-rank"><span class="seer-f34-review-number">'+String(i+1).padStart(2,"0")+'</span><div><h3>'+htmlEscape(m.title)+'</h3><small>'+htmlEscape(m.chain||"Network not returned")+' · '+htmlEscape(m.type||"Market")+' · Price '+(m.p===null||m.p===undefined?"—":Number(m.p).toFixed(1)+"%")+'</small></div></div><div class="seer-f34-score"><strong>'+score+'</strong><small>/100</small></div></div><div class="seer-f34-prioritybar"><span style="width:'+score+'%"></span></div><div class="seer-f34-review-top"><span class="seer-f34-chip '+(score>=65?"warn":score>=35?"edge":"good")+'">'+t.level+'</span><span class="seer-f34-chip">Transparent review heuristic</span></div><div class="seer-f34-reasons">'+reasons+'</div><p class="seer-f34-copy">Score components: move '+Math.round(t.move?Math.min(40,Math.abs(t.move.delta)*4):0)+'/40 · evidence gaps '+Math.round(Math.min(25,(t.missing.includes("Resolution criteria not returned")?10:0)+(t.missing.includes("Volume not reported")?5:0)+(t.missing.includes("Liquidity not reported")?5:0)+(t.missing.includes("Verification field absent")?5:0)))+'/25 · structure '+Math.round(t.structurePoints)+'/15 · refresh gap '+t.agePoints+'/20. Higher means investigate the record sooner; it is not a prediction of event outcome or a merit score.</p><div class="seer-f34-review-fields"><div><label class="seer-f34-label" for="seerF34Status-'+htmlEscape(key)+'">Reviewer status</label><select class="seer-f34-status-select" id="seerF34Status-'+htmlEscape(key)+'" data-f34-decision-status="'+htmlEscape(key)+'">'+opts+'</select><p class="seer-f34-review-saved">'+last+'</p></div><div><label class="seer-f34-label" for="seerF34Note-'+htmlEscape(key)+'">Reviewer rationale / next action</label><textarea class="seer-f34-textarea" id="seerF34Note-'+htmlEscape(key)+'" data-f34-decision-note="'+htmlEscape(key)+'" placeholder="Record why this deserves attention, what evidence to fetch, or why it can wait.">'+htmlEscape(saved.note||"")+'</textarea></div></div><div class="seer-f34-actions"><button class="seer-f34-button primary" type="button" data-f34-decision-save="'+htmlEscape(key)+'">Save review</button><button class="seer-f34-button" type="button" data-f34-decision-inspect="'+htmlEscape(key)+'" data-f34-decision-chain-id="'+htmlEscape(String(m.chainId??""))+'">Inspect source</button><button class="seer-f34-button" type="button" data-f34-decision-forecast="'+htmlEscape(key)+'">Build forecast</button>'+(href?'<a class="seer-f34-button" target="_blank" rel="noopener noreferrer" href="'+htmlEscape(href)+'">Open Seer ↗</a>':"")+'</div><p class="seer-f34-feedback" role="status" data-f34-decision-feedback="'+htmlEscape(key)+'"></p></article>';
+  return '<article class="seer-f34-review-card"><div class="seer-f34-review-top"><div class="seer-f34-review-rank"><span class="seer-f34-review-number">'+String(i+1).padStart(2,"0")+'</span><div><h3>'+htmlEscape(m.title)+'</h3><small>'+htmlEscape(m.chain||"Network not returned")+' · '+htmlEscape(m.type||"Market")+' · Price '+(m.p===null||m.p===undefined?"—":Number(m.p).toFixed(1)+"%")+'</small></div></div><div class="seer-f34-score"><strong>'+score+'</strong><small>/100</small></div></div><div class="seer-f34-prioritybar"><span style="width:'+score+'%"></span></div><div class="seer-f34-review-top"><span class="seer-f34-chip '+(score>=65?"warn":score>=35?"edge":"good")+'">'+t.level+'</span><span class="seer-f34-chip">Transparent review heuristic</span></div><div class="seer-f34-reasons">'+reasons+'</div><p class="seer-f34-copy">Score components: move '+Math.round(t.move?Math.min(40,Math.abs(t.move.delta)*4):0)+'/40 · evidence gaps '+Math.round(Math.min(25,(t.missing.includes("Resolution criteria not returned")?10:0)+(t.missing.includes("Volume not reported")?5:0)+(t.missing.includes("Liquidity not reported")?5:0)+(t.missing.includes("Verification field absent")?5:0)))+'/25 · structure '+Math.round(t.structurePoints)+'/15 · refresh gap '+t.agePoints+'/20. Higher means investigate the record sooner; it is not a prediction of event outcome or a merit score.</p><div class="seer-f34-review-fields"><div><label class="seer-f34-label" for="seerF34Status-'+htmlEscape(key)+'">Reviewer status</label><select class="seer-f34-status-select" id="seerF34Status-'+htmlEscape(key)+'" data-f34-decision-status="'+htmlEscape(identity)+'">'+opts+'</select><p class="seer-f34-review-saved">'+last+'</p></div><div><label class="seer-f34-label" for="seerF34Note-'+htmlEscape(key)+'">Reviewer rationale / next action</label><textarea class="seer-f34-textarea" id="seerF34Note-'+htmlEscape(key)+'" data-f34-decision-note="'+htmlEscape(identity)+'" placeholder="Record why this deserves attention, what evidence to fetch, or why it can wait.">'+htmlEscape(saved.note||"")+'</textarea></div></div><div class="seer-f34-actions"><button class="seer-f34-button primary" type="button" data-f34-decision-save="'+htmlEscape(identity)+'">Save review</button><button class="seer-f34-button" type="button" data-f34-decision-inspect="'+htmlEscape(key)+'" data-f34-decision-chain-id="'+htmlEscape(String(m.chainId??""))+'">Inspect source</button><button class="seer-f34-button" type="button" data-f34-decision-forecast="'+htmlEscape(identity)+'">Build forecast</button>'+(href?'<a class="seer-f34-button" target="_blank" rel="noopener noreferrer" href="'+htmlEscape(href)+'">Open Seer ↗</a>':"")+'</div><p class="seer-f34-feedback" role="status" data-f34-decision-feedback="'+htmlEscape(identity)+'"></p></article>';
  }).join("");
  return '<section class="seer-f34-panel" id="seerDecisionDesk" aria-labelledby="seerDecisionTitle"><div class="seer-f34-head"><div><div class="seer-f34-kicker">PHASE 04 / OPPORTUNITY DECISION DESK</div><h2 id="seerDecisionTitle">Make the next review defensible.</h2><p>Rank market records by explicit reasons to inspect them—not by a hidden recommendation. The score is intentionally separate from the existing activity index and never ranks people, applicants or grants.</p></div><span class="seer-f34-pill">'+candidates.length+' source records</span></div><div class="seer-f34-scoreband"><div class="seer-f34-stat"><span>Records triaged</span><strong>'+candidates.length+'</strong><small>Deduplicated live source records</small></div><div class="seer-f34-stat"><span>Review entries</span><strong>'+reviewed+'</strong><small>Markets with a saved reviewer action</small></div><div class="seer-f34-stat"><span>Formula</span><strong>4 parts</strong><small>Move · gaps · structure · stale data</small></div></div><p class="seer-f34-copy">Priority = observed move (0–40) + missing source fields (0–25) + outcome complexity (0–15) + refresh gap (0–20). Scores describe review urgency only. Missing fields increase scrutiny; they are never replaced by assumed values.</p><div class="seer-f34-ledger">'+(cards||'<div class="notice">No live market records are available. The desk does not rank demo fallback records as source evidence.</div>')+'</div><p class="seer-f34-note">Reviewer statuses, notes and action history are stored locally in this browser. Each save records the current score, its reasons, source record, observation time and note; clearing browser storage removes this private review trail.</p></section>';
 }
 function seerF34SyncDraft(){
  const marketSelect=document.getElementById("seerF34Market"),outcomeSelect=document.getElementById("seerF34Outcome"),belief=document.getElementById("seerF34Belief"),rationale=document.getElementById("seerF34Rationale"),evidence=document.getElementById("seerF34Evidence");
- if(marketSelect)seerF34Draft.marketKey=marketSelect.value;
+ if(marketSelect){const option=marketSelect.selectedOptions[0];seerF34Draft.marketKey=option?option.dataset.marketId||"":"";seerF34Draft.chainId=parseMarketChainId(option?option.dataset.chainId:null);}
  if(outcomeSelect)seerF34Draft.outcomeIndex=Number(outcomeSelect.value)||0;
  if(belief)seerF34Draft.belief=Number(belief.value);
  if(rationale)seerF34Draft.rationale=rationale.value;
@@ -3224,8 +3227,8 @@ document.getElementById("main").addEventListener("change",function(event){
  const marketSelect=event.target.closest("[data-f34-market]");
  const outcomeSelect=event.target.closest("[data-f34-outcome]");
  if(marketSelect){
-  seerF34SyncDraft();seerF34Draft.marketKey=marketSelect.value;
-  const m=seerF34ForecastRecords().find(x=>marketKey(x)===marketSelect.value);
+  seerF34SyncDraft();
+  const m=seerF34ForecastRecords().find(x=>marketIdentity(x)===marketSelect.value);
   const first=m&&seerF34Outcomes(m).find(o=>o.p!==null);
   seerF34Draft.outcomeIndex=first?first.index:0;seerF34Draft.belief=first&&first.p!==null?first.p:50;
   seerF34Mount();
@@ -3246,7 +3249,7 @@ document.getElementById("main").addEventListener("click",function(event){
   const rationale=String(seerF34Draft.rationale||"").trim();
   if(rationale.length<12){seerF34Feedback.forecast="Add a thesis of at least 12 characters so the forecast can be audited later.";const fb=document.getElementById("seerF34ForecastFeedback");if(fb)fb.textContent=seerF34Feedback.forecast;return;}
   const now=new Date().toISOString(),ev=m.evidence||{};
-  const item={id:"f34-"+Date.now()+"-"+(++seerF34Sequence),status:"open",marketKey:marketKey(m),title:m.title,chain:m.chain||"Unknown network",chainId:m.chainId||null,marketUrl:seerMarketHref(m)||"https://app.seer.pm/",outcomeIndex:outcome.index,outcomeName:outcome.name,sourceProbability:sourcePrice,userProbability:Number(seerF34Draft.belief),edge:Number(seerF34Draft.belief)-sourcePrice,rationale:rationale,evidenceNote:String(seerF34Draft.evidenceNote||"").trim(),sourceObservedAt:ev.observation&&ev.observation.capturedAt||null,sourceEndpoint:ev.source&&ev.source.endpoint||SEER_EVIDENCE_ENDPOINT,sourceRecordId:ev.source&&ev.source.recordId||m.fullId,sourceMode:ev.source&&ev.source.mode||"live source record",createdAt:now,result:null,resolvedAt:null,resolutionUrl:null};
+  const item={id:"f34-"+Date.now()+"-"+(++seerF34Sequence),status:"open",marketKey:marketKey(m),marketIdentity:marketIdentity(m),title:m.title,chain:m.chain||"Unknown network",chainId:parseMarketChainId(m.chainId),marketUrl:seerMarketHref(m)||"https://app.seer.pm/",outcomeIndex:outcome.index,outcomeName:outcome.name,sourceProbability:sourcePrice,userProbability:Number(seerF34Draft.belief),edge:Number(seerF34Draft.belief)-sourcePrice,rationale:rationale,evidenceNote:String(seerF34Draft.evidenceNote||"").trim(),sourceObservedAt:ev.observation&&ev.observation.capturedAt||null,sourceEndpoint:ev.source&&ev.source.endpoint||SEER_EVIDENCE_ENDPOINT,sourceRecordId:ev.source&&ev.source.recordId||m.fullId,sourceMode:ev.source&&ev.source.mode||"live source record",createdAt:now,result:null,resolvedAt:null,resolutionUrl:null};
   const journal=seerF34Read(SEER_F34_FORECAST_KEY,[]);journal.unshift(item);
   if(!seerF34Write(SEER_F34_FORECAST_KEY,journal.slice(0,300))){seerF34Feedback.forecast="Browser storage is full; forecast was not saved.";const fb=document.getElementById("seerF34ForecastFeedback");if(fb)fb.textContent=seerF34Feedback.forecast;return;}
   seerF34Feedback.forecast="Forecast snapshot saved with its source price and observation time.";
@@ -3268,18 +3271,18 @@ document.getElementById("main").addEventListener("click",function(event){
  const loadDraft=event.target.closest("[data-f34-load]");
  if(loadDraft){
   const journal=seerF34Read(SEER_F34_FORECAST_KEY,[]),item=journal.find(x=>x.id===loadDraft.dataset.f34Load);
-  if(item){seerF34Draft.marketKey=item.marketKey;seerF34Draft.outcomeIndex=item.outcomeIndex;seerF34Draft.belief=Number(item.userProbability);seerF34Draft.rationale=item.rationale;seerF34Draft.evidenceNote=item.evidenceNote||"";seerF34Feedback.forecast="Loaded as a draft. Saving will create a new forecast observation.";go("deep");}
+  if(item){seerF34Draft.marketKey=item.marketKey;seerF34Draft.chainId=parseMarketChainId(item.chainId);seerF34Draft.outcomeIndex=item.outcomeIndex;seerF34Draft.belief=Number(item.userProbability);seerF34Draft.rationale=item.rationale;seerF34Draft.evidenceNote=item.evidenceNote||"";seerF34Feedback.forecast="Loaded as a draft. Saving will create a new forecast observation.";go("deep");}
   return;
  }
  const saveReview=event.target.closest("[data-f34-decision-save]");
  if(saveReview){
-  const key=saveReview.dataset.f34DecisionSave,card=saveReview.closest(".seer-f34-review-card"),market=seerF34Records().find(m=>marketKey(m)===key);
+  const identity=saveReview.dataset.f34DecisionSave,card=saveReview.closest(".seer-f34-review-card"),records=seerF34Records(),market=records.find(m=>marketIdentity(m)===identity);
   if(!card||!market)return;
   const statusEl=card.querySelector("[data-f34-decision-status]"),noteEl=card.querySelector("[data-f34-decision-note]");
-  const status=String(statusEl&&statusEl.value||"Unreviewed"),note=String(noteEl&&noteEl.value||"").trim(),history=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]),triage=seerF34ScoreCandidate(market,history),saved=seerF34DecisionStore(),old=saved[key]||{};
+  const key=marketKey(market),status=String(statusEl&&statusEl.value||"Unreviewed"),note=String(noteEl&&noteEl.value||"").trim(),history=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]),triage=seerF34ScoreCandidate(market,history),saved=seerF34DecisionStore(),legacy=records.filter(m=>marketKey(m)===key).length===1?saved[key]||{}:{},old=saved[identity]||legacy;
   const now=new Date().toISOString(),ev=market.evidence||{};
-  const entry={status:status,note:note,updatedAt:now,marketKey:key,title:market.title,chain:market.chain||"Unknown network",marketUrl:seerMarketHref(market)||"https://app.seer.pm/",currentPrice:market.p??null,sourceObservedAt:ev.observation&&ev.observation.capturedAt||null,sourceRecordId:ev.source&&ev.source.recordId||market.fullId,score:triage.score,reasons:triage.reasons.map(x=>x),events:[...(old.events||[]),{at:now,status:status,note:note,score:triage.score,reasons:triage.reasons.map(x=>x),currentPrice:market.p??null,sourceObservedAt:ev.observation&&ev.observation.capturedAt||null}].slice(-20)};
-  saved[key]=entry;
+  const entry={status:status,note:note,updatedAt:now,marketKey:key,marketIdentity:identity,chainId:parseMarketChainId(market.chainId),title:market.title,chain:market.chain||"Unknown network",marketUrl:seerMarketHref(market)||"https://app.seer.pm/",currentPrice:market.p??null,sourceObservedAt:ev.observation&&ev.observation.capturedAt||null,sourceRecordId:ev.source&&ev.source.recordId||market.fullId,score:triage.score,reasons:triage.reasons.map(x=>x),events:[...(old.events||[]),{at:now,status:status,note:note,score:triage.score,reasons:triage.reasons.map(x=>x),currentPrice:market.p??null,sourceObservedAt:ev.observation&&ev.observation.capturedAt||null}].slice(-20)};
+  saved[identity]=entry;if(legacy&&Object.keys(legacy).length)delete saved[key];
   if(!seerF34Write(SEER_F34_DECISION_KEY,saved)){const feedback=card.querySelector("[data-f34-decision-feedback]");if(feedback)feedback.textContent="Browser storage is full; review was not saved.";return;}
   seerF34Feedback.decision="Review saved.";
   seerF34Mount();return;
@@ -3288,10 +3291,10 @@ document.getElementById("main").addEventListener("click",function(event){
  if(inspect){toggleMarketDetail(inspect.dataset.f34DecisionInspect,inspect.dataset.f34DecisionChainId);return;}
  const forecast=event.target.closest("[data-f34-decision-forecast]");
  if(forecast){
-  const market=seerF34Records().find(m=>marketKey(m)===forecast.dataset.f34DecisionForecast);
+  const market=seerF34Records().find(m=>marketIdentity(m)===forecast.dataset.f34DecisionForecast);
   if(market){
    const outcome=seerF34Outcomes(market).find(o=>o.p!==null);
-   if(outcome){seerF34Draft.marketKey=marketKey(market);seerF34Draft.outcomeIndex=outcome.index;seerF34Draft.belief=outcome.p;seerF34Draft.rationale="";seerF34Draft.evidenceNote="";seerF34Feedback.forecast="Selected from the Opportunity Decision Desk. Add a thesis before saving.";go("deep");}
+   if(outcome){seerF34Draft.marketKey=marketKey(market);seerF34Draft.chainId=parseMarketChainId(market.chainId);seerF34Draft.outcomeIndex=outcome.index;seerF34Draft.belief=outcome.p;seerF34Draft.rationale="";seerF34Draft.evidenceNote="";seerF34Feedback.forecast="Selected from the Opportunity Decision Desk. Add a thesis before saving.";go("deep");}
   }
   return;
  }
