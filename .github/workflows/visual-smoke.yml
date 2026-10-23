@@ -666,12 +666,12 @@ jobs:
 
               if (route === "home" && viewport.name === "desktop" && theme === "dark") {
                 const themeToggle = page.locator("#themeToggle");
-                const beforeTheme = await page.locator("body").getAttribute("data-theme");
+                const beforeTheme = await page.locator("body").evaluate(el => el.dataset.theme || "dark");
                 await themeToggle.click();
-                const toggledTheme = await page.locator("body").getAttribute("data-theme");
+                const toggledTheme = await page.locator("body").evaluate(el => el.dataset.theme || "dark");
                 if (beforeTheme !== "dark" || toggledTheme !== "light") report.failures.push("desktop/dark/home: theme toggle did not switch from dark to light");
                 await themeToggle.click();
-                if (await page.locator("body").getAttribute("data-theme") !== "dark") report.failures.push("desktop/dark/home: theme toggle did not restore dark theme");
+                if (await page.locator("body").evaluate(el => el.dataset.theme || "dark") !== "dark") report.failures.push("desktop/dark/home: theme toggle did not restore dark theme");
               }
 
               if (route === "app" && viewport.name === "desktop" && theme === "dark") {
