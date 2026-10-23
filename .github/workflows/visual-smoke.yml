@@ -985,7 +985,7 @@ jobs:
                   if (!openedFromTape) report.failures.push(`${viewport.name}/${theme}: clicking a homepage Market Tape item did not open that exact market in Explorer`);
                 }
               }
-              if (metrics.marketFeedStatus !== "live") report.warnings.push(`${viewport.name}/${theme}/${route}: live API status was ${metrics.marketFeedStatus}; check CORS/API availability`);
+              if (route !== "docs" && metrics.marketFeedStatus !== "live") report.warnings.push(`${viewport.name}/${theme}/${route}: live API status was ${metrics.marketFeedStatus}; check CORS/API availability`);
               }
             }
             await context.close();
