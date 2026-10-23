@@ -37,7 +37,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           const url = "https://pascaline06.github.io/Seer-six-interfaces/";
-          const marker = 'A guide to the signal, the evidence, and the limits.';
+          const marker = 'Seer Six Product Guide';
           for (let attempt = 1; attempt <= 18; attempt++) {
             try {
               const response = await fetch(url, { cache: "no-store" });
@@ -189,24 +189,56 @@ jobs:
                 };
               });
 
-              // Market Wire is hidden on home because the homepage uses the featured Market Tape instead.
+              // Price changes is intentionally absent until the browser observes a qualifying repricing.
+              // Exercise the populated state with a temporary in-memory fixture, then restore real history.
               if (route !== "home") {
-              // The movement log opens and closes, and its empty state must be honest on an unchanged source snapshot.
-              const historyToggle = page.locator('#marketWire button[data-wire-action="history"]');
-              if (await historyToggle.count() !== 1) {
-                report.failures.push(viewport.name+"/"+theme+"/"+route+": observed movement-log control is missing");
-              } else {
-                await historyToggle.click();
-                const historyPanelVisible = await page.locator("#marketWire .wire-ledger").count() === 1;
-                const historyExpanded = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
-                const historyHasState = await page.locator("#marketWire .wire-ledger").innerText().catch(() => "");
-                if (!historyPanelVisible || historyExpanded !== "true") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not open accessibly");
-                if (!historyHasState.includes("OBSERVED REPRICING") || (!historyHasState.includes("No repricing observed yet.") && !historyHasState.includes("pp"))) report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log has neither an honest empty state nor observed price changes");
-                await page.locator('#marketWire button[data-wire-action="history"]').click();
-                const historyClosed = await page.locator("#marketWire .wire-ledger").count() === 0;
-                const historyCollapsed = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
-                if (!historyClosed || historyCollapsed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not close");
-              }
+                const historySnapshot = await page.evaluate(() => ({
+                  history: wireState.history.slice(),
+                  toggleVisible: !!document.querySelector('#marketWire button[data-wire-action="history"]')
+                }));
+                const originalHistory = historySnapshot.history;
+                const initialToggleCount = await page.locator('#marketWire button[data-wire-action="history"]').count();
+                if ((originalHistory.length === 0 && initialToggleCount !== 0) || (originalHistory.length > 0 && initialToggleCount !== 1)) {
+                  report.failures.push(viewport.name+"/"+theme+"/"+route+": Price changes control visibility does not match observed history");
+                }
+                await page.evaluate(() => {
+                  wireState.history = [{
+                    key: "smoke-history-fixture",
+                    title: "Smoke-test market",
+                    chain: "Smoke fixture",
+                    fromP: 49.2,
+                    toP: 50.1,
+                    observedAt: new Date().toISOString()
+                  }];
+                  wireState.ledgerOpen = false;
+                  renderMarketWire();
+                });
+                const historyToggle = page.locator('#marketWire button[data-wire-action="history"]');
+                if (await historyToggle.count() !== 1) {
+                  report.failures.push(viewport.name+"/"+theme+"/"+route+": populated Price changes control is missing");
+                } else {
+                  await historyToggle.click();
+                  const historyPanelVisible = await page.locator("#marketWire .wire-ledger").count() === 1;
+                  const historyExpanded = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
+                  const historyText = await page.locator("#marketWire .wire-ledger").innerText().catch(() => "");
+                  if (!historyPanelVisible || historyExpanded !== "true") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not open accessibly");
+                  if (!historyText.includes("OBSERVED REPRICING") || !historyText.includes("49.2%") || !historyText.includes("50.1%") || !historyText.includes("pp")) report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not render the observed before/after price fixture");
+                  await page.locator('#marketWire button[data-wire-action="history"]').click();
+                  const historyClosed = await page.locator("#marketWire .wire-ledger").count() === 0;
+                  const historyCollapsed = await page.locator('#marketWire button[data-wire-action="history"]').getAttribute("aria-expanded");
+                  if (!historyClosed || historyCollapsed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": movement log did not close");
+                }
+                await page.evaluate((history) => {
+                  wireState.history = history;
+                  wireState.ledgerOpen = false;
+                  renderMarketWire();
+                }, originalHistory);
+                const restoredToggleCount = await page.locator('#marketWire button[data-wire-action="history"]').count();
+                if ((originalHistory.length === 0 && restoredToggleCount !== 0) || (originalHistory.length > 0 && restoredToggleCount !== 1)) {
+                  report.failures.push(viewport.name+"/"+theme+"/"+route+": restoring observed history did not restore the appropriate control state");
+                }
+                const restoredWireText = await page.locator("#marketWire").innerText();
+                if (/Price changes\s*\(0\)/.test(restoredWireText)) report.failures.push(viewport.name+"/"+theme+"/"+route+": empty price-change history control should not be shown");
               }
               // The homepage market tape must show real market records, move continuously, and respect reduced motion.
               if (route === "home") {
