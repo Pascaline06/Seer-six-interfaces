@@ -2530,7 +2530,7 @@ function seerEvidenceText(value){
  return "";
 }
 function seerResolutionField(raw){
- const candidates=["resolutionCriteria","resolutionRules","resolutionDescription","resolutionSource","resolution_source","rules","description","marketDescription","market_description","criteria","oracle","resolution"];
+ const candidates=["resolutionCriteria","resolutionRules","resolutionDescription","resolutionSource","resolution_source","rules","criteria","oracle","resolution"];
  for(const name of candidates){const value=raw&&raw[name];const text=seerEvidenceText(value);if(text)return {field:name,text:text};}
  return {field:"",text:""};
 }
@@ -2574,7 +2574,7 @@ function seerBuildEvidence(raw,details){
  };
 }
 function normalizeLiveMarket(m,observedAt){
- const at=observedAt||new Date().toISOString();
+ const at=typeof observedAt==="string"&&Number.isFinite(Date.parse(observedAt))?observedAt:new Date().toISOString();
  const odds=Array.isArray(m.odds)?m.odds:[];
  const first=odds.find(v=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v)));
  const probability=first===undefined?null:normalizeOutcomeProbability(first);
