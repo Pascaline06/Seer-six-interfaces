@@ -151,7 +151,6 @@ async function main() {
         resolutionCriteriaField: resolution.field, resolutionCriteria: resolution.text
       };
       const sourceFingerprint = createHash("sha256").update(JSON.stringify(fingerprintPayload)).digest("hex");
-      const rowCount = Math.max(outcomes.length, odds.length);
       for (let i = 0; i < rowCount; i++) {
         const p = normalizePrice(odds[i]);
         if (p === null) continue;
