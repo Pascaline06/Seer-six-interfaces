@@ -600,7 +600,7 @@ jobs:
                 if (!inspectCount) {
                   report.failures.push(viewport.name+"/"+theme+"/opportunity: market ledger rows have no Inspect action");
                 } else {
-                  const wantedTitle = (await ledgerInspect.locator("xpath=ancestor::tr").locator(".opportunity-market-title").innerText()).replace(/^\\s*0?\\d+\\s*/, "").trim();
+                  const wantedTitle = (await ledgerInspect.locator("xpath=ancestor::tr").locator(".opportunity-market-title strong").innerText()).trim();
                   await ledgerInspect.click();
                   const matchingInspector = await page.waitForFunction((wanted) => {
                     const detail = document.querySelector("#marketDetail");
