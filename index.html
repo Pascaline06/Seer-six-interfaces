@@ -1744,6 +1744,76 @@ body[data-theme="dark"] .docs-callout{background:#241e33;border-color:#57466c;co
 .market-trace-storage{margin:8px 0 0;color:var(--dim);font-size:10px;line-height:1.6}
 @media(max-width:640px){.evidence-facts{grid-template-columns:1fr 1fr}.evidence-fact:last-child{grid-column:1/-1}.market-evidence{padding:14px}.market-evidence-head{flex-direction:column}.market-trace-head{align-items:flex-start}.market-trace-head-tools{justify-content:flex-start}.evidence-ledger{min-width:440px}}
 
+
+/* Phase 3–4: explainable signal lab, user-owned forecast journal and review-triage desk. */
+.seer-f34-panel{margin:22px 0;padding:clamp(16px,2vw,24px);border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);box-shadow:0 12px 30px rgba(20,16,32,.04)}
+.seer-f34-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.seer-f34-kicker{font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--violet)}
+.seer-f34-head h2{margin:6px 0 5px;font-size:clamp(20px,2.2vw,26px);line-height:1.2;letter-spacing:-.035em}
+.seer-f34-head p,.seer-f34-copy{margin:0;color:var(--muted);font-size:12px;line-height:1.75;max-width:760px}
+.seer-f34-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel-raised);font-size:10px;font-weight:800;white-space:nowrap}
+.seer-f34-pill::before{content:"";display:block;width:6px;height:6px;border-radius:50%;background:var(--violet)}
+.seer-f34-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:14px}
+.seer-f34-inset{min-width:0;padding:15px;border:1px solid var(--line);border-radius:11px;background:var(--panel-raised)}
+.seer-f34-inset h3{font-size:14px;margin:0 0 5px}
+.seer-f34-label{display:block;margin:13px 0 6px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.seer-f34-select,.seer-f34-input,.seer-f34-textarea{width:100%;max-width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit;font-size:12px}
+.seer-f34-textarea{resize:vertical;min-height:84px;line-height:1.6}
+.seer-f34-range-row{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:11px;align-items:center}
+.seer-f34-range{width:100%;accent-color:var(--violet)}
+.seer-f34-value{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:18px;text-align:right}
+.seer-f34-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.seer-f34-stat{padding:11px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.seer-f34-stat span{display:block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.seer-f34-stat strong{display:block;font-size:17px;font-family:"JetBrains Mono",monospace;margin-top:5px;overflow-wrap:anywhere}
+.seer-f34-stat small{display:block;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.5}
+.seer-f34-signals{display:grid;gap:8px;margin-top:12px}
+.seer-f34-signal{display:grid;grid-template-columns:7px minmax(0,1fr);gap:9px;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.seer-f34-signal-dot{width:7px;height:7px;border-radius:50%;background:var(--violet);margin-top:4px}
+.seer-f34-signal.is-warning .seer-f34-signal-dot{background:var(--amber)}
+.seer-f34-signal.is-positive .seer-f34-signal-dot{background:var(--green)}
+.seer-f34-signal strong{display:block;font-size:11px}
+.seer-f34-signal p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.6}
+.seer-f34-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.seer-f34-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:35px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font-size:11px;font-weight:800;cursor:pointer;text-decoration:none}
+.seer-f34-button.primary{background:var(--violet);border-color:var(--violet);color:#fff}
+body[data-theme="dark"] .seer-f34-button.primary{color:#16121f}
+.seer-f34-button:hover{border-color:var(--violet)}
+.seer-f34-button:disabled{opacity:.45;cursor:not-allowed}
+.seer-f34-note{margin:11px 0 0;color:var(--muted);font-size:10px;line-height:1.65}
+.seer-f34-feedback{min-height:16px;margin:8px 0 0;color:var(--violet);font-size:11px;font-weight:700;line-height:1.5}
+.seer-f34-ledger{display:grid;gap:10px;margin-top:14px}
+.seer-f34-entry{padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--panel-raised);min-width:0}
+.seer-f34-entry-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.seer-f34-entry h4{font-size:12px;line-height:1.55;margin:0;overflow-wrap:anywhere}
+.seer-f34-entry p{font-size:11px;line-height:1.65;color:var(--muted);margin:7px 0 0;overflow-wrap:anywhere}
+.seer-f34-entry-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.seer-f34-chip{display:inline-flex;align-items:center;padding:4px 7px;border-radius:6px;border:1px solid var(--line);background:var(--panel);font-size:9px;font-weight:800;color:var(--muted)}
+.seer-f34-chip.good{color:var(--green)}.seer-f34-chip.warn{color:var(--amber)}.seer-f34-chip.edge{color:var(--violet)}
+.seer-f34-entry-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.seer-f34-resolution{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;margin-top:10px}
+.seer-f34-resolution .seer-f34-input{min-width:0;padding:8px;font-size:10px}
+.seer-f34-scoreband{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.seer-f34-status-select{width:100%;max-width:100%;min-height:35px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit;font-size:11px}
+.seer-f34-review-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--panel-raised);min-width:0}
+.seer-f34-review-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.seer-f34-review-rank{display:flex;align-items:center;gap:9px;min-width:0}
+.seer-f34-review-number{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:8px;background:var(--panel);border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:800}
+.seer-f34-review-top h3{font-size:13px;line-height:1.5;margin:0;overflow-wrap:anywhere}
+.seer-f34-review-top small{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+.seer-f34-score{flex:0 0 auto;min-width:57px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;text-align:center;background:var(--panel)}
+.seer-f34-score strong{display:block;font:800 16px "JetBrains Mono",monospace}
+.seer-f34-score small{font-size:8px;letter-spacing:.05em;text-transform:uppercase}
+.seer-f34-prioritybar{height:4px;border-radius:999px;background:var(--line);overflow:hidden;margin:11px 0}
+.seer-f34-prioritybar span{display:block;height:100%;border-radius:inherit;background:var(--violet)}
+.seer-f34-reasons{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}
+.seer-f34-reason{font-size:9px;font-weight:750;padding:5px 7px;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--muted)}
+.seer-f34-review-fields{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:8px;margin-top:10px}
+.seer-f34-review-fields textarea{min-height:62px}
+.seer-f34-review-saved{font-size:10px;line-height:1.5;color:var(--muted);margin:8px 0 0}
+@media(max-width:760px){.seer-f34-grid{grid-template-columns:minmax(0,1fr)}.seer-f34-head{flex-direction:column}.seer-f34-stats,.seer-f34-scoreband{grid-template-columns:repeat(3,minmax(0,1fr))}.seer-f34-resolution{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.seer-f34-resolution .seer-f34-input{grid-column:1/-1}.seer-f34-review-fields{grid-template-columns:minmax(0,1fr)}.seer-f34-review-top{gap:7px}.seer-f34-review-number{flex-basis:27px;width:27px;height:27px}}
+@media(max-width:420px){.seer-f34-panel{padding:12px}.seer-f34-inset{padding:11px}.seer-f34-stats,.seer-f34-scoreband{gap:5px}.seer-f34-stat{padding:8px}.seer-f34-stat strong{font-size:14px}.seer-f34-entry-head{flex-direction:column}.seer-f34-resolution{grid-template-columns:1fr 1fr}}
+
 </style>
 </head>
 <body data-theme="light">
@@ -2846,6 +2916,323 @@ document.getElementById("main").addEventListener("change",function(event){
 });
 seerInitializePriceHistory();
 seerLoadSharedArchive();
+</script>
+
+
+<script>
+/* Seer Six Phase 3 forecast journal and Phase 4 decision desk.
+   All personal forecasts and reviewer annotations stay in this browser. Signals are heuristics, not recommendations. */
+const SEER_F34_FORECAST_KEY="seer-six-forecast-journal-v1";
+const SEER_F34_DECISION_KEY="seer-six-decision-desk-v1";
+const seerF34Draft={marketKey:"",outcomeIndex:0,belief:50,rationale:"",evidenceNote:""};
+const seerF34Feedback={forecast:"",decision:""};
+let seerF34Sequence=0;
+
+function seerF34Read(key,fallback){
+ try{const value=JSON.parse(localStorage.getItem(key)||"null");return value===null?fallback:value;}catch{return fallback;}
+}
+function seerF34Write(key,value){
+ try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(error){return false;}
+}
+function seerF34Records(){
+ const pool=[...(Array.isArray(markets)?markets:[]),...(Array.isArray(explorerMarkets)?explorerMarkets:[]),...(Array.isArray(futarchyMarkets)?futarchyMarkets:[])];
+ const map=new Map();
+ for(const m of pool){
+  if(!m||!m.title||m.isLive!==true||!m.fullId)continue;
+  const key=marketKey(m),old=map.get(key);
+  if(!old||(!old.evidence&&m.evidence))map.set(key,m);
+ }
+ return [...map.values()];
+}
+function seerF34Outcomes(m){
+ if(!m)return [];
+ const source=Array.isArray(m.outcomePrices)?m.outcomePrices:[];
+ const mapped=source.map((row,i)=>{
+  const p=row&&row.p!==null&&row.p!==undefined&&row.p!==""&&Number.isFinite(Number(row.p))?Number(row.p):null;
+  return {index:Number.isInteger(row&&row.index)?row.index:i,name:String(row&&row.name||outcomeName((m.outcomes||[])[i]||("Outcome "+(i+1)))),p:p};
+ }).filter(row=>row.name);
+ if(mapped.length)return mapped;
+ if(m.p!==null&&m.p!==undefined&&Number.isFinite(Number(m.p)))return [{index:0,name:"Lead returned outcome",p:Number(m.p)}];
+ return [];
+}
+function seerF34ForecastRecords(){
+ return seerF34Records().filter(m=>{
+  const kind=String(m.evidence&&m.evidence.marketStructure&&m.evidence.marketStructure.kind||m.type||"").toLowerCase();
+  if(kind.includes("scalar"))return false;
+  return seerF34Outcomes(m).some(o=>o.p!==null&&o.p>=0&&o.p<=100);
+ }).sort((a,b)=>marketMoneyMetric(b,"liquidity")-marketMoneyMetric(a,"liquidity"));
+}
+function seerF34SelectedMarket(){
+ const records=seerF34ForecastRecords();
+ let selected=records.find(m=>marketKey(m)===seerF34Draft.marketKey);
+ if(!selected)selected=records[0]||null;
+ if(selected&&marketKey(selected)!==seerF34Draft.marketKey){
+  seerF34Draft.marketKey=marketKey(selected);
+  const first=seerF34Outcomes(selected).find(o=>o.p!==null)||seerF34Outcomes(selected)[0];
+  seerF34Draft.outcomeIndex=first?first.index:0;
+  seerF34Draft.belief=first&&first.p!==null?first.p:50;
+ }
+ return selected;
+}
+function seerF34SelectedOutcome(m){
+ const outcomes=seerF34Outcomes(m);
+ return outcomes.find(o=>o.index===Number(seerF34Draft.outcomeIndex))||outcomes.find(o=>o.p!==null)||outcomes[0]||null;
+}
+function seerF34EscapeURL(value){
+ const url=String(value||"").trim();
+ return /^https?:\/\/[^\s]+$/i.test(url)?url:"";
+}
+function seerF34LatestHistory(key,outcomeIndex){
+ const history=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]);
+ return history.filter(x=>x.key===key&&Number(x.outcomeIndex||0)===Number(outcomeIndex)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+}
+function seerF34Move(key,outcomeIndex){
+ const rows=seerF34LatestHistory(key,outcomeIndex);
+ if(rows.length<2)return null;
+ const first=rows[rows.length-2],last=rows[rows.length-1],delta=Number(last.p)-Number(first.p);
+ return {delta:delta,from:Number(first.p),to:Number(last.p),fromAt:first.observedAt,toAt:last.observedAt,source:last.source||"observed API response"};
+}
+function seerF34SourcePrice(m,outcome){
+ return outcome&&outcome.p!==null&&Number.isFinite(Number(outcome.p))?Number(outcome.p):null;
+}
+function seerF34Freshness(m){
+ const sourceTime=m&&m.evidence&&m.evidence.observation&&m.evidence.observation.capturedAt;
+ const all=[...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])].filter(x=>x.key===marketKey(m));
+ const historic=all.sort((a,b)=>Date.parse(b.observedAt)-Date.parse(a.observedAt))[0];
+ const at=historic&&Date.parse(historic.observedAt)>Date.parse(sourceTime||"")?historic.observedAt:sourceTime;
+ if(!at||!Number.isFinite(Date.parse(at)))return {ageMs:Infinity,label:"Observation time unavailable",at:null};
+ const ageMs=Math.max(0,Date.now()-Date.parse(at));
+ const label=ageMs<30*60000?"Observed within 30 min":ageMs<2*3600000?"Observed within 2 hours":ageMs<24*3600000?"Older than 2 hours":"Older than 24 hours";
+ return {ageMs:ageMs,label:label,at:at};
+}
+function seerF34SignalMarkup(m,outcome,belief){
+ if(!m)return '<div class="seer-f34-signal is-warning"><span class="seer-f34-signal-dot"></span><div><strong>No live source record selected</strong><p>Load a current Seer response before saving a forecast.</p></div></div>';
+ const price=seerF34SourcePrice(m,outcome),signals=[];
+ if(price!==null){
+  const edge=Number(belief)-price,abs=Math.abs(edge);
+  if(abs>=10)signals.push({kind:"is-warning",title:(edge>0?"Your estimate is materially above the source price":"Your estimate is materially below the source price"),copy:"Difference: "+(edge>0?"+":"")+edge.toFixed(1)+" percentage points. This is a comparison of two estimates, not evidence that either is correct."});
+  else if(abs>=5)signals.push({kind:"",title:"Review the estimate gap",copy:"Difference: "+(edge>0?"+":"")+edge.toFixed(1)+" percentage points. Write down the evidence that supports the disagreement."});
+  else signals.push({kind:"is-positive",title:"Your estimate is close to the returned price",copy:"Difference: "+(edge>0?"+":"")+edge.toFixed(1)+" percentage points. Similar prices do not establish forecast accuracy."});
+ }else{
+  signals.push({kind:"is-warning",title:"No comparable source price returned",copy:"The event-specific edge is not calculated until Seer returns a usable price for this outcome."});
+ }
+ const fields=m.evidence&&m.evidence.fields||{};
+ if(!m.evidence||!m.evidence.resolution||!m.evidence.resolution.criteria){
+  signals.push({kind:"is-warning",title:"Resolution criteria are not in this response",copy:"Review the original market rules before treating this as a resolvable forecast; the interface will not invent settlement criteria."});
+ }
+ if((fields.volumeUSD&&fields.volumeUSD.status!=="reported")||m.volumeUSD===null||m.volumeUSD===undefined){
+  signals.push({kind:"is-warning",title:"Reported volume unavailable",copy:"No volume amount is inferred from price movement. The returned response does not support a volume-based conclusion."});
+ }
+ if((fields.liquidityUSD&&fields.liquidityUSD.status!=="reported")||m.liquidityUSD===null||m.liquidityUSD===undefined){
+  signals.push({kind:"is-warning",title:"Reported liquidity unavailable",copy:"The depth context is incomplete; a displayed price is not a guarantee of executable size."});
+ }
+ const freshness=seerF34Freshness(m);
+ if(freshness.ageMs>2*3600000)signals.push({kind:"is-warning",title:"Observation needs refreshing",copy:"Latest known observation: "+freshness.label.toLowerCase()+". Capture time is not the same as an upstream trade timestamp."});
+ const move=outcome?seerF34Move(marketKey(m),outcome.index):null;
+ if(move&&Math.abs(move.delta)>=2)signals.push({kind:"",title:"Observed repricing in captured snapshots",copy:"The selected outcome moved "+(move.delta>0?"+":"")+move.delta.toFixed(1)+" pp from "+move.from.toFixed(1)+"% to "+move.to.toFixed(1)+"%. This records a price difference; it does not explain why the market moved."});
+ return signals.map(signal=>'<div class="seer-f34-signal '+signal.kind+'"><span class="seer-f34-signal-dot"></span><div><strong>'+htmlEscape(signal.title)+'</strong><p>'+htmlEscape(signal.copy)+'</p></div></div>').join("");
+}
+function seerF34ForecastJournalMarkup(){
+ const items=seerF34Read(SEER_F34_FORECAST_KEY,[]);
+ const resolved=items.filter(x=>x.status==="resolved"&&(x.result===0||x.result===1));
+ const open=items.filter(x=>x.status!=="resolved");
+ const score=resolved.length?resolved.reduce((sum,x)=>sum+Math.pow(Number(x.userProbability)/100-Number(x.result),2),0)/resolved.length:null;
+ const sorted=[...items].sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).slice(0,10);
+ const cards=sorted.map(item=>{
+  const price=item.sourceProbability===null||item.sourceProbability===undefined?"Not returned":Number(item.sourceProbability).toFixed(1)+"%";
+  const edge=item.sourceProbability===null||item.sourceProbability===undefined?null:Number(item.userProbability)-Number(item.sourceProbability);
+  const edgeLabel=edge===null?"No comparable price":(edge>0?"+":"")+edge.toFixed(1)+" pp";
+  const edgeClass=edge===null?"":Math.abs(edge)>=10?"warn":"edge";
+  const resolvedStatus=item.status==="resolved"?'Resolved · user-attested':'Open forecast';
+  const resolution=item.status==="resolved"?'<p>Resolution recorded '+htmlEscape(new Date(item.resolvedAt).toLocaleString())+' · result: '+(Number(item.result)===1?'selected outcome occurred':'selected outcome did not occur')+' · <a target="_blank" rel="noopener noreferrer" href="'+htmlEscape(item.resolutionUrl)+'">reviewed source ↗</a></p>':'<div class="seer-f34-resolution"><input class="seer-f34-input" type="url" placeholder="Resolution evidence URL (required)" data-f34-resolution-url="'+htmlEscape(item.id)+'" aria-label="Resolution evidence URL for '+htmlEscape(item.outcomeName)+'"><button class="seer-f34-button" type="button" data-f34-resolve="1" data-f34-id="'+htmlEscape(item.id)+'">Outcome occurred</button><button class="seer-f34-button" type="button" data-f34-resolve="0" data-f34-id="'+htmlEscape(item.id)+'">Did not occur</button></div>';
+  return '<article class="seer-f34-entry"><div class="seer-f34-entry-head"><div><h4>'+htmlEscape(item.title)+'</h4><p>Event: '+htmlEscape(item.outcomeName)+' · '+htmlEscape(item.chain||"Network not returned")+'</p></div><span class="seer-f34-chip '+(item.status==="resolved"?"good":"")+'">'+resolvedStatus+'</span></div><div class="seer-f34-entry-meta"><span class="seer-f34-chip">Source '+htmlEscape(price)+'</span><span class="seer-f34-chip">Your forecast '+Number(item.userProbability).toFixed(1)+'%</span><span class="seer-f34-chip '+edgeClass+'">Gap '+htmlEscape(edgeLabel)+'</span><span class="seer-f34-chip">'+htmlEscape(new Date(item.createdAt).toLocaleString())+'</span></div><p><strong>Thesis:</strong> '+htmlEscape(item.rationale)+'</p>'+(item.evidenceNote?'<p><strong>Evidence note:</strong> '+htmlEscape(item.evidenceNote)+'</p>':'')+'<p>Source observed '+htmlEscape(item.sourceObservedAt?new Date(item.sourceObservedAt).toLocaleString():"time not returned")+' · <a target="_blank" rel="noopener noreferrer" href="'+htmlEscape(item.marketUrl||"https://app.seer.pm/")+'">open market ↗</a></p>'+resolution+'<div class="seer-f34-entry-actions"><button class="seer-f34-button" type="button" data-f34-load="'+htmlEscape(item.id)+'">Use as draft</button></div></article>';
+ }).join("");
+ return '<div class="seer-f34-scoreband"><div class="seer-f34-stat"><span>Open forecasts</span><strong>'+open.length+'</strong><small>Unresolved entries in this browser</small></div><div class="seer-f34-stat"><span>Resolved</span><strong>'+resolved.length+'</strong><small>Resolution supplied by user</small></div><div class="seer-f34-stat"><span>Mean binary Brier</span><strong>'+(score===null?"—":score.toFixed(3))+'</strong><small>Lower is better · user-attested outcomes only</small></div></div><div class="seer-f34-note">Brier score = (forecast probability − observed binary outcome)², averaged over manually resolved entries. No score is shown until a tracked outcome is resolved with a source URL. Resolutions are not independently verified.</div><div class="seer-f34-ledger">'+(cards||'<div class="notice">No forecasts saved yet. Create a forecast above to start a private, auditable journal in this browser.</div>')+'</div>';
+}
+function seerF34RenderForecastPanel(){
+ const records=seerF34ForecastRecords(),m=seerF34SelectedMarket(),outcomes=seerF34Outcomes(m),selected=seerF34SelectedOutcome(m);
+ const price=seerF34SourcePrice(m,selected),belief=Math.max(0,Math.min(100,Number(seerF34Draft.belief)||0));
+ const edge=price===null?null:belief-price;
+ const marketOptions=records.map(row=>'<option value="'+htmlEscape(marketKey(row))+'" '+(m&&marketKey(row)===marketKey(m)?"selected":"")+'>'+htmlEscape(row.title)+' · '+htmlEscape(row.chain||"Chain not returned")+'</option>').join("");
+ const outcomeOptions=outcomes.map(row=>'<option value="'+row.index+'" '+(selected&&row.index===selected.index?"selected":"")+'>'+htmlEscape(row.name)+(row.p===null?" · price not returned":" · "+Number(row.p).toFixed(1)+"%")+'</option>').join("");
+ const signal=seerF34SignalMarkup(m,selected,belief);
+ const detail=m?'<div class="seer-f34-stats"><div class="seer-f34-stat"><span>Source price</span><strong>'+(price===null?"—":price.toFixed(1)+"%")+'</strong><small>Returned event price</small></div><div class="seer-f34-stat"><span>Your forecast</span><strong>'+belief.toFixed(1)+'%</strong><small>Personal probability estimate</small></div><div class="seer-f34-stat"><span>Difference</span><strong>'+(edge===null?"—":(edge>0?"+":"")+edge.toFixed(1)+" pp")+'</strong><small>Estimate minus source price</small></div></div><p class="seer-f34-note">Source observation: '+htmlEscape(seerF34Freshness(m).at?new Date(seerF34Freshness(m).at).toLocaleString():"time not returned")+'. This compares your probability with the price returned for the selected outcome. It is not a recommendation or a claim that the market is mispriced.</p>':'<div class="notice">No live, probability-bearing outcome is available yet. Refresh the Market Explorer to load source records. Scalar records are excluded from the probability journal unless represented as discrete outcome probabilities.</div>';
+ return '<section class="seer-f34-panel" id="seerForecastLab" aria-labelledby="seerForecastTitle"><div class="seer-f34-head"><div><div class="seer-f34-kicker">PHASE 03 / SIGNAL &amp; FORECAST LAB</div><h2 id="seerForecastTitle">Turn a market quote into a testable thesis.</h2><p>Record what you believe, why you believe it, and what Seer actually returned at the time. Explanations remain tied to observed fields and rule-based alerts—not invented causes.</p></div><span class="seer-f34-pill">Explainable · private journal</span></div><div class="seer-f34-grid"><div class="seer-f34-inset"><h3>Forecast capture</h3><p class="seer-f34-copy">Save an event-specific probability against a source snapshot. A saved row is an immutable forecast observation; a later revision becomes a new entry.</p>'+(records.length?'<label class="seer-f34-label" for="seerF34Market">Market record</label><select class="seer-f34-select" id="seerF34Market" data-f34-market>'+marketOptions+'</select><label class="seer-f34-label" for="seerF34Outcome">Outcome / event</label><select class="seer-f34-select" id="seerF34Outcome" data-f34-outcome>'+outcomeOptions+'</select><label class="seer-f34-label" for="seerF34Belief">Your probability estimate</label><div class="seer-f34-range-row"><input class="seer-f34-range" id="seerF34Belief" data-f34-belief type="range" min="0" max="100" step="1" value="'+belief+'"><output class="seer-f34-value" id="seerF34BeliefValue">'+belief.toFixed(0)+'%</output></div><label class="seer-f34-label" for="seerF34Rationale">Why do you believe this?</label><textarea class="seer-f34-textarea" id="seerF34Rationale" data-f34-rationale placeholder="State the evidence, mechanism, dependencies, or uncertainty that moves your estimate.">'+htmlEscape(seerF34Draft.rationale)+'</textarea><label class="seer-f34-label" for="seerF34Evidence">Evidence note / reference (optional)</label><input class="seer-f34-input" id="seerF34Evidence" data-f34-evidence type="text" placeholder="Source, claim, document, or key assumption" value="'+htmlEscape(seerF34Draft.evidenceNote)+'"><div class="seer-f34-actions"><button class="seer-f34-button primary" type="button" data-f34-save-forecast '+(!m||!selected||price===null?'disabled':'')+'>Save forecast snapshot</button>'+(m&&seerMarketHref(m)?'<a class="seer-f34-button" href="'+htmlEscape(seerMarketHref(m))+'" target="_blank" rel="noopener noreferrer">Open Seer source ↗</a>':'')+'</div><p class="seer-f34-feedback" role="status" id="seerF34ForecastFeedback">'+htmlEscape(seerF34Feedback.forecast)+'</p>':'<div class="notice">No eligible live records.</div>')+'</div><div class="seer-f34-inset"><h3>Explainable signals</h3><p class="seer-f34-copy">Each trigger states the returned field or explicit comparison behind it. Missing values stay missing.</p><div class="seer-f34-signals" id="seerF34Signals">'+signal+'</div><p class="seer-f34-note">Thresholds: a 5 pp difference prompts review; a 10 pp difference is marked material. Those are product heuristics, not calibrated warning levels. Prices may be stale or thinly traded.</p></div></div><div class="seer-f34-inset" style="margin-top:14px"><div class="seer-f34-head" style="margin-bottom:8px"><div><div class="seer-f34-kicker">FORECAST JOURNAL</div><h3>What was believed, and when?</h3><p>Saved forecasts keep the source record, price, personal estimate, thesis and capture timestamp for later review.</p></div><span class="seer-f34-pill">Local to this browser</span></div><div id="seerF34Journal">'+seerF34ForecastJournalMarkup()+'</div></div><p class="seer-f34-note">The journal and notes are stored on this device. No forecast is submitted to Seer, and the interface does not execute trades.</p></section>';
+}
+function seerF34ScoreCandidate(m,history){
+ const key=marketKey(m);
+ const rows=history.filter(x=>x.key===key).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+ const perOutcome=new Map();
+ for(const row of rows){const series=Number(row.outcomeIndex||0);if(!perOutcome.has(series))perOutcome.set(series,[]);perOutcome.get(series).push(row);}
+ let move=null;
+ for(const series of perOutcome.values()){
+  if(series.length<2)continue;
+  const a=series[series.length-2],b=series[series.length-1],delta=Number(b.p)-Number(a.p);
+  if(!move||Math.abs(delta)>Math.abs(move.delta))move={delta:delta,from:Number(a.p),to:Number(b.p),outcomeName:b.outcomeName,observedAt:b.observedAt};
+ }
+ const evidence=m.evidence||{},fields=evidence.fields||{},criteria=!!(evidence.resolution&&evidence.resolution.criteria);
+ const missing=[];
+ if(!criteria)missing.push("Resolution criteria not returned");
+ if(!(fields.volumeUSD&&fields.volumeUSD.status==="reported")&&(m.volumeUSD===null||m.volumeUSD===undefined||!Number.isFinite(Number(m.volumeUSD))))missing.push("Volume not reported");
+ if(!(fields.liquidityUSD&&fields.liquidityUSD.status==="reported")&&(m.liquidityUSD===null||m.liquidityUSD===undefined||!Number.isFinite(Number(m.liquidityUSD))))missing.push("Liquidity not reported");
+ if(fields.verification&&fields.verification.status!=="reported")missing.push("Verification field absent");
+ const movementPoints=move?Math.min(40,Math.abs(move.delta)*4):0;
+ const uncertaintyPoints=Math.min(25,(missing.includes("Resolution criteria not returned")?10:0)+(missing.includes("Volume not reported")?5:0)+(missing.includes("Liquidity not reported")?5:0)+(missing.includes("Verification field absent")?5:0));
+ const outs=seerF34Outcomes(m),isComplex=outs.length>2||/categorical|scalar|futarchy/.test(String(evidence.marketStructure&&evidence.marketStructure.kind||m.type||"").toLowerCase());
+ const structurePoints=isComplex?Math.min(15,5+Math.max(0,outs.length-2)*2.5):0;
+ const fresh=seerF34Freshness(m),agePoints=fresh.ageMs<=30*60000?0:fresh.ageMs<=2*3600000?5:fresh.ageMs<=24*3600000?10:20;
+ const score=Math.max(0,Math.min(100,Math.round(movementPoints+uncertaintyPoints+structurePoints+agePoints)));
+ const reasons=[];
+ if(move&&Math.abs(move.delta)>=1)reasons.push("Observed move "+(move.delta>0?"+":"")+move.delta.toFixed(1)+" pp · "+htmlEscape(move.outcomeName||"outcome"));
+ for(const item of missing)reasons.push(item);
+ if(isComplex)reasons.push("Outcome structure needs a careful read ("+outs.length+" returned prices)");
+ if(agePoints>=5)reasons.push("Refresh gap: "+fresh.label.toLowerCase());
+ if(!reasons.length)reasons.push("No elevated trigger from the available fields");
+ const level=score>=65?"High review priority":score>=35?"Review suggested":"Routine review";
+ return {score:score,level:level,reasons:reasons,move:move,missing:missing,structurePoints:structurePoints,agePoints:agePoints,observedAt:fresh.at,price:m.p};
+}
+function seerF34DecisionStore(){const value=seerF34Read(SEER_F34_DECISION_KEY,{});return value&&typeof value==="object"&&!Array.isArray(value)?value:{};}
+function seerF34DecisionDeskMarkup(){
+ const records=seerF34Records(),history=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]),decisions=seerF34DecisionStore();
+ const candidates=records.map(m=>({m:m,triage:seerF34ScoreCandidate(m,history)})).sort((a,b)=>b.triage.score-a.triage.score||marketActivityScore(b.m,records)-marketActivityScore(a.m,records)).slice(0,8);
+ const reviews=Object.values(decisions),reviewed=reviews.filter(x=>x&&x.updatedAt).length;
+ const cards=candidates.map((row,i)=>{
+  const m=row.m,t=row.triage,key=marketKey(m),saved=decisions[key]||{},score=t.score;
+  const reasons=t.reasons.slice(0,5).map(reason=>'<span class="seer-f34-reason">'+htmlEscape(reason)+'</span>').join("");
+  const opts=["Unreviewed","Investigate","Monitor","Reviewed","Dismissed"].map(v=>'<option value="'+v+'" '+(String(saved.status||"Unreviewed")===v?"selected":"")+'>'+v+'</option>').join("");
+  const last=saved.updatedAt?'Last review '+htmlEscape(new Date(saved.updatedAt).toLocaleString())+' · '+htmlEscape(String((saved.events||[]).length))+' logged action(s)':'No reviewer action recorded yet';
+  const href=seerMarketHref(m);
+  return '<article class="seer-f34-review-card"><div class="seer-f34-review-top"><div class="seer-f34-review-rank"><span class="seer-f34-review-number">'+String(i+1).padStart(2,"0")+'</span><div><h3>'+htmlEscape(m.title)+'</h3><small>'+htmlEscape(m.chain||"Network not returned")+' · '+htmlEscape(m.type||"Market")+' · Price '+(m.p===null||m.p===undefined?"—":Number(m.p).toFixed(1)+"%")+'</small></div></div><div class="seer-f34-score"><strong>'+score+'</strong><small>/100</small></div></div><div class="seer-f34-prioritybar"><span style="width:'+score+'%"></span></div><div class="seer-f34-review-top"><span class="seer-f34-chip '+(score>=65?"warn":score>=35?"edge":"good")+'">'+t.level+'</span><span class="seer-f34-chip">Transparent review heuristic</span></div><div class="seer-f34-reasons">'+reasons+'</div><p class="seer-f34-copy">Score components: move '+Math.round(t.move?Math.min(40,Math.abs(t.move.delta)*4):0)+'/40 · evidence gaps '+Math.round(Math.min(25,(t.missing.includes("Resolution criteria not returned")?10:0)+(t.missing.includes("Volume not reported")?5:0)+(t.missing.includes("Liquidity not reported")?5:0)+(t.missing.includes("Verification field absent")?5:0)))+'/25 · structure '+Math.round(t.structurePoints)+'/15 · refresh gap '+t.agePoints+'/20. Higher means investigate the record sooner; it is not a prediction of event outcome or a merit score.</p><div class="seer-f34-review-fields"><div><label class="seer-f34-label" for="seerF34Status-'+htmlEscape(key)+'">Reviewer status</label><select class="seer-f34-status-select" id="seerF34Status-'+htmlEscape(key)+'" data-f34-decision-status="'+htmlEscape(key)+'">'+opts+'</select><p class="seer-f34-review-saved">'+last+'</p></div><div><label class="seer-f34-label" for="seerF34Note-'+htmlEscape(key)+'">Reviewer rationale / next action</label><textarea class="seer-f34-textarea" id="seerF34Note-'+htmlEscape(key)+'" data-f34-decision-note="'+htmlEscape(key)+'" placeholder="Record why this deserves attention, what evidence to fetch, or why it can wait.">'+htmlEscape(saved.note||"")+'</textarea></div></div><div class="seer-f34-actions"><button class="seer-f34-button primary" type="button" data-f34-decision-save="'+htmlEscape(key)+'">Save review</button><button class="seer-f34-button" type="button" data-f34-decision-inspect="'+htmlEscape(key)+'">Inspect source</button><button class="seer-f34-button" type="button" data-f34-decision-forecast="'+htmlEscape(key)+'">Build forecast</button>'+(href?'<a class="seer-f34-button" target="_blank" rel="noopener noreferrer" href="'+htmlEscape(href)+'">Open Seer ↗</a>':"")+'</div><p class="seer-f34-feedback" role="status" data-f34-decision-feedback="'+htmlEscape(key)+'"></p></article>';
+ }).join("");
+ return '<section class="seer-f34-panel" id="seerDecisionDesk" aria-labelledby="seerDecisionTitle"><div class="seer-f34-head"><div><div class="seer-f34-kicker">PHASE 04 / OPPORTUNITY DECISION DESK</div><h2 id="seerDecisionTitle">Make the next review defensible.</h2><p>Rank market records by explicit reasons to inspect them—not by a hidden recommendation. The score is intentionally separate from the existing activity index and never ranks people, applicants or grants.</p></div><span class="seer-f34-pill">'+candidates.length+' source records</span></div><div class="seer-f34-scoreband"><div class="seer-f34-stat"><span>Records triaged</span><strong>'+candidates.length+'</strong><small>Deduplicated live source records</small></div><div class="seer-f34-stat"><span>Review entries</span><strong>'+reviewed+'</strong><small>Markets with a saved reviewer action</small></div><div class="seer-f34-stat"><span>Formula</span><strong>4 parts</strong><small>Move · gaps · structure · stale data</small></div></div><p class="seer-f34-copy">Priority = observed move (0–40) + missing source fields (0–25) + outcome complexity (0–15) + refresh gap (0–20). Scores describe review urgency only. Missing fields increase scrutiny; they are never replaced by assumed values.</p><div class="seer-f34-ledger">'+(cards||'<div class="notice">No live market records are available. The desk does not rank demo fallback records as source evidence.</div>')+'</div><p class="seer-f34-note">Reviewer statuses, notes and action history are stored locally in this browser. Each save records the current score, its reasons, source record, observation time and note; clearing browser storage removes this private review trail.</p></section>';
+}
+function seerF34SyncDraft(){
+ const marketSelect=document.getElementById("seerF34Market"),outcomeSelect=document.getElementById("seerF34Outcome"),belief=document.getElementById("seerF34Belief"),rationale=document.getElementById("seerF34Rationale"),evidence=document.getElementById("seerF34Evidence");
+ if(marketSelect)seerF34Draft.marketKey=marketSelect.value;
+ if(outcomeSelect)seerF34Draft.outcomeIndex=Number(outcomeSelect.value)||0;
+ if(belief)seerF34Draft.belief=Number(belief.value);
+ if(rationale)seerF34Draft.rationale=rationale.value;
+ if(evidence)seerF34Draft.evidenceNote=evidence.value;
+}
+function seerF34UpdateForecastSummary(){
+ const m=seerF34SelectedMarket(),outcome=seerF34SelectedOutcome(m),beliefEl=document.getElementById("seerF34Belief"),valueEl=document.getElementById("seerF34BeliefValue"),signals=document.getElementById("seerF34Signals"),stats=document.querySelector("#seerForecastLab .seer-f34-stats");
+ seerF34Draft.belief=beliefEl?Number(beliefEl.value):seerF34Draft.belief;
+ if(valueEl)valueEl.textContent=Number(seerF34Draft.belief).toFixed(0)+"%";
+ if(signals)signals.innerHTML=seerF34SignalMarkup(m,outcome,Number(seerF34Draft.belief));
+ const price=seerF34SourcePrice(m,outcome),edge=price===null?null:Number(seerF34Draft.belief)-price;
+ if(stats){const strong=stats.querySelectorAll("strong");if(strong.length>=3){strong[0].textContent=price===null?"—":price.toFixed(1)+"%";strong[1].textContent=Number(seerF34Draft.belief).toFixed(1)+"%";strong[2].textContent=edge===null?"—":(edge>0?"+":"")+edge.toFixed(1)+" pp";}}
+}
+function seerF34Mount(){
+ const main=document.getElementById("main");if(!main)return;
+ if(state.page==="deep"){
+  const old=document.getElementById("seerForecastLab");
+  const markup=seerF34RenderForecastPanel();
+  if(old)old.outerHTML=markup;else main.insertAdjacentHTML("beforeend",markup);
+ }else{
+  const old=document.getElementById("seerForecastLab");if(old)old.remove();
+ }
+ if(state.page==="opportunity"){
+  const old=document.getElementById("seerDecisionDesk");
+  const markup=seerF34DecisionDeskMarkup();
+  if(old)old.outerHTML=markup;
+  else {const anchor=main.querySelector("#opportunityLab");if(anchor)anchor.insertAdjacentHTML("beforebegin",markup);else main.insertAdjacentHTML("beforeend",markup);}
+ }else{
+  const old=document.getElementById("seerDecisionDesk");if(old)old.remove();
+ }
+}
+const seerF34BaseRender=render;
+render=function(){
+ const result=seerF34BaseRender.apply(this,arguments);
+ try{seerF34Mount();}catch(error){console.error("Seer Six forecast/review panels could not mount:",error);}
+ return result;
+};
+document.getElementById("main").addEventListener("input",function(event){
+ const range=event.target.closest("[data-f34-belief]");
+ if(range){seerF34Draft.belief=Number(range.value);seerF34UpdateForecastSummary();}
+ const rationale=event.target.closest("[data-f34-rationale]");
+ if(rationale)seerF34Draft.rationale=rationale.value;
+ const evidence=event.target.closest("[data-f34-evidence]");
+ if(evidence)seerF34Draft.evidenceNote=evidence.value;
+ const decisionNote=event.target.closest("[data-f34-decision-note]");
+ if(decisionNote)decisionNote.dataset.draftValue=decisionNote.value;
+});
+document.getElementById("main").addEventListener("change",function(event){
+ const marketSelect=event.target.closest("[data-f34-market]");
+ const outcomeSelect=event.target.closest("[data-f34-outcome]");
+ if(marketSelect){
+  seerF34SyncDraft();seerF34Draft.marketKey=marketSelect.value;
+  const m=seerF34ForecastRecords().find(x=>marketKey(x)===marketSelect.value);
+  const first=m&&seerF34Outcomes(m).find(o=>o.p!==null);
+  seerF34Draft.outcomeIndex=first?first.index:0;seerF34Draft.belief=first&&first.p!==null?first.p:50;
+  seerF34Mount();
+ }else if(outcomeSelect){
+  seerF34SyncDraft();
+  const m=seerF34SelectedMarket(),selected=seerF34Outcomes(m).find(o=>o.index===Number(outcomeSelect.value));
+  seerF34Draft.outcomeIndex=selected?selected.index:0;
+  if(selected&&selected.p!==null)seerF34Draft.belief=selected.p;
+  seerF34Mount();
+ }
+});
+document.getElementById("main").addEventListener("click",function(event){
+ const saveForecast=event.target.closest("[data-f34-save-forecast]");
+ if(saveForecast){
+  seerF34SyncDraft();
+  const m=seerF34SelectedMarket(),outcome=seerF34SelectedOutcome(m),sourcePrice=seerF34SourcePrice(m,outcome);
+  if(!m||!outcome||sourcePrice===null){seerF34Feedback.forecast="A current source price is required before saving.";seerF34Mount();return;}
+  const rationale=String(seerF34Draft.rationale||"").trim();
+  if(rationale.length<12){seerF34Feedback.forecast="Add a thesis of at least 12 characters so the forecast can be audited later.";const fb=document.getElementById("seerF34ForecastFeedback");if(fb)fb.textContent=seerF34Feedback.forecast;return;}
+  const now=new Date().toISOString(),ev=m.evidence||{};
+  const item={id:"f34-"+Date.now()+"-"+(++seerF34Sequence),status:"open",marketKey:marketKey(m),title:m.title,chain:m.chain||"Unknown network",chainId:m.chainId||null,marketUrl:seerMarketHref(m)||"https://app.seer.pm/",outcomeIndex:outcome.index,outcomeName:outcome.name,sourceProbability:sourcePrice,userProbability:Number(seerF34Draft.belief),edge:Number(seerF34Draft.belief)-sourcePrice,rationale:rationale,evidenceNote:String(seerF34Draft.evidenceNote||"").trim(),sourceObservedAt:ev.observation&&ev.observation.capturedAt||null,sourceEndpoint:ev.source&&ev.source.endpoint||SEER_EVIDENCE_ENDPOINT,sourceRecordId:ev.source&&ev.source.recordId||m.fullId,sourceMode:ev.source&&ev.source.mode||"live source record",createdAt:now,result:null,resolvedAt:null,resolutionUrl:null};
+  const journal=seerF34Read(SEER_F34_FORECAST_KEY,[]);journal.unshift(item);
+  if(!seerF34Write(SEER_F34_FORECAST_KEY,journal.slice(0,300))){seerF34Feedback.forecast="Browser storage is full; forecast was not saved.";const fb=document.getElementById("seerF34ForecastFeedback");if(fb)fb.textContent=seerF34Feedback.forecast;return;}
+  seerF34Feedback.forecast="Forecast snapshot saved with its source price and observation time.";
+  seerF34Draft.rationale="";seerF34Draft.evidenceNote="";
+  seerF34Mount();return;
+ }
+ const resolve=event.target.closest("[data-f34-resolve]");
+ if(resolve){
+  const id=resolve.dataset.f34Id,journal=seerF34Read(SEER_F34_FORECAST_KEY,[]);
+  const item=journal.find(x=>x.id===id);if(!item||item.status==="resolved")return;
+  const input=document.querySelector('[data-f34-resolution-url="'+CSS.escape(id)+'"]');
+  const sourceURL=seerF34EscapeURL(input&&input.value);
+  if(!sourceURL){const parent=resolve.closest(".seer-f34-entry");const note=parent&&parent.querySelector(".seer-f34-feedback");if(note)note.textContent="Enter an HTTP(S) resolution evidence URL before recording an outcome.";return;}
+  item.status="resolved";item.result=Number(resolve.dataset.f34Resolve)===1?1:0;item.resolvedAt=new Date().toISOString();item.resolutionUrl=sourceURL;item.resolutionAttribution="User supplied; not independently verified";
+  if(!seerF34Write(SEER_F34_FORECAST_KEY,journal)){const parent=resolve.closest(".seer-f34-entry");const note=parent&&parent.querySelector(".seer-f34-feedback");if(note)note.textContent="Could not save the resolution; browser storage may be full.";return;}
+  seerF34Feedback.forecast="Resolution stored with its supplied source URL; scores are user-attested.";
+  seerF34Mount();return;
+ }
+ const loadDraft=event.target.closest("[data-f34-load]");
+ if(loadDraft){
+  const journal=seerF34Read(SEER_F34_FORECAST_KEY,[]),item=journal.find(x=>x.id===loadDraft.dataset.f34Load);
+  if(item){seerF34Draft.marketKey=item.marketKey;seerF34Draft.outcomeIndex=item.outcomeIndex;seerF34Draft.belief=Number(item.userProbability);seerF34Draft.rationale=item.rationale;seerF34Draft.evidenceNote=item.evidenceNote||"";seerF34Feedback.forecast="Loaded as a draft. Saving will create a new forecast observation.";go("deep");}
+  return;
+ }
+ const saveReview=event.target.closest("[data-f34-decision-save]");
+ if(saveReview){
+  const key=saveReview.dataset.f34DecisionSave,card=saveReview.closest(".seer-f34-review-card"),market=seerF34Records().find(m=>marketKey(m)===key);
+  if(!card||!market)return;
+  const statusEl=card.querySelector("[data-f34-decision-status]"),noteEl=card.querySelector("[data-f34-decision-note]");
+  const status=String(statusEl&&statusEl.value||"Unreviewed"),note=String(noteEl&&noteEl.value||"").trim(),history=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]),triage=seerF34ScoreCandidate(market,history),saved=seerF34DecisionStore(),old=saved[key]||{};
+  const now=new Date().toISOString(),ev=market.evidence||{};
+  const entry={status:status,note:note,updatedAt:now,marketKey:key,title:market.title,chain:market.chain||"Unknown network",marketUrl:seerMarketHref(market)||"https://app.seer.pm/",currentPrice:market.p??null,sourceObservedAt:ev.observation&&ev.observation.capturedAt||null,sourceRecordId:ev.source&&ev.source.recordId||market.fullId,score:triage.score,reasons:triage.reasons.map(x=>x),events:[...(old.events||[]),{at:now,status:status,note:note,score:triage.score,reasons:triage.reasons.map(x=>x),currentPrice:market.p??null,sourceObservedAt:ev.observation&&ev.observation.capturedAt||null}].slice(-20)};
+  saved[key]=entry;
+  if(!seerF34Write(SEER_F34_DECISION_KEY,saved)){const feedback=card.querySelector("[data-f34-decision-feedback]");if(feedback)feedback.textContent="Browser storage is full; review was not saved.";return;}
+  seerF34Feedback.decision="Review saved.";
+  seerF34Mount();return;
+ }
+ const inspect=event.target.closest("[data-f34-decision-inspect]");
+ if(inspect){toggleMarketDetail(inspect.dataset.f34DecisionInspect);return;}
+ const forecast=event.target.closest("[data-f34-decision-forecast]");
+ if(forecast){
+  const market=seerF34Records().find(m=>marketKey(m)===forecast.dataset.f34DecisionForecast);
+  if(market){
+   const outcome=seerF34Outcomes(market).find(o=>o.p!==null);
+   if(outcome){seerF34Draft.marketKey=marketKey(market);seerF34Draft.outcomeIndex=outcome.index;seerF34Draft.belief=outcome.p;seerF34Draft.rationale="";seerF34Draft.evidenceNote="";seerF34Feedback.forecast="Selected from the Opportunity Decision Desk. Add a thesis before saving.";go("deep");}
+  }
+  return;
+ }
+});
+seerF34Mount();
 </script>
 
 </body>
