@@ -72,7 +72,7 @@ function compact(samples) {
   const sorted = [...unique.values()].sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
   const counts = new Map(), kept = [];
   for (const row of sorted.reverse()) {
-    const series = row.key + "::" + row.outcomeIndex;
+    const series = String(row.chainId || 0) + "::" + row.key + "::" + row.outcomeIndex;
     const n = counts.get(series) || 0;
     if (n < PER_SERIES_LIMIT) { kept.push(row); counts.set(series, n + 1); }
   }
@@ -156,7 +156,7 @@ async function main() {
         const p = normalizePrice(odds[i]);
         if (p === null) continue;
         const outcomeName = nameOf(outcomes[i], i);
-        const id = key + "::" + i + "::" + observedAt;
+        const id = chainId + "::" + key + "::" + i + "::" + observedAt;
         captured.push({
           id, key, title: String(market.marketName || "Untitled market"),
           chain: ({ 100: "Gnosis", 10: "Optimism", 8453: "Base", 1: "Ethereum" })[chainId] || ("Chain " + chainId),
