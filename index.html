@@ -2042,6 +2042,7 @@ function updateFutarchyScenario(){const m=currentFutarchyReference();const node=
 
 function marketKey(m){return String(m?.fullId||m?.id||m?.title||"")}
 function parseMarketChainId(value){return value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))?Number(value):null}
+function historyChainMatches(sampleChainId,marketChainId){const sample=parseMarketChainId(sampleChainId),market=parseMarketChainId(marketChainId);return (sample===null||sample===0?"unknown":String(sample))===(market===null||market===0?"unknown":String(market))}
 function marketIdentity(m){const chain=parseMarketChainId(m?.chainId);return (chain===null||chain===0?"unknown":String(chain))+"::"+marketKey(m)}
 function matchesSelectedMarket(m){return !!m&&marketKey(m)===state.selectedMarketId&&(state.selectedMarketChainId===null||Number(m.chainId)===state.selectedMarketChainId)}
 function compactSavedMarket(m){return {id:String(m.id||m.fullId||""),fullId:String(m.fullId||m.id||""),type:String(m.type||"Prediction market"),title:String(m.title||"Untitled market"),p:m.p??null,volume:String(m.volume||"—"),depth:String(m.depth||"—"),time:String(m.time||"Not specified"),status:String(m.status||"Listed"),chainId:Number(m.chainId||0),chain:String(m.chain||"Unknown network"),url:String(m.url||""),liquidityUSD:Number(m.liquidityUSD||0),volumeUSD:Number(m.volumeUSD||0),outcomes:Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v.name||v.title||v.outcome||"Outcome"):String(v)).slice(0,20):[],outcomePrices:Array.isArray(m.outcomePrices)?m.outcomePrices:[],parentMarket:String(m.parentMarket||""),parentOutcome:String(m.parentOutcome||""),isConditional:Boolean(m.isConditional),verification:String(m.verification||"Not verified"),isLive:false,isSnapshot:true}}
@@ -2900,7 +2901,7 @@ function seerHistoryOutcomeList(m){
  return list.length?list:[{index:0,name:"Lead outcome",p:m&&m.p}].filter(o=>o.p!==null&&o.p!==undefined&&Number.isFinite(Number(o.p))&&Number(o.p)>=0&&Number(o.p)<=100);
 }
 function exportMarketHistoryCSV(key,chainId){
- const rows=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]).filter(x=>x.key===String(key)&&(!Number.isFinite(Number(chainId))||!Number.isFinite(Number(x.chainId))||Number(x.chainId)===Number(chainId))).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+ const rows=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]).filter(x=>x.key===String(key)&&historyChainMatches(x.chainId,chainId)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
  if(!rows.length){const host=document.getElementById("marketDetail");if(host){const p=document.createElement("p");p.className="market-trace-storage";p.textContent="No recorded observations are available to export yet.";host.appendChild(p);}return;}
  const cols=["observed_at","market_key","market_title","chain","chain_id","outcome_index","outcome","price_percent","source","source_mode","source_schema_version","snapshot_id","market_type","market_status","outcome_count","volume_usd","liquidity_usd","verification_status","source_updated_at","resolution_criteria_field","resolution_criteria","source_fingerprint","source_endpoint","market_url"];
  const quote=value=>'"'+String(value??"").replace(/"/g,'""')+'"';
@@ -2916,7 +2917,7 @@ function renderObservedPriceTrace(m){
  const selected=outcomes.find(o=>o.index===Number(wanted))||outcomes.find(o=>o.index===firstIndex)||null;
  const selectedIndex=selected?selected.index:firstIndex;
  const selectedName=selected?selected.name:"Lead outcome";
- const rows=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]).filter(x=>x.key===key&&Number(x.outcomeIndex||0)===selectedIndex&&(!Number.isFinite(Number(m.chainId))||!Number.isFinite(Number(x.chainId))||Number(x.chainId)===Number(m.chainId))).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt)).slice(-120);
+ const rows=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]).filter(x=>x.key===key&&Number(x.outcomeIndex||0)===selectedIndex&&historyChainMatches(x.chainId,m.chainId)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt)).slice(-120);
  const count=rows.length,current=selected?Number(selected.p):null,first=count?rows[0]:null,last=count?rows[count-1]:null;
  const formatTime=value=>value?new Date(value).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}):"—";
  const controls=(outcomes.length>1?'<label class="trace-outcome-control">Plot outcome <select data-trace-outcome data-market-key="'+htmlEscape(key)+'" aria-label="Historical outcome to plot">'+outcomes.map(o=>'<option value="'+o.index+'" '+(o.index===selectedIndex?'selected':'')+'>'+htmlEscape(o.name)+'</option>').join("")+'</select></label>':'');
@@ -3031,7 +3032,7 @@ function seerF34EscapeURL(value){
 }
 function seerF34LatestHistory(key,outcomeIndex,chainId){
  const history=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]);
- return history.filter(x=>x.key===key&&Number(x.outcomeIndex||0)===Number(outcomeIndex)&&(!Number.isFinite(Number(chainId))||!Number.isFinite(Number(x.chainId))||Number(x.chainId)===Number(chainId))).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+ return history.filter(x=>x.key===key&&Number(x.outcomeIndex||0)===Number(outcomeIndex)&&historyChainMatches(x.chainId,chainId)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
 }
 function seerF34Move(key,outcomeIndex,chainId){
  const rows=seerF34LatestHistory(key,outcomeIndex,chainId);
@@ -3044,7 +3045,7 @@ function seerF34SourcePrice(m,outcome){
 }
 function seerF34Freshness(m){
  const sourceTime=m&&m.evidence&&m.evidence.observation&&m.evidence.observation.capturedAt;
- const all=[...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])].filter(x=>x.key===marketKey(m)&&(!Number.isFinite(Number(m.chainId))||!Number.isFinite(Number(x.chainId))||Number(x.chainId)===Number(m.chainId)));
+ const all=[...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])].filter(x=>x.key===marketKey(m)&&historyChainMatches(x.chainId,m.chainId));
  const historic=all.sort((a,b)=>Date.parse(b.observedAt)-Date.parse(a.observedAt))[0];
  const sourceMs=Date.parse(sourceTime||""),historicMs=historic?Date.parse(historic.observedAt):NaN;const at=historic&&(!Number.isFinite(sourceMs)||(Number.isFinite(historicMs)&&historicMs>sourceMs))?historic.observedAt:sourceTime;
  if(!at||!Number.isFinite(Date.parse(at)))return {ageMs:Infinity,label:"Observation time unavailable",at:null};
@@ -3115,7 +3116,7 @@ function seerF34RenderForecastPanel(){
 }
 function seerF34ScoreCandidate(m,history){
  const key=marketKey(m);
- const rows=history.filter(x=>x.key===key&&(!Number.isFinite(Number(m.chainId))||!Number.isFinite(Number(x.chainId))||Number(x.chainId)===Number(m.chainId))).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+ const rows=history.filter(x=>x.key===key&&historyChainMatches(x.chainId,m.chainId)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
  const perOutcome=new Map();
  for(const row of rows){const series=Number(row.outcomeIndex||0);if(!perOutcome.has(series))perOutcome.set(series,[]);perOutcome.get(series).push(row);}
  let move=null;
