@@ -3072,6 +3072,13 @@ function seerF34SignalMarkup(m,outcome,belief){
  if(freshness.ageMs>2*3600000)signals.push({kind:"is-warning",title:"Observation needs refreshing",copy:"Latest known observation: "+freshness.label.toLowerCase()+". Capture time is not the same as an upstream trade timestamp."});
  const move=outcome?seerF34Move(marketKey(m),outcome.index):null;
  if(move&&Math.abs(move.delta)>=2)signals.push({kind:"",title:"Observed repricing in captured snapshots",copy:"The selected outcome moved "+(move.delta>0?"+":"")+move.delta.toFixed(1)+" pp from "+move.from.toFixed(1)+"% to "+move.to.toFixed(1)+"%. This records a price difference; it does not explain why the market moved."});
+ if(typeof seerF5Snapshots==="function"&&typeof seerF5DiffRows==="function"){
+  const captures=seerF5Snapshots(m);
+  if(captures.length>=2){
+   const sourceDeltas=seerF5DiffRows(captures[captures.length-2],captures[captures.length-1]).filter(row=>row.changed);
+   if(sourceDeltas.length)signals.push({kind:"is-warning",title:"Source fields changed between scheduled captures",copy:sourceDeltas.slice(0,3).map(row=>row.label+": "+row.description).join(" · ")+". These are observed differences, not an explanation of what caused a price movement."});
+  }
+ }
  return signals.map(signal=>'<div class="seer-f34-signal '+signal.kind+'"><span class="seer-f34-signal-dot"></span><div><strong>'+htmlEscape(signal.title)+'</strong><p>'+htmlEscape(signal.copy)+'</p></div></div>').join("");
 }
 function seerF34ForecastJournalMarkup(){
@@ -3129,6 +3136,13 @@ function seerF34ScoreCandidate(m,history){
  for(const item of missing)reasons.push(item);
  if(isComplex)reasons.push("Outcome structure needs a careful read ("+outs.length+" returned prices)");
  if(agePoints>=5)reasons.push("Refresh gap: "+fresh.label.toLowerCase());
+ if(typeof seerF5Snapshots==="function"&&typeof seerF5DiffRows==="function"){
+  const captures=seerF5Snapshots(m);
+  if(captures.length>=2){
+   const changed=seerF5DiffRows(captures[captures.length-2],captures[captures.length-1]).filter(row=>row.changed);
+   if(changed.length)reasons.push("Source fields changed across scheduled captures: "+changed.slice(0,3).map(row=>row.label).join(", "));
+  }
+ }
  if(!reasons.length)reasons.push("No elevated trigger from the available fields");
  const level=score>=65?"High review priority":score>=35?"Review suggested":"Routine review";
  return {score:score,level:level,reasons:reasons,move:move,missing:missing,structurePoints:structurePoints,agePoints:agePoints,observedAt:fresh.at,price:m.p};
