@@ -156,7 +156,7 @@ async function main() {
         const p = normalizePrice(odds[i]);
         if (p === null) continue;
         const outcomeName = nameOf(outcomes[i], i);
-        const id = chainId + "::" + key + "::" + i + "::" + observedAt;
+        const id = chainId + "::" + key + "::" + i + "::" + observedAt + "::scheduled";
         captured.push({
           id, key, title: String(market.marketName || "Untitled market"),
           chain: ({ 100: "Gnosis", 10: "Optimism", 8453: "Base", 1: "Ethereum" })[chainId] || ("Chain " + chainId),
