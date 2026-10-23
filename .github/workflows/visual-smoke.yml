@@ -359,10 +359,10 @@ jobs:
                       const captureInfo = await page.evaluate(({ key, chainId: rawChainId }) => {
                         const chainId = parseMarketChainId(rawChainId);
                         const market = [...markets, ...explorerMarkets].find(m => marketKey(m) === key && parseMarketChainId(m.chainId) === chainId);
-                        const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.source === "seer-scheduled-capture" && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && row.snapshotId && row.observedAt && chainId !== null && Number.isFinite(chainId) && parseMarketChainId(row.chainId) === chainId);
+                        const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.source === "seer-scheduled-capture" && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && row.snapshotId && row.observedAt && chainId !== null && chainId !== 0 && Number.isFinite(chainId) && parseMarketChainId(row.chainId) === chainId);
                         const forensicSnapshots = market && typeof seerF5Snapshots === "function" ? seerF5Snapshots(market) : [];
                         const mixedChainSnapshots = chainId !== null && Number.isFinite(chainId) ? forensicSnapshots.filter(snapshot => parseMarketChainId(snapshot.chainId) !== chainId).length : forensicSnapshots.length;
-                        return { snapshots: [...new Set(rows.map(row => row.snapshotId).filter(Boolean))].length, rows: rows.length, mixedChainSnapshots };
+                        return { chainId, snapshots: [...new Set(rows.map(row => row.snapshotId).filter(Boolean))].length, rows: rows.length, mixedChainSnapshots };
                       }, detailIdentity);
                       if (captureInfo.mixedChainSnapshots > 0) {
                         report.failures.push("desktop/dark/app: Source Change Forensics included a snapshot without an exact matching chain identity");
@@ -413,8 +413,8 @@ jobs:
                       if (!identityProbe.historySeparatesNetworks) {
                         report.failures.push("desktop/dark/app: price history failed to keep unknown-chain observations separate from known networks");
                       }
-                      if (captureInfo.snapshots >= 2 && !forensicsText.includes("What changed between captures?")) {
-                        report.failures.push("desktop/dark/app: two fingerprinted captures exist but their source-diff ledger is not rendered");
+                      if (captureInfo.snapshots >= 2 && !forensicsText.includes("what changed between captures?")) {
+                        report.failures.push("desktop/dark/app: two fingerprinted captures exist but their source-diff ledger is not rendered (chain="+captureInfo.chainId+", captures="+captureInfo.snapshots+", rows="+captureInfo.rows+")");
                       }
                     }
                     const archiveState = await page.evaluate(() => ({ status: marketTrace.sharedStatus, count: (marketTrace.sharedSamples || []).length }));
