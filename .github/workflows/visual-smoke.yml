@@ -175,7 +175,7 @@ jobs:
                   themeToggleLabel: (document.querySelector("#themeToggle span")?.textContent || "").trim(),
                   unhandledEnabledButtons: [...document.querySelectorAll("button:not(:disabled)")].filter(button => {
                     if (button.hasAttribute("onclick")) return false;
-                    return !["data-market-action","data-opportunity-side","data-page","data-wire-action","data-explorer-view"].some(attribute => button.hasAttribute(attribute));
+                    return !["data-market-action","data-opportunity-side","data-page","data-wire-action","data-explorer-view","data-f34-save-forecast","data-f34-resolve","data-f34-load","data-f34-decision-save","data-f34-decision-inspect","data-f34-decision-forecast"].some(attribute => button.hasAttribute(attribute));
                   }).map(button => (button.getAttribute("aria-label") || button.innerText || button.className || "unnamed button").replace(/\\s+/g," ").trim()).slice(0,12),
                   mobileNavRowCount: [...new Set([...document.querySelectorAll("#nav button")].map(el=>Math.round(el.getBoundingClientRect().top)))].length,
                   mobileNavFlexWrap: getComputedStyle(nav).flexWrap,
