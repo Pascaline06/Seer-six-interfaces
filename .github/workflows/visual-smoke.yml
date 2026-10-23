@@ -42,7 +42,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("marketAvatarHTML(m,44)") && html.includes("market-tape") && html.includes('id="getAppButton" href="https://app.seer.pm/" target="_blank" rel="noopener noreferrer"') && html.includes('body[data-theme="light"] .signal-ticker.market-tape{background:linear-gradient') && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("async function seerLoadSharedArchive") && html.includes("Source &amp; provenance ledger") && html.includes("seer-scheduled-capture") && html.includes("Export CSV ↓") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes('id="getAppButton"') && html.includes("top-app-cta") && html.includes("const reportedNumber=") && html.includes("liquidityUSD:reportedNumber(m.liquidityUSD)") && html.includes("function marketSideControls(m)") && html.includes("market-side-picker") && html.includes('data-market-action="analyze-side"') && html.includes("function canPaperFrameOutcome(m)") && html.includes("function makeBinaryPaperProjection(m)") && html.includes("hasNativeBinaryPrices(m)") && html.includes("derived-frame-notice") && html.includes("NO represents all remaining listed outcomes") && html.includes("not a returned NO quote") && html.includes("DERIVED PAPER FRAME") && html.includes("Premium art direction refresh") && html.includes("LAVENDER BRAND DIRECTION") && html.includes('body data-theme="light"') && html.includes("--bg:#f7f7f9") && html.includes("--bg:#101013") && html.includes("--panel-raised:#f2f2f4") && html.includes("--panel-raised:#2f2f34") && html.includes("--violet:#6c2bd9") && html.includes("--violet:#b7a0ff") && html.includes("linear-gradient(180deg,#f7f7f9 0%,#efe9fc 52%,#f7f7f9 100%)") && html.includes("--text:#17171c") && html.includes("--dim:#6d6d78") && html.includes("signal-cyan:#67e6ee") && html.includes(".signal-ticker.market-tape:before") && html.includes("no squeezed headers or six tiny wrapped nav buttons") && html.includes("Mobile information hierarchy: navigation always follows the header, with the market wire below it.") && html.includes("function renderLiquidityLandscape") && html.includes("Liquidity landscape") && html.includes("landscape-rail is-unreported") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:focus-within .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("marketAvatarHTML(m,44)") && html.includes("market-tape") && html.includes('id="getAppButton" href="https://app.seer.pm/" target="_blank" rel="noopener noreferrer"') && html.includes('body[data-theme="light"] .signal-ticker.market-tape{background:linear-gradient') && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("async function seerLoadSharedArchive") && html.includes("Source &amp; provenance ledger") && html.includes("seer-scheduled-capture") && html.includes("Export CSV ↓") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes('id="getAppButton"') && html.includes("top-app-cta") && html.includes("PHASE 03 / SIGNAL &amp; FORECAST LAB") && html.includes("PHASE 04 / OPPORTUNITY DECISION DESK") && html.includes("seerF34ScoreCandidate") && html.includes("seer-six-forecast-journal-v1") && html.includes("seer-six-decision-desk-v1") && html.includes('data-f34-save-forecast') && html.includes('data-f34-decision-save') && html.includes("const reportedNumber=") && html.includes("liquidityUSD:reportedNumber(m.liquidityUSD)") && html.includes("function marketSideControls(m)") && html.includes("market-side-picker") && html.includes('data-market-action="analyze-side"') && html.includes("function canPaperFrameOutcome(m)") && html.includes("function makeBinaryPaperProjection(m)") && html.includes("hasNativeBinaryPrices(m)") && html.includes("derived-frame-notice") && html.includes("NO represents all remaining listed outcomes") && html.includes("not a returned NO quote") && html.includes("DERIVED PAPER FRAME") && html.includes("Premium art direction refresh") && html.includes("LAVENDER BRAND DIRECTION") && html.includes('body data-theme="light"') && html.includes("--bg:#f7f7f9") && html.includes("--bg:#101013") && html.includes("--panel-raised:#f2f2f4") && html.includes("--panel-raised:#2f2f34") && html.includes("--violet:#6c2bd9") && html.includes("--violet:#b7a0ff") && html.includes("linear-gradient(180deg,#f7f7f9 0%,#efe9fc 52%,#f7f7f9 100%)") && html.includes("--text:#17171c") && html.includes("--dim:#6d6d78") && html.includes("signal-cyan:#67e6ee") && html.includes(".signal-ticker.market-tape:before") && html.includes("no squeezed headers or six tiny wrapped nav buttons") && html.includes("Mobile information hierarchy: navigation always follows the header, with the market wire below it.") && html.includes("function renderLiquidityLandscape") && html.includes("Liquidity landscape") && html.includes("landscape-rail is-unreported") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:focus-within .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -397,6 +397,87 @@ jobs:
                 if (await page.locator("#main .docs-card").count() !== 6) report.failures.push(`${viewport.name}/${theme}/docs: documentation must explain all six interfaces`);
                 if (!(await page.locator("#main").innerText()).includes("History provenance")) report.failures.push(`${viewport.name}/${theme}/docs: ticker behavior and history provenance are undocumented`);
               }
+
+              // Phase 3: verify an explainable forecast can be recorded, resolved with a supplied source, and scored.
+              if (route === "deep" && viewport.name === "desktop" && theme === "dark") {
+                const forecastPanel = page.locator("#seerForecastLab");
+                if (await forecastPanel.count() !== 1) {
+                  report.failures.push("desktop/dark/deep: explainable Forecast Journal panel is missing");
+                } else {
+                  const marketOptions = await page.locator("#seerF34Market option").count();
+                  const saveForecast = page.locator("#seerForecastLab [data-f34-save-forecast]");
+                  if (marketOptions < 1 || await saveForecast.count() !== 1 || await saveForecast.isDisabled()) {
+                    report.failures.push("desktop/dark/deep: Forecast Journal has no usable live price-bearing source record");
+                  } else {
+                    await page.locator("#seerF34Rationale").fill("The public evidence and recent disclosures support this event, but delivery uncertainty remains.");
+                    await page.locator("#seerF34Evidence").fill("Smoke fixture: public evidence note");
+                    await page.locator("#seerF34Belief").evaluate(el => { el.value = "77"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+                    const edgeReadout = (await page.locator("#seerForecastLab .seer-f34-stats strong").nth(2).innerText()).trim();
+                    if (!edgeReadout.includes("pp")) report.failures.push("desktop/dark/deep: belief slider did not update the source-price difference");
+                    await saveForecast.click();
+                    const journalSaved = await page.waitForFunction(() => {
+                      const list = JSON.parse(localStorage.getItem("seer-six-forecast-journal-v1") || "[]");
+                      return list.length === 1 && list[0].sourceRecordId && list[0].sourceObservedAt && list[0].rationale.length >= 12;
+                    }, null, { timeout: 5000 }).then(() => true).catch(() => false);
+                    if (!journalSaved) {
+                      report.failures.push("desktop/dark/deep: saving a forecast did not preserve thesis, source price and observed-at provenance");
+                    } else {
+                      const resolutionUrl = page.locator("#seerF34Journal .seer-f34-entry [data-f34-resolution-url]").first();
+                      if (await resolutionUrl.count() !== 1) {
+                        report.failures.push("desktop/dark/deep: an open forecast does not provide the resolution-evidence control");
+                      } else {
+                        await resolutionUrl.fill("https://example.com/seer-smoke-resolution");
+                        await page.locator('#seerF34Journal .seer-f34-entry button[data-f34-resolve="1"]').click();
+                        const scored = await page.waitForFunction(() => {
+                          const list = JSON.parse(localStorage.getItem("seer-six-forecast-journal-v1") || "[]");
+                          const score = document.querySelectorAll("#seerF34Journal .seer-f34-stat strong")[2]?.innerText || "";
+                          return list.length === 1 && list[0].status === "resolved" && list[0].resolutionUrl === "https://example.com/seer-smoke-resolution" && /^\d\.\d{3}$/.test(score);
+                        }, null, { timeout: 5000 }).then(() => true).catch(() => false);
+                        if (!scored) report.failures.push("desktop/dark/deep: user-attested resolution did not produce a Brier score");
+                      }
+                    }
+                    await page.evaluate(() => { localStorage.removeItem("seer-six-forecast-journal-v1"); seerF34Feedback.forecast = ""; render(); });
+                  }
+                }
+              }
+
+              // Phase 4: verify explainable review scoring, saved reviewer notes and the route into a forecast.
+              if (route === "opportunity" && viewport.name === "desktop" && theme === "dark") {
+                const desk = page.locator("#seerDecisionDesk");
+                if (await desk.count() !== 1) {
+                  report.failures.push("desktop/dark/opportunity: Opportunity Decision Desk is missing");
+                } else {
+                  const cards = desk.locator(".seer-f34-review-card");
+                  if (await cards.count() < 1) {
+                    report.failures.push("desktop/dark/opportunity: Decision Desk does not contain live source records");
+                  } else {
+                    const first = cards.first();
+                    const title = (await first.locator("h3").innerText()).trim();
+                    const noteText = "Review the missing settlement criteria and compare the latest observed price with the next source snapshot.";
+                    await first.locator("[data-f34-decision-status]").selectOption("Investigate");
+                    await first.locator("[data-f34-decision-note]").fill(noteText);
+                    await first.locator("[data-f34-decision-save]").click();
+                    const reviewSaved = await page.waitForFunction((wanted) => {
+                      const data = JSON.parse(localStorage.getItem("seer-six-decision-desk-v1") || "{}");
+                      const values = Object.values(data);
+                      return values.some(x => x.title === wanted && x.status === "Investigate" && x.note.includes("settlement criteria") && x.events?.length === 1 && Number.isFinite(x.score) && x.reasons.length > 0);
+                    }, title, { timeout: 5000 }).then(() => true).catch(() => false);
+                    if (!reviewSaved) report.failures.push("desktop/dark/opportunity: reviewer action did not persist score, reasons and rationale");
+                    const inspect = first.locator("[data-f34-decision-inspect]");
+                    await inspect.click();
+                    const inspectorOpen = await page.waitForFunction((wanted) => document.querySelector("#marketDetail h2")?.innerText.trim() === wanted, title, { timeout: 5000 }).then(() => true).catch(() => false);
+                    if (!inspectorOpen) report.failures.push("desktop/dark/opportunity: Decision Desk Inspect did not open the matching source record");
+                    else await page.locator('#main #marketDetail button[data-market-action="close-detail"]').click();
+                    await page.locator("#seerDecisionDesk .seer-f34-review-card").first().locator("[data-f34-decision-forecast]").click();
+                    const linkedForecast = await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "deep" && !!document.querySelector("#seerForecastLab"), null, { timeout: 5000 }).then(() => true).catch(() => false);
+                    if (!linkedForecast) report.failures.push("desktop/dark/opportunity: Build forecast did not open the Forecast Journal");
+                    await page.locator('#nav button[data-page="opportunity"]').click();
+                    await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "opportunity" && !!document.querySelector("#seerDecisionDesk"), null, { timeout: 5000 }).catch(() => {});
+                    await page.evaluate(() => { localStorage.removeItem("seer-six-decision-desk-v1"); seerF34Feedback.decision = ""; render(); });
+                  }
+                }
+              }
+
               const screenshot = `artifacts/${viewport.name}-${theme}-${route}.png`;
               await page.screenshot({ path: screenshot, fullPage: true, animations: "disabled" });
               const result = { viewport: viewport.name, theme, route, screenshot, ...metrics, pageErrors: [...pageErrors] };
