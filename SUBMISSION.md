@@ -1,36 +1,61 @@
-# Seer Six — Submission notes
+# Seer Six — Markets for Better Decisions
 
-## Project title
+## Claim title
 
-**Seer Six — Markets for better decisions**
+**Seer Six — Markets for Better Decisions**
 
-## Short rationale
+## Live demo
 
-Seer can surface what a market believes; a useful interface must also show how much that signal deserves to be trusted. This concept treats market probabilities as decision inputs, not verdicts. Across all six interfaces, a shared Evidence Rail makes source status, signal meaning, limitations and decision authority explicit.
+https://pascaline06.github.io/Seer-six-interfaces/
 
-The six experiences are intentionally distinct: the overview establishes the mental model; the Market Explorer helps people discover and interpret a market; Deep Forecasts compares competing outcomes and uncertainty; Futarchy contrasts measurable outcomes conditional on a proposal passing or failing; Opportunity Markets informs a fair review process without replacing reviewers; and Risk Pricing compares risk dimensions rather than compressing exposure, severity and liquidity into one opaque number.
+## Source repository
 
-The main departure from a conventional market dashboard is the persistent emphasis on evidence quality and decision boundaries. The design avoids false precision, labels every sample figure as illustrative, and does not claim that market popularity equals merit. In grant and governance contexts, independent human judgment, conflict checks and an audit trail remain essential.
-
-The prototype prioritizes responsive layouts, clear hierarchy, direct routes and keyboard accessibility. It deliberately does not pretend to have live Seer data: connecting production market and pool data requires a verified data source, freshness handling and clear provenance before any figures can be labeled live.
-
-## Six interface links
-
-- **Overview:** https://pascaline06.github.io/Seer-six-interfaces/#/home
-- **Market Explorer:** https://pascaline06.github.io/Seer-six-interfaces/#/app
-- **Deep Forecasts:** https://pascaline06.github.io/Seer-six-interfaces/#/deep
-- **Futarchy:** https://pascaline06.github.io/Seer-six-interfaces/#/futarchy
-- **Opportunity Markets:** https://pascaline06.github.io/Seer-six-interfaces/#/opportunity
-- **Risk Pricing:** https://pascaline06.github.io/Seer-six-interfaces/#/risk
-
-## Preview image
-
-Use preview.svg as a designed project preview if the submission form accepts SVG. If it requires a screenshot, capture the actual deployed site in a browser instead of presenting concept artwork as a screenshot.
+https://github.com/Pascaline06/Seer-six-interfaces
 
 ## X handle
 
 @Pascaline7933
 
-## Accuracy note
+## Short design rationale
 
-This is a front-end prototype. All probabilities, market volumes/depth, price changes, forecast ranges, risk scores, and futarchy scenario outcomes are illustrative. There is no live Seer API/subgraph, wallet, trading, or on-chain integration in this version. Do not use these values for real financial, funding, security or governance decisions.
+Seer can surface what a market believes; a useful interface must also show how much that signal deserves to be trusted. Seer Six treats market probabilities as decision inputs, not verdicts. Across all six interfaces, the design puts source status, evidence quality, assumptions, limitations, and human decision authority close to the signal being interpreted.
+
+The experiences are purposefully differentiated: the Overview introduces Seer as one protocol beneath several decision contexts; Market Explorer helps people find and compare records; Deep Forecasts emphasizes multi-outcome structure and outcome-level evidence; Futarchy makes pass/fail scenarios around measurable outcomes easier to compare; Opportunity Markets adds explicit review-priority reasoning without automating the final selection; and Risk Pricing separates reported price, liquidity, volume, and user-defined sensitivity assumptions rather than hiding them inside one opaque score.
+
+## Electric Foundation adaptations
+
+The design keeps a coordinated violet/lavender visual identity, consistent navigation and component language, strong display typography, and compact technical data treatments. It extends the brand kit into an evidence-first analytical system: distinctive visualizations and controls vary by decision context, while the shared shell makes the six interfaces feel like one product.
+
+The deliberate departure is the emphasis on legibility and auditability over a uniform decorative dashboard. Source-backed values are visibly distinguished from local calculations and hypothetical assumptions; unknown fields remain unknown; and the interface avoids presenting popularity as merit or a forecast as certainty. Bricolage Grotesque, DM Sans, and JetBrains Mono were chosen because the supplied kit did not prescribe a typeface.
+
+## Six labelled public demos
+
+1. **Landing page / Overview:** https://pascaline06.github.io/Seer-six-interfaces/#/home
+2. **Seer app / Market Explorer:** https://pascaline06.github.io/Seer-six-interfaces/#/app
+3. **Deep Forecasts:** https://pascaline06.github.io/Seer-six-interfaces/#/deep
+4. **Futarchy:** https://pascaline06.github.io/Seer-six-interfaces/#/futarchy
+5. **Opportunity Markets:** https://pascaline06.github.io/Seer-six-interfaces/#/opportunity
+6. **Risk Pricing:** https://pascaline06.github.io/Seer-six-interfaces/#/risk
+
+**In-product documentation:** https://pascaline06.github.io/Seer-six-interfaces/#/docs
+
+## Preview image to attach
+
+Attach **one image** for this single claim: the supplied `seer-six-claim-preview.png` (1200×630 PNG) preview sheet composed from desktop browser captures of all six interfaces. Use Poidh's native image uploader rather than pasting a GitHub page into the image field. The bounty says the preview image does not replace the six labelled demo links above.
+
+## What is implemented
+
+- Live, read-only market records from Seer's public market-search endpoint, with connected/fallback states and last-successful snapshot handling.
+- Market Wire and homepage Market Tape with market-specific navigation, pause/reduced-motion behavior, and snapshot-based repricing history.
+- Market Explorer search, category/network filtering, sorting, pagination, card/table views, watchlist, comparison, and source-aware inspection.
+- Source & Provenance Ledger and outcome-level browser/shared scheduled price history with CSV export.
+- Source Change Forensics comparing metadata-enriched snapshots of the same market and network.
+- Forecast Journal with versioned beliefs, evidence references, user-attested resolution, and Brier scoring after resolution.
+- Opportunity Decision Desk with transparent review-priority components and local reviewer notes.
+- Futarchy pass/fail what-if scenarios and Opportunity paper-analysis tools; these model user assumptions and do not submit orders.
+- Chain-qualified market identity so same-ID records on different networks remain separate across selectors, inspectors, comparison, forecast/review records, and history.
+- Responsive layouts, light/dark themes, keyboard-operable controls, and reduced-motion support.
+
+## Accuracy and limitations
+
+This is a front-end prototype with a read-only live market feed, not a trading terminal. It does not connect a wallet, place orders, execute on-chain transactions, independently verify market resolution, or provide a protocol-security audit. Source prices may be stale or affected by thin liquidity. Observation history represents captured API snapshots, not trades or settlement records. Scenario outcomes and assumptions remain hypothetical; the interface labels missing source fields rather than inventing them.
