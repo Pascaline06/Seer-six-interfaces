@@ -940,7 +940,7 @@ jobs:
                   if (count < 1 || avatars !== count) report.failures.push(`${viewport.name}/${theme}: home Market Tape is missing per-market avatars`);
                   const firstTapeMarket = items.first();
                   const tapeLabel = await firstTapeMarket.getAttribute("aria-label") || "";
-                  const expectedTapeTitle = tapeLabel.replace(/^Open market in explorer:\\s*/, "").trim();
+                  const expectedTapeTitle = tapeLabel.replace(/^Open market in explorer:\s*/, "").trim();
                   await firstTapeMarket.evaluate(el => el.click());
                   const openedFromTape = await page.waitForFunction((wanted) => {
                     const main = document.querySelector("#main");
