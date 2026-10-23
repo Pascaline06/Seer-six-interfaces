@@ -563,6 +563,121 @@ jobs:
                 }
               }
 
+              // Risk Pricing: record Inspect must resolve to the matching record inspector, and close must dismiss it.
+              if (route === "risk") {
+                const riskInspect = page.locator('#main .risk-market-record button[data-market-action="inspect"]').first();
+                const riskInspectCount = await page.locator('#main .risk-market-record button[data-market-action="inspect"]').count();
+                if (riskInspectCount > 0) {
+                  const wantedTitle = (await riskInspect.locator("xpath=ancestor::article").locator("h3").innerText()).trim();
+                  await riskInspect.click();
+                  const matchingInspector = await page.waitForFunction((wanted) => {
+                    const detail = document.querySelector("#marketDetail");
+                    return !!detail && detail.querySelector("h2")?.innerText.trim() === wanted;
+                  }, wantedTitle, { timeout: 8000 }).then(() => true).catch(() => false);
+                  if (!matchingInspector) report.failures.push(viewport.name+"/"+theme+"/risk: Inspect record did not open the inspector for the exact market");
+                  const closeRiskInspector = page.locator('#main #marketDetail button[data-market-action="close-detail"]');
+                  if (matchingInspector && await closeRiskInspector.count() !== 1) {
+                    report.failures.push(viewport.name+"/"+theme+"/risk: risk inspector did not expose its close action");
+                  } else if (matchingInspector) {
+                    await closeRiskInspector.click();
+                    if (await page.locator("#main #marketDetail").count() !== 0) report.failures.push(viewport.name+"/"+theme+"/risk: closing the inspector left stale market detail visible");
+                  }
+                } else {
+                  report.failures.push(viewport.name+"/"+theme+"/risk: market records are missing Inspect actions");
+                }
+                await page.locator("#riskA").evaluate(el => { el.value = "17"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+                await page.locator("#riskB").evaluate(el => { el.value = "82"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+                const riskGapText = (await page.locator("#riskGap").innerText()).trim();
+                const riskALabel = (await page.locator("#riskALabel").innerText()).trim();
+                const riskBLabel = (await page.locator("#riskBLabel").innerText()).trim();
+                if (riskGapText !== "65 points" || riskALabel !== "17/100" || riskBLabel !== "82/100") {
+                  report.failures.push(viewport.name+"/"+theme+"/risk: sensitivity sliders did not update their values and derived gap");
+                }
+              }
+
+              // Futarchy: both scenario buttons, reference selector and shift slider must update the what-if output.
+              if (route === "futarchy") {
+                const passButton = page.locator('.futarchy-workbench .scenario-toggle button').filter({ hasText: "If proposal passes" });
+                const failButton = page.locator('.futarchy-workbench .scenario-toggle button').filter({ hasText: "If proposal fails" });
+                if (await passButton.count() !== 1 || await failButton.count() !== 1) {
+                  report.failures.push(viewport.name+"/"+theme+"/futarchy: pass/fail scenario controls are missing");
+                } else {
+                  await failButton.click();
+                  if (!(await page.locator('.scenario-toggle button.primary').innerText()).includes("If proposal fails")) {
+                    report.failures.push(viewport.name+"/"+theme+"/futarchy: selecting proposal failure did not update the active state");
+                  }
+                  await passButton.click();
+                  if (!(await page.locator('.scenario-toggle button.primary').innerText()).includes("If proposal passes")) {
+                    report.failures.push(viewport.name+"/"+theme+"/futarchy: selecting proposal pass did not update the active state");
+                  }
+                  const shift = page.locator("#scenarioDelta");
+                  await shift.evaluate(el => { el.value = "12"; el.dispatchEvent(new Event("input", { bubbles: true })); });
+                  if (!(await page.locator("#scenarioDeltaLabel").innerText()).includes("+12 percentage points")) {
+                    report.failures.push(viewport.name+"/"+theme+"/futarchy: scenario shift slider did not update its visible label");
+                  }
+                  const marketSelect = page.locator("#futarchyMarketSelect");
+                  if (await marketSelect.locator("option").count() > 1) {
+                    await marketSelect.selectOption({ index: 1 });
+                    const selectedStillRendered = await page.waitForFunction(() => {
+                      const select = document.querySelector("#futarchyMarketSelect");
+                      const output = document.querySelector("#futarchyScenarioValue");
+                      return !!select && !!output && !!select.value;
+                    }, null, { timeout: 5000 }).then(() => true).catch(() => false);
+                    if (!selectedStillRendered) report.failures.push(viewport.name+"/"+theme+"/futarchy: selecting a reference market did not retain a coherent scenario");
+                  }
+                }
+              }
+
+              // Home calls to action and all six interface cards / navigation buttons must route to their matching interface.
+              if (route === "home" && viewport.name === "desktop" && theme === "dark") {
+                for (const [selector, expectedRoute, label] of [
+                  ['.hero-actions button:has-text("Explore live markets")', "app", "Explore live markets"],
+                  ['.hero-actions button:has-text("Explore forecasts")', "deep", "Explore forecasts"]
+                ]) {
+                  const cta = page.locator(selector);
+                  if (await cta.count() !== 1) {
+                    report.failures.push("desktop/dark/home: "+label+" CTA is missing");
+                  } else {
+                    await cta.click();
+                    const routed = await page.waitForFunction(wanted => document.querySelector("#main")?.dataset.page === wanted, expectedRoute, { timeout: 6000 }).then(() => true).catch(() => false);
+                    if (!routed) report.failures.push("desktop/dark/home: "+label+" CTA did not navigate to "+expectedRoute);
+                    await page.locator('#nav button[data-page="home"]').click();
+                    await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "home", null, { timeout: 6000 }).catch(() => {});
+                  }
+                }
+                const interfaceButtons = page.locator("#main .interface-preview .interface-open");
+                const interfaceButtonCount = await interfaceButtons.count();
+                if (interfaceButtonCount !== 6) {
+                  report.failures.push("desktop/dark/home: expected six interface preview buttons, found "+interfaceButtonCount);
+                } else {
+                  for (let n = 0; n < interfaceButtonCount; n++) {
+                    const button = interfaceButtons.nth(n);
+                    const onclick = await button.getAttribute("onclick") || "";
+                    const match = onclick.match(/go\(['"]([^'"]+)['"]\)/);
+                    if (!match) {
+                      report.failures.push("desktop/dark/home: interface preview button "+n+" has no route target");
+                      continue;
+                    }
+                    const expectedRoute = match[1];
+                    await button.click();
+                    const routed = await page.waitForFunction(wanted => document.querySelector("#main")?.dataset.page === wanted, expectedRoute, { timeout: 6000 }).then(() => true).catch(() => false);
+                    if (!routed) report.failures.push("desktop/dark/home: interface preview button "+n+" did not navigate to "+expectedRoute);
+                    await page.goto(base+"#/home", { waitUntil: "domcontentloaded", timeout: 45000 });
+                    await page.waitForSelector("#main h1", { timeout: 15000 });
+                    await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#main .hero-signal")?.dataset.marketStatus || ""), null, { timeout: 20000 }).catch(() => {});
+                  }
+                }
+                // All six side-navigation buttons must navigate to the matching page.
+                for (const target of routes) {
+                  await page.locator('#nav button[data-page="'+target+'"]').click();
+                  const routed = await page.waitForFunction(wanted => document.querySelector("#main")?.dataset.page === wanted, target, { timeout: 6000 }).then(() => true).catch(() => false);
+                  if (!routed) report.failures.push("desktop/dark/home: sidebar navigation did not open "+target);
+                }
+                await page.goto(base+"#/home", { waitUntil: "domcontentloaded", timeout: 45000 });
+                await page.waitForSelector("#main h1", { timeout: 15000 });
+                await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#main .hero-signal")?.dataset.marketStatus || ""), null, { timeout: 20000 }).catch(() => {});
+              }
+
               const nextRoute = routes[(routes.indexOf(route) + 1) % routes.length];
               const nextLink = page.locator(`#siteFooter .interface-link[data-suite-page="${nextRoute}"]`);
               await nextLink.click();
