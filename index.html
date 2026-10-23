@@ -1551,6 +1551,24 @@ body[data-theme="light"] :focus-visible{outline-color:#7b55d2}
 body[data-theme="dark"] :focus-visible{outline-color:#d1bcff}
 /* LAVENDER BRAND DIRECTION end. */
 
+
+/* Contrast refinement: preserve the brand's light lavender swatch while keeping accent text readable. */
+:root{
+  --brand-lavender:#b7a0ff;
+  --violet:#7b55d2;
+  --violet-strong:#6943b4;
+}
+body[data-theme="light"]{
+  --brand-lavender:#b7a0ff;
+  --violet:#7b55d2;
+  --violet-strong:#6943b4;
+}
+body[data-theme="dark"]{
+  --brand-lavender:#d1bcff;
+  --violet:#d1bcff;
+  --violet-strong:#b294f0;
+}
+
 </style>
 </head>
 <body data-theme="light">
