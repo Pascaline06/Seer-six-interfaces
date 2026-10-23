@@ -37,7 +37,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           const url = "https://pascaline06.github.io/Seer-six-interfaces/";
-          const marker = 'statlabel">Opened</div>';
+          const marker = 'A guide to the signal, the evidence, and the limits.';
           for (let attempt = 1; attempt <= 18; attempt++) {
             try {
               const response = await fetch(url, { cache: "no-store" });
@@ -64,7 +64,7 @@ jobs:
           import { chromium } from "playwright";
 
           const base = "https://pascaline06.github.io/Seer-six-interfaces/";
-          const routes = ["home", "app", "deep", "futarchy", "opportunity", "risk"];
+          const routes = ["home", "app", "deep", "futarchy", "opportunity", "docs", "risk"];
           const viewports = [
             { name: "desktop", width: 1440, height: 1000 },
             { name: "mobile", width: 390, height: 844 },
@@ -322,8 +322,8 @@ jobs:
               if (!metrics.marketWireHasGradient) report.failures.push(viewport.name+"/"+theme+"/"+route+": Market Wire lost its themed surface treatment");
               if (route === "home" && !metrics.signalTickerHasGradient) report.failures.push(viewport.name+"/"+theme+"/home: source briefing ticker lost its themed surface treatment");
               if (route === "home" && (!/linear-gradient/i.test(metrics.marketTapeGradient) || !metrics.marketTapeAccentBorder)) report.failures.push(viewport.name+"/"+theme+"/home: the Market Tape must retain its distinct premium gradient and accent border");
-              const expectedPaletteBase = theme === "light" ? "#f5f0ff" : "#1a1227";
-              const expectedPaletteAccent = theme === "light" ? "#7b55d2" : "#d1bcff";
+              const expectedPaletteBase = theme === "light" ? "#f7f7f9" : "#101013";
+              const expectedPaletteAccent = theme === "light" ? "#6c2bd9" : "#b7a0ff";
               const expectedToggleLabel = theme === "light" ? "Dark" : "Light";
               if (metrics.paletteBase !== expectedPaletteBase) report.failures.push(viewport.name+"/"+theme+"/"+route+": wrong brand palette base "+metrics.paletteBase+" (expected "+expectedPaletteBase+")");
               if (metrics.paletteAccent !== expectedPaletteAccent) report.failures.push(viewport.name+"/"+theme+"/"+route+": wrong contrast accent "+metrics.paletteAccent+" (expected "+expectedPaletteAccent+")");
@@ -359,7 +359,7 @@ jobs:
               if (route === "home" && !["live","fallback"].includes(metrics.heroMarketStatus)) report.failures.push(viewport.name+"/"+theme+"/home: hero signal never left its loading state");
               if (route === "app" && !["live","fallback"].includes(metrics.explorerIndexStatus)) report.failures.push(viewport.name+"/"+theme+"/app: full-index explorer never left its loading state before screenshot");
               if (route === "app" && metrics.explorerIndexStatus === "live" && !metrics.explorerPageLabel) report.failures.push(viewport.name+"/"+theme+"/app: live results loaded without pagination state");
-              if (metrics.interfaceNavCount !== 6 || metrics.interfaceNavTargets.length !== 6 || metrics.currentFooterRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: footer must show all six directly-accessible routes with the current route marked`);
+              if (metrics.interfaceNavCount !== 7 || metrics.interfaceNavTargets.length !== 7 || metrics.currentFooterRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: footer must show six interfaces plus Documentation, with the current route marked`);
               if (route === "app") {
                 await page.locator("#marketSearch").fill("Ethereum");
                 await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
