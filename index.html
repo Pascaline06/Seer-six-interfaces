@@ -1892,6 +1892,7 @@ demoMarkets.forEach(m=>{m.outcomes=["Yes","No"];m.outcomePrices=[{name:"Yes",p:N
 let markets=demoMarkets;
 const marketFeed={status:"loading",count:0,updatedAt:null,lastAttemptAt:null,error:"",errorDetail:"",refreshing:false,chains:[100,10,8453,1]};
 function readMarketWireHistory(){try{const v=JSON.parse(localStorage.getItem("seer-six-wire-history-v1")||"[]");return Array.isArray(v)?v.filter(x=>x&&x.key&&Number.isFinite(Number(x.fromP))&&Number.isFinite(Number(x.toP))&&x.observedAt).slice(0,40):[]}catch{return []}}
+function wireMarketIdentity(m){const raw=m&&m.chainId,parsed=raw===null||raw===undefined||raw===""||!Number.isFinite(Number(raw))?null:Number(raw),network=parsed===null||parsed===0?"unknown":String(parsed),key=String(m&&(m.fullId||m.id||m.title)||"");return network+"::"+key}
 const wireState={paused:false,ledgerOpen:false,history:readMarketWireHistory(),changedIds:new Set(),hasComparedSnapshot:false,lastSweep:null,refreshTimer:null};
 function readMarketPriceTrace(){
  try{
@@ -1956,7 +1957,7 @@ function renderMarketWire(){
  const statusClass=marketFeed.refreshing||marketFeed.status==="loading"?"is-loading":live?(marketFeed.error?"is-stale":"is-live"):"is-preview";
  const items=records.length?records.map(m=>{
   const key=marketKey(m),rawP=m.p===null||m.p===undefined?null:Number(m.p),validP=rawP!==null&&Number.isFinite(rawP)&&rawP>=0&&rawP<=100,price=validP?Math.round(rawP)+"%":"—";
-  return '<button type="button" class="wire-item '+(wireState.changedIds.has(key)?"wire-item-updated":"")+'" data-wire-action="inspect" data-market-id="'+htmlEscape(key)+'" data-market-chain-id="'+ (m.chainId!==null&&m.chainId!==undefined&&m.chainId!==""&&Number.isFinite(Number(m.chainId))?String(m.chainId):"") +'" aria-label="Inspect market: '+htmlEscape(m.title)+', price '+htmlEscape(price)+'">'+marketAvatarHTML(m,27)+'<span class="wire-market-copy"><span class="wire-chain">'+htmlEscape(m.chain||m.type||"Market")+'</span><span class="wire-title" title="'+htmlEscape(m.title)+'">'+htmlEscape(m.title)+'</span></span><strong class="wire-price">'+price+'</strong><span class="wire-metric">VOL '+htmlEscape(m.volume||"—")+'</span><span class="wire-metric">LIQ '+htmlEscape(m.depth||"—")+'</span></button>';
+  return '<button type="button" class="wire-item '+(wireState.changedIds.has(wireMarketIdentity(m))?"wire-item-updated":"")+'" data-wire-action="inspect" data-market-id="'+htmlEscape(key)+'" data-market-chain-id="'+ (m.chainId!==null&&m.chainId!==undefined&&m.chainId!==""&&Number.isFinite(Number(m.chainId))?String(m.chainId):"") +'" aria-label="Inspect market: '+htmlEscape(m.title)+', price '+htmlEscape(price)+'">'+marketAvatarHTML(m,27)+'<span class="wire-market-copy"><span class="wire-chain">'+htmlEscape(m.chain||m.type||"Market")+'</span><span class="wire-title" title="'+htmlEscape(m.title)+'">'+htmlEscape(m.title)+'</span></span><strong class="wire-price">'+price+'</strong><span class="wire-metric">VOL '+htmlEscape(m.volume||"—")+'</span><span class="wire-metric">LIQ '+htmlEscape(m.depth||"—")+'</span></button>';
  }).join(""):'<span class="wire-empty">No market records have been returned yet.</span>';
  const snapshot=marketFeed.updatedAt?"LAST SNAPSHOT · "+marketWireTime(marketFeed.updatedAt):"WAITING FOR FIRST SNAPSHOT";
  const sweep=wireState.lastSweep?(wireState.hasComparedSnapshot?wireState.lastSweep.checked+" markets checked · "+(wireState.lastSweep.changed?wireState.lastSweep.changed+" price changes":"no repricing"):""+wireState.lastSweep.checked+" records · first comparison pending"):"Awaiting first sync";
@@ -1982,10 +1983,10 @@ async function loadLiveMarkets(){
   if(!Array.isArray(payload.markets))throw new Error("The Seer endpoint returned an unexpected market response");
   const observedAt=new Date().toISOString();const live=payload.markets.map(m=>normalizeLiveMarket(m,observedAt)).filter(m=>m.fullId&&m.title);
   if(!live.length)throw new Error("The Seer endpoint returned no market records");
-  const previous=new Map(markets.filter(m=>m&&m.isLive).map(m=>[marketKey(m),m]));
+  const previous=new Map(markets.filter(m=>m&&m.isLive).map(m=>[wireMarketIdentity(m),m]));
   const changed=[];
-  for(const m of live){const old=previous.get(marketKey(m));if(old&&old.p!==null&&old.p!==undefined&&m.p!==null&&m.p!==undefined&&Math.abs(Number(m.p)-Number(old.p))>=0.2){changed.push({market:m,old});}}
-  wireState.changedIds=new Set(changed.map(x=>marketKey(x.market)));
+  for(const m of live){const old=previous.get(wireMarketIdentity(m));if(old&&old.p!==null&&old.p!==undefined&&m.p!==null&&m.p!==undefined&&Math.abs(Number(m.p)-Number(old.p))>=0.2){changed.push({market:m,old});}}
+  wireState.changedIds=new Set(changed.map(x=>wireMarketIdentity(x.market)));
   wireState.lastSweep={checked:live.length,changed:changed.length,at:new Date()};
   wireState.hasComparedSnapshot=previous.size>0;
   if(changed.length){
@@ -2037,7 +2038,7 @@ function sortedSpecialistMarkets(items=markets){return [...items].filter(m=>m&&m
 function marketActivityScore(m,records){const maxL=Math.max(1,...records.map(x=>marketMoneyMetric(x,"liquidity")));const maxV=Math.max(1,...records.map(x=>marketMoneyMetric(x,"volume")));return Math.round(100*(.6*Math.min(1,marketMoneyMetric(m,"liquidity")/maxL)+.4*Math.min(1,marketMoneyMetric(m,"volume")/maxV)))}
 function marketOutcomeDistribution(m){const entries=(m&&Array.isArray(m.outcomePrices)?m.outcomePrices:[]).filter(x=>x.p!==null&&Number.isFinite(Number(x.p)));if(entries.length<2)return '<div class="notice">This API record does not include two or more priced outcomes in the returned payload. No range or missing outcome has been invented.</div>';return '<div class="outcome-distribution">'+entries.map(x=>'<div class="distribution-row"><div class="distribution-title"><span>'+htmlEscape(x.name)+'</span><strong>'+Math.round(x.p)+'%</strong></div><div class="distribution-track"><i style="width:'+x.p+'%"></i></div></div>').join("")+'</div>'}
 async function loadFutarchyMarkets(){if(["loading","live"].includes(futarchyFeed.status))return;futarchyFeed.status="loading";futarchyFeed.error="";render();try{const response=await fetch("https://app.seer.pm/.netlify/functions/markets-search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chainsList:marketFeed.chains.map(String),marketStatusList:["open","answer_not_final","in_dispute"],limit:60,page:1,orderBy:"liquidityUSD",orderDirection:"desc",showConditionalMarkets:true})});if(!response.ok)throw new Error("Seer conditional-market endpoint returned HTTP "+response.status);const payload=await response.json();if(!Array.isArray(payload.markets))throw new Error("Unexpected conditional-market response");const observedAt=new Date().toISOString();futarchyMarkets=payload.markets.map(m=>normalizeLiveMarket(m,observedAt)).filter(m=>m.fullId&&m.title);futarchyFeed.count=Number(payload.count)||futarchyMarkets.length;futarchyFeed.status=futarchyMarkets.length?"live":"fallback";futarchyFeed.updatedAt=new Date()}catch(error){futarchyFeed.status="fallback";futarchyFeed.error=error&&error.message?error.message:"Conditional market data unavailable";futarchyMarkets=[]}render()}
-function currentFutarchyReference(){const pool=sortedSpecialistMarkets(markets);return pool.find(m=>marketKey(m)===state.futarchyMarketId&&historyChainMatches(m.chainId,state.futarchyMarketChainId))||pool[0]||null}
+function currentFutarchyReference(){const pool=sortedSpecialistMarkets(markets),selected=pool.find(m=>marketKey(m)===state.futarchyMarketId&&historyChainMatches(m.chainId,state.futarchyMarketChainId));if(selected)return selected;const fallback=pool[0]||null;if(fallback){state.futarchyMarketId=marketKey(fallback);state.futarchyMarketChainId=parseMarketChainId(fallback.chainId);}return fallback;}
 function updateFutarchyScenario(){const m=currentFutarchyReference();const node=document.getElementById("futarchyScenarioValue");const base=m&&m.p!==null&&m.p!==undefined?Number(m.p):null;if(!node)return;const shift=Number(state.scenarioDelta||0)*(state.pass?1:-1);node.textContent=base===null?"No live price":Math.round(Math.max(0,Math.min(100,base+shift)))+"%";const explain=document.getElementById("futarchyScenarioLabel");if(explain)explain.textContent=base===null?"The selected record has no returned price.":(state.pass?"Pass assumption: +":"Fail assumption: −")+Math.abs(Number(state.scenarioDelta||0))+" percentage points from the current "+Math.round(base)+"% price."}
 
 function marketKey(m){return String(m?.fullId||m?.id||m?.title||"")}
@@ -2718,7 +2719,8 @@ function normalizeLiveMarket(m,observedAt){
 function seerNormalizeHistorySample(x){
  if(!x||typeof x.key!=="string"||!x.key||!x.observedAt||!Number.isFinite(Date.parse(x.observedAt))||!Number.isFinite(Number(x.p))||Number(x.p)<0||Number(x.p)>100)return null;
  const outcomeIndex=Number.isInteger(Number(x.outcomeIndex))&&Number(x.outcomeIndex)>=0?Number(x.outcomeIndex):0;
- return Object.assign({},x,{id:String(x.id||x.key+"::"+outcomeIndex+"::"+x.observedAt),outcomeIndex,outcomeName:String(x.outcomeName||"Lead outcome"),p:Number(x.p),source:String(x.source||"legacy-browser-observation")});
+ const chain=parseMarketChainId(x.chainId),chainId=chain===0?null:chain;
+ return Object.assign({},x,{id:marketIdentity({id:x.key,chainId})+"::"+outcomeIndex+"::"+x.observedAt,chainId,outcomeIndex,outcomeName:String(x.outcomeName||"Lead outcome"),p:Number(x.p),source:String(x.source||"legacy-browser-observation")});
 }
 function seerPruneHistory(input){
  const byId=new Map();
@@ -2726,7 +2728,7 @@ function seerPruneHistory(input){
  const all=[...byId.values()].sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
  const counts=new Map(),kept=[];
  for(const sample of all.slice().reverse()){
-  const series=String(sample.chainId??"")+"::"+sample.key+"::"+sample.outcomeIndex;
+  const series=marketIdentity({id:sample.key,chainId:sample.chainId})+"::"+sample.outcomeIndex;
   const n=counts.get(series)||0;
   if(n<marketTrace.perMarketLimit){kept.push(sample);counts.set(series,n+1);}
  }
@@ -2915,15 +2917,15 @@ function exportMarketHistoryCSV(key,chainId){
  document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function renderObservedPriceTrace(m){
- const key=marketKey(m),outcomes=seerHistoryOutcomeList(m),firstIndex=outcomes.length?outcomes[0].index:0;
- const wanted=state.traceOutcomeSelections[key];
+ const key=marketKey(m),selectionKey=marketIdentity(m),outcomes=seerHistoryOutcomeList(m),firstIndex=outcomes.length?outcomes[0].index:0;
+ const wanted=state.traceOutcomeSelections[selectionKey];
  const selected=outcomes.find(o=>o.index===Number(wanted))||outcomes.find(o=>o.index===firstIndex)||null;
  const selectedIndex=selected?selected.index:firstIndex;
  const selectedName=selected?selected.name:"Lead outcome";
  const rows=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]).filter(x=>x.key===key&&Number(x.outcomeIndex||0)===selectedIndex&&historyChainMatches(x.chainId,m.chainId)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt)).slice(-120);
  const count=rows.length,current=selected?Number(selected.p):null,first=count?rows[0]:null,last=count?rows[count-1]:null;
  const formatTime=value=>value?new Date(value).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}):"—";
- const controls=(outcomes.length>1?'<label class="trace-outcome-control">Plot outcome <select data-trace-outcome data-market-key="'+htmlEscape(key)+'" aria-label="Historical outcome to plot">'+outcomes.map(o=>'<option value="'+o.index+'" '+(o.index===selectedIndex?'selected':'')+'>'+htmlEscape(o.name)+'</option>').join("")+'</select></label>':'');
+ const controls=(outcomes.length>1?'<label class="trace-outcome-control">Plot outcome <select data-trace-outcome data-market-key="'+htmlEscape(key)+'" data-market-chain-id="'+htmlEscape(String(m.chainId??""))+'" aria-label="Historical outcome to plot">'+outcomes.map(o=>'<option value="'+o.index+'" '+(o.index===selectedIndex?'selected':'')+'>'+htmlEscape(o.name)+'</option>').join("")+'</select></label>':'');
  const head='<div class="market-trace-head"><div><div class="category">OBSERVED PRICE HISTORY</div><h3>'+htmlEscape(selectedName)+' · price history</h3></div><div class="market-trace-head-tools"><span class="market-trace-count">'+count+' snapshots</span><button class="trace-export" type="button" data-market-action="export-history" data-market-id="'+htmlEscape(key)+'" data-market-chain-id="'+htmlEscape(String(m.chainId||0))+'">Export CSV ↓</button></div></div>'+controls;
  const sharedCount=rows.filter(x=>x.source==="seer-scheduled-capture").length;
  const sharedLast=marketTrace.sharedCollectedAt?new Date(marketTrace.sharedCollectedAt).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):"";
@@ -2960,7 +2962,7 @@ document.getElementById("main").addEventListener("click",function(event){
 document.getElementById("main").addEventListener("change",function(event){
  const select=event.target.closest("[data-trace-outcome]");
  if(!select)return;
- state.traceOutcomeSelections[String(select.dataset.marketKey||"")]=Number(select.value)||0;
+ state.traceOutcomeSelections[marketIdentity({id:String(select.dataset.marketKey||""),chainId:parseMarketChainId(select.dataset.marketChainId)})]=Number(select.value)||0;
  const scrollY=window.scrollY;
  render();
  window.scrollTo({top:scrollY,behavior:window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
