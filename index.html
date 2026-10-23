@@ -1826,6 +1826,29 @@ body[data-theme="dark"] .seer-f34-button.primary{color:#16121f}
   }
 }
 
+
+/* Phase 5: auditable source-to-source change forensics. */
+.seer-f5-panel{margin:16px 0;padding:17px;border:1px solid var(--line);border-radius:11px;background:var(--panel-raised)}
+.seer-f5-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.seer-f5-kicker{font-size:9px;font-weight:850;letter-spacing:.13em;color:var(--violet);text-transform:uppercase}
+.seer-f5-head h3{margin:5px 0 5px;font-size:16px;line-height:1.35}
+.seer-f5-head p{margin:0;color:var(--muted);font-size:11px;line-height:1.7;max-width:730px}
+.seer-f5-stamp{flex:0 0 auto;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font:700 9px "JetBrains Mono",monospace;white-space:nowrap}
+.seer-f5-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.seer-f5-stat{padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.seer-f5-stat span{display:block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.seer-f5-stat strong{display:block;margin-top:5px;font:750 12px "JetBrains Mono",monospace;overflow-wrap:anywhere}
+.seer-f5-delta-list{display:grid;gap:7px;margin-top:12px}
+.seer-f5-delta{display:grid;grid-template-columns:minmax(110px,.7fr) minmax(0,1.3fr);gap:12px;align-items:start;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.seer-f5-delta strong{font-size:11px}
+.seer-f5-delta p{margin:0;color:var(--muted);font-size:11px;line-height:1.65;overflow-wrap:anywhere}
+.seer-f5-status{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800}
+.seer-f5-status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green)}
+.seer-f5-status.changed::before{background:var(--amber)}
+.seer-f5-empty{padding:14px;border:1px dashed var(--line);border-radius:8px;background:var(--panel);color:var(--muted);font-size:11px;line-height:1.7}
+.seer-f5-foot{margin:10px 0 0;color:var(--muted);font-size:10px;line-height:1.65}
+@media(max-width:560px){.seer-f5-panel{padding:12px}.seer-f5-head{flex-direction:column}.seer-f5-summary{grid-template-columns:1fr 1fr}.seer-f5-stat:last-child{grid-column:1/-1}.seer-f5-delta{grid-template-columns:1fr;gap:5px}}
+
 </style>
 </head>
 <body data-theme="light">
@@ -3251,6 +3274,92 @@ document.getElementById("main").addEventListener("click",function(event){
  }
 });
 seerF34Mount();
+</script>
+
+
+<script>
+/* Phase 5 market-source change forensics.
+   Compares two scheduled source snapshots. Differences are descriptive and never described as causes. */
+function seerF5Number(value){
+ if(value===null||value===undefined||value==="")return null;
+ const n=Number(value);return Number.isFinite(n)?n:null;
+}
+function seerF5Money(value){
+ const n=seerF5Number(value);
+ if(n===null)return "Not returned";
+ return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:4}).format(n);
+}
+function seerF5Snapshots(m){
+ const key=marketKey(m);
+ const source=Array.isArray(marketTrace.sharedSamples)?marketTrace.sharedSamples:[];
+ const filtered=source.filter(x=>x&&x.key===key&&(!Number.isFinite(Number(m.chainId))||!Number.isFinite(Number(x.chainId))||Number(x.chainId)===Number(m.chainId))&&x.source==="seer-scheduled-capture"&&Number(x.schemaVersion)>=2&&x.sourceFingerprint&&x.observedAt);
+ const grouped=new Map();
+ for(const row of filtered){
+  const snapshotKey=String(row.snapshotId||row.observedAt);
+  let snap=grouped.get(snapshotKey);
+  if(!snap){
+   snap={snapshotId:snapshotKey,observedAt:row.observedAt,sourceFingerprint:row.sourceFingerprint,chainId:row.chainId,title:row.title,marketType:row.marketType,marketStatus:row.marketStatus,outcomeCount:row.outcomeCount,outcomeNames:Array.isArray(row.outcomeNames)?row.outcomeNames:[],volumeUSD:row.volumeUSD,liquidityUSD:row.liquidityUSD,verificationStatus:row.verificationStatus,sourceUpdatedAt:row.sourceUpdatedAt,resolutionCriteria:row.resolutionCriteria,resolutionCriteriaField:row.resolutionCriteriaField,prices:{}};
+   grouped.set(snapshotKey,snap);
+  }
+  snap.prices[Number(row.outcomeIndex)]= {index:Number(row.outcomeIndex),name:String(row.outcomeName||"Outcome"),p:seerF5Number(row.p)};
+ }
+ return [...grouped.values()].sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+}
+function seerF5DiffRows(previous,current){
+ const result=[],add=(label,description,changed)=>result.push({label,description,changed:!!changed});
+ for(const key of ["marketType","marketStatus","outcomeCount"]){
+  const a=previous[key],b=current[key];
+  if(a!==null&&a!==undefined&&b!==null&&b!==undefined&&String(a)!==String(b))add(key==="marketType"?"Market format":key==="marketStatus"?"Market status":"Outcome count",String(a)+" → "+String(b),true);
+ }
+ for(const [key,label] of [["volumeUSD","Reported volume"],["liquidityUSD","Reported liquidity"]]){
+  const a=seerF5Number(previous[key]),b=seerF5Number(current[key]);
+  if(a!==null&&b!==null){
+   if(a!==b)add(label, key==="volumeUSD"?seerF5Money(a)+" → "+seerF5Money(b)+" (Δ "+(b-a>=0?"+":"")+seerF5Money(b-a)+")":seerF5Money(a)+" → "+seerF5Money(b)+" (Δ "+(b-a>=0?"+":"")+seerF5Money(b-a)+")",true);
+   else add(label,"No difference in the captured field ("+seerF5Money(b)+")",false);
+  }else add(label,"Not comparable: the field was not present in both source snapshots.",false);
+ }
+ if(previous.verificationStatus!==null&&previous.verificationStatus!==undefined&&current.verificationStatus!==null&&current.verificationStatus!==undefined){
+  add("Verification",String(previous.verificationStatus)+" → "+String(current.verificationStatus),String(previous.verificationStatus)!==String(current.verificationStatus));
+ }else add("Verification","Not comparable: verification status was not returned in both captures.",false);
+ if(previous.resolutionCriteria&&current.resolutionCriteria){
+  const same=String(previous.resolutionCriteria)===String(current.resolutionCriteria);
+  add("Resolution criteria",same?"No text difference in the returned criteria.":"Returned criteria text changed; review the market rules before relying on prior analysis.",!same);
+ }else add("Resolution criteria","Not comparable: the criteria field was absent in at least one capture. This is not treated as proof that the market rules changed.",false);
+ const priceIndices=[...new Set([...Object.keys(previous.prices),...Object.keys(current.prices)])].map(Number).sort((a,b)=>a-b);
+ for(const index of priceIndices){
+  const a=previous.prices[index],b=current.prices[index];
+  if(!a||!b||a.p===null||b.p===null)continue;
+  const delta=b.p-a.p;
+  add("Outcome · "+(b.name||a.name),a.p.toFixed(1)+"% → "+b.p.toFixed(1)+"% ("+(delta>=0?"+":"")+delta.toFixed(1)+" pp)",Math.abs(delta)>=0.05);
+ }
+ add("Source fingerprint",previous.sourceFingerprint===current.sourceFingerprint?"SHA-256 matches between captures.":"SHA-256 differs between captures; the normalized source-field payload changed.",previous.sourceFingerprint!==current.sourceFingerprint);
+ return result;
+}
+function seerF5SourceChangeMarkup(m){
+ const snapshots=seerF5Snapshots(m);
+ if(!snapshots.length){
+  return '<section class="seer-f5-panel" id="seerSourceForensics" aria-label="Source change forensics"><div class="seer-f5-head"><div><div class="seer-f5-kicker">SOURCE CHANGE FORENSICS / V1</div><h3>Audit changes between source captures.</h3><p>Forensics compares normalized source fields between scheduled API snapshots. It does not infer a cause from temporal co-occurrence.</p></div><span class="seer-f5-stamp">Awaiting source snapshot</span></div><div class="seer-f5-empty">'+htmlEscape(marketTrace.sharedStatus==="unavailable"?"The shared history archive is unavailable. Try again after the archive loads.":"This exact market has not yet appeared in a metadata-enriched scheduled capture. The collector records a bounded sample of open markets per chain; absence here does not mean the market is inactive.")+'</div></section>';
+ }
+ const last=snapshots[snapshots.length-1],previous=snapshots.length>1?snapshots[snapshots.length-2]:null;
+ const stamp=value=>{const date=new Date(value||"");return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):"Time not returned";};
+ if(!previous){
+  return '<section class="seer-f5-panel" id="seerSourceForensics" aria-label="Source change forensics"><div class="seer-f5-head"><div><div class="seer-f5-kicker">SOURCE CHANGE FORENSICS / V1</div><h3>Audit changes between source captures.</h3><p>Snapshots include source-reported prices, volume, liquidity, verification and resolution criteria where present. Values are compared only when both captures contain the relevant field.</p></div><span class="seer-f5-stamp">One fingerprinted capture</span></div><div class="seer-f5-summary"><div class="seer-f5-stat"><span>Last capture</span><strong>'+htmlEscape(stamp(last.observedAt))+'</strong></div><div class="seer-f5-stat"><span>Market format</span><strong>'+htmlEscape(last.marketType||"Not returned")+'</strong></div><div class="seer-f5-stat"><span>Source hash</span><strong>'+htmlEscape(String(last.sourceFingerprint).slice(0,12))+'…</strong></div></div><div class="seer-f5-empty">The first metadata-enriched capture is recorded. A second scheduled capture is required before the interface can show field-level differences. Earlier history remains available for price charts but did not contain the new source metadata.</div><p class="seer-f5-foot">Source fingerprint: SHA-256 over a normalized market payload. It is a reproducible comparison aid, not a digital signature or on-chain attestation.</p></section>';
+ }
+ const rows=seerF5DiffRows(previous,last);
+ const changeCount=rows.filter(x=>x.changed).length;
+ const markup=rows.map(row=>'<div class="seer-f5-delta"><strong>'+htmlEscape(row.label)+'</strong><p>'+htmlEscape(row.description)+'</p></div>').join("");
+ const firstDate=Date.parse(previous.observedAt),lastDate=Date.parse(last.observedAt);
+ const span=Number.isFinite(firstDate)&&Number.isFinite(lastDate)?Math.max(0,Math.round((lastDate-firstDate)/60000))+" min apart":"Interval unavailable";
+ return '<section class="seer-f5-panel" id="seerSourceForensics" aria-label="Source change forensics"><div class="seer-f5-head"><div><div class="seer-f5-kicker">SOURCE CHANGE FORENSICS / V1</div><h3>What changed between captures?</h3><p>Side-by-side field comparison across the two most recent metadata-enriched scheduled API observations. A change is evidence that the returned payload differed—not an explanation of why.</p></div><span class="seer-f5-stamp">'+changeCount+' changed signal'+(changeCount===1?"":"s")+'</span></div><div class="seer-f5-summary"><div class="seer-f5-stat"><span>Earlier capture</span><strong>'+htmlEscape(stamp(previous.observedAt))+'</strong></div><div class="seer-f5-stat"><span>Latest capture</span><strong>'+htmlEscape(stamp(last.observedAt))+'</strong></div><div class="seer-f5-stat"><span>Capture interval</span><strong>'+htmlEscape(span)+'</strong></div></div><div class="seer-f5-delta-list">'+markup+'</div><p class="seer-f5-foot">The fingerprint is SHA-256 over normalized prices, outcome labels, market format/status, source-reported volume/liquidity, verification, upstream timestamp and any explicitly returned resolution criteria. A changed fingerprint can reflect any of those fields. This is an audit hint, not a signed attestation. Reported volume/liquidity semantics are not inferred, and no movement is attributed to a cause.</p></section>';
+}
+const seerF5BaseMarketDetail=renderMarketDetail;
+renderMarketDetail=function(m){
+ const markup=seerF5BaseMarketDetail.apply(this,arguments);
+ if(!m)return markup;
+ const section=seerF5SourceChangeMarkup(m);
+ const anchor='<div class="market-detail-actions">';
+ return markup.includes(anchor)?markup.replace(anchor,section+anchor):markup.replace("</section>",section+"</section>");
+};
 </script>
 
 </body>
