@@ -112,6 +112,15 @@ jobs:
                 await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
               }
               await page.waitForTimeout(500);
+              // Rendering the live market response and focused controls can shift scroll after navigation.
+              // Reset immediately before geometry assertions so sticky-nav layout is measured at the route's top.
+              await page.evaluate(() => {
+                document.documentElement.style.scrollBehavior = "auto";
+                document.body.style.scrollBehavior = "auto";
+                if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+                window.scrollTo(0, 0);
+              });
+              await page.waitForFunction(() => Math.abs(window.scrollY) < 2, null, { timeout: 5000 });
 
               const metrics = await page.evaluate(() => {
                 const main = document.querySelector("#main");
