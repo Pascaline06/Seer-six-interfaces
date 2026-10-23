@@ -245,6 +245,8 @@ jobs:
                 const resumedPressed = await page.locator('#marketWire button[data-wire-action="pause"]').getAttribute("aria-pressed");
                 if (resumedClass?.includes("is-paused") || resumedPressed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": resume control did not restore ticker motion");
               }
+              const wireText = await page.locator("#marketWire").innerText();
+              if (/Price changes\s*\(0\)/.test(wireText)) report.failures.push(viewport.name+"/"+theme+"/"+route+": empty price-change history control should not be shown");
               }
               // Market Wire: inspect must route to the exact source record and Refresh must complete/recover.
               if (route === "app" && viewport.name === "desktop" && theme === "dark") {
@@ -313,6 +315,10 @@ jobs:
                 }
               }
 
+              if (route === "docs") {
+                if (await page.locator("#main .docs-card").count() !== 6) report.failures.push(`${viewport.name}/${theme}/docs: documentation must explain all six interfaces`);
+                if (!(await page.locator("#main").innerText()).includes("History provenance")) report.failures.push(`${viewport.name}/${theme}/docs: ticker behavior and history provenance are undocumented`);
+              }
               const screenshot = `artifacts/${viewport.name}-${theme}-${route}.png`;
               await page.screenshot({ path: screenshot, fullPage: true, animations: "disabled" });
               const result = { viewport: viewport.name, theme, route, screenshot, ...metrics, pageErrors: [...pageErrors] };
@@ -327,6 +333,32 @@ jobs:
               const expectedToggleLabel = theme === "light" ? "Dark" : "Light";
               if (metrics.paletteBase !== expectedPaletteBase) report.failures.push(viewport.name+"/"+theme+"/"+route+": wrong brand palette base "+metrics.paletteBase+" (expected "+expectedPaletteBase+")");
               if (metrics.paletteAccent !== expectedPaletteAccent) report.failures.push(viewport.name+"/"+theme+"/"+route+": wrong contrast accent "+metrics.paletteAccent+" (expected "+expectedPaletteAccent+")");
+              const contrastMetrics = await page.evaluate(() => {
+                const root = getComputedStyle(document.body);
+                const toLuminance = (value) => {
+                  const match = value.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+                  if (!match) return null;
+                  let hex = match[1];
+                  if (hex.length === 3) hex = hex.split("").map(ch => ch + ch).join("");
+                  const rgb = [0,2,4].map(i => parseInt(hex.slice(i,i+2),16)/255)
+                    .map(v => v <= .04045 ? v/12.92 : Math.pow((v+.055)/1.055,2.4));
+                  return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
+                };
+                const contrast = (a,b) => {
+                  const x = toLuminance(a), y = toLuminance(b);
+                  if (x === null || y === null) return 0;
+                  return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+                };
+                const panel = root.getPropertyValue("--panel").trim();
+                return {
+                  primary: contrast(root.getPropertyValue("--text"),panel),
+                  secondary: contrast(root.getPropertyValue("--muted"),panel),
+                  tertiary: contrast(root.getPropertyValue("--dim"),panel)
+                };
+              });
+              for (const [label,value] of Object.entries(contrastMetrics)) {
+                if (value < 4.5) report.failures.push(viewport.name+"/"+theme+"/"+route+": "+label+" text contrast is below 4.5:1 ("+value.toFixed(2)+":1)");
+              }
               if (!metrics.siteBackgroundImage.includes("linear-gradient") || !metrics.mainPanelBackgroundImage.includes("linear-gradient")) report.failures.push(viewport.name+"/"+theme+"/"+route+": lavender surface gradients are missing");
               if (metrics.themeToggleLabel !== expectedToggleLabel) report.failures.push(viewport.name+"/"+theme+"/"+route+": theme toggle does not offer the alternate theme ("+metrics.themeToggleLabel+")");
               if (metrics.unhandledEnabledButtons.length) report.failures.push(viewport.name+"/"+theme+"/"+route+": enabled buttons without an inline or delegated action: "+metrics.unhandledEnabledButtons.join(", "));
@@ -906,6 +938,16 @@ jobs:
                   const avatars = await items.locator(".market-avatar").count();
                   if (animation !== "signalTickerRun") report.failures.push(`${viewport.name}/${theme}: home Market Tape stopped after route navigation`);
                   if (count < 1 || avatars !== count) report.failures.push(`${viewport.name}/${theme}: home Market Tape is missing per-market avatars`);
+                  const firstTapeMarket = items.first();
+                  const tapeLabel = await firstTapeMarket.getAttribute("aria-label") || "";
+                  const expectedTapeTitle = tapeLabel.replace(/^Open market in explorer:\\s*/, "").trim();
+                  await firstTapeMarket.evaluate(el => el.click());
+                  const openedFromTape = await page.waitForFunction((wanted) => {
+                    const main = document.querySelector("#main");
+                    const detail = document.querySelector("#marketDetail");
+                    return main?.dataset.page === "app" && detail?.querySelector("h2")?.innerText.trim() === wanted;
+                  }, expectedTapeTitle, { timeout: 8000 }).then(() => true).catch(() => false);
+                  if (!openedFromTape) report.failures.push(`${viewport.name}/${theme}: clicking a homepage Market Tape item did not open that exact market in Explorer`);
                 }
               }
               if (metrics.marketFeedStatus !== "live") report.warnings.push(`${viewport.name}/${theme}/${route}: live API status was ${metrics.marketFeedStatus}; check CORS/API availability`);
