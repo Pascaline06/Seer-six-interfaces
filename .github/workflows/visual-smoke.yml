@@ -361,6 +361,27 @@ jobs:
                       if (captureInfo.mixedChainSnapshots > 0) {
                         report.failures.push("desktop/dark/app: Source Change Forensics included a snapshot without an exact matching chain identity");
                       }
+                      const identityProbe = await page.evaluate(() => {
+                        const original = marketTrace.sharedSamples;
+                        const key = "__qa_chain_identity_collision__";
+                        const make = (chainId, snapshotId, minutes) => ({
+                          key, chainId, snapshotId, source: "seer-scheduled-capture", schemaVersion: 2,
+                          sourceFingerprint: "qa-" + snapshotId,
+                          observedAt: new Date(Date.UTC(2026, 9, 23, 12, minutes)).toISOString(),
+                          outcomeIndex: 0, outcomeName: "Yes", p: 50
+                        });
+                        marketTrace.sharedSamples = [
+                          make(8453, "qa-base", 0),
+                          make(10, "qa-optimism", 1),
+                          make(null, "qa-missing-chain", 2)
+                        ];
+                        const snapshots = seerF5Snapshots({ id: key, fullId: key, chainId: 8453 });
+                        marketTrace.sharedSamples = original;
+                        return snapshots.map(snapshot => snapshot.chainId);
+                      });
+                      if (identityProbe.length !== 1 || Number(identityProbe[0]) !== 8453) {
+                        report.failures.push("desktop/dark/app: chain-identity regression fixture did not exclude wrong-network and missing-chain snapshots");
+                      }
                       if (captureInfo.snapshots >= 2 && !forensicsText.includes("What changed between captures?")) {
                         report.failures.push("desktop/dark/app: two fingerprinted captures exist but their source-diff ledger is not rendered");
                       }
