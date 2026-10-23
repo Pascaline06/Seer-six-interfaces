@@ -2535,10 +2535,15 @@ function seerResolutionField(raw){
  return {field:"",text:""};
 }
 function seerStructure(raw,outcomes,parent){
- const count=outcomes.length,kind=String(raw&& (raw.marketType||raw.marketFormat||raw.type)||"").toLowerCase();
+ const count=outcomes.length,kind=String(raw&&(raw.marketType||raw.marketFormat||raw.marketKind||raw.type)||"").toLowerCase().replace(/[\s_-]+/g,"");
  if(/futarchy/.test(kind))return "Futarchy";
+ if(/multiscalar/.test(kind))return "Multi-scalar";
+ if(/scalar/.test(kind))return "Scalar";
+ if(/multicategorical/.test(kind))return "Multi-categorical";
+ if(/categorical/.test(kind))return "Categorical"+(count?" ("+count+" listed outcomes)":"");
+ if(/binary|yesno/.test(kind))return "Binary";
  if(parent)return "Conditional market";
- if(count===2)return "Two-outcome";
+ if(count===2)return "Two-outcome (source format unspecified)";
  if(count>2)return "Multi-outcome ("+count+")";
  if(count===1)return "One returned outcome";
  return "Outcome structure not returned";
@@ -2712,7 +2717,7 @@ function renderMarketEvidence(m){
   return '<section class="market-evidence" aria-label="Source and provenance ledger"><div class="market-evidence-head"><div><div class="category">SOURCE &amp; PROVENANCE</div><h3>Evidence record unavailable</h3><p>This record is illustrative or was saved without a source-evidence envelope. It is not being presented as a verified live quote.</p></div><span class="evidence-state unknown">No source envelope</span></div><div class="evidence-facts"><div class="evidence-fact"><span>Record type</span><strong>Illustrative / saved record</strong></div><div class="evidence-fact"><span>History persistence</span><strong>'+htmlEscape(marketTrace.persistence||"Browser-local")+'</strong></div><div class="evidence-fact"><span>Market structure</span><strong>Not verified from source metadata</strong></div></div></section>';
  }
  const fresh=seerFreshness(ev.observation&&ev.observation.capturedAt);
- const fmt=value=>{const date=new Date(value||"");return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium"}):"Not returned";};
+ const fmt=value=>{let candidate=value;if(typeof candidate==="number"||(typeof candidate==="string"&&/^\d{10,13}$/.test(candidate))){const numeric=Number(candidate);candidate=new Date(String(candidate).length<=10?numeric*1000:numeric);}const date=candidate instanceof Date?candidate:new Date(candidate||"");return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium"}):"Not returned";};
  const fields=ev.fields||{};
  const fieldRows=[
   ["Market title",fields.title,"Title string returned by source"],
@@ -2725,7 +2730,7 @@ function renderMarketEvidence(m){
  const rows=fieldRows.map(item=>{
   const f=item[1]||{},reported=f.status==="reported";
   const val=item[0]==="Market title"?String(f.value||m.title||"Not returned"):
-   item[0]==="Outcome prices"?(reported?(Array.isArray(f.value)?f.value.map(v=>String(v)).join(", "):"Returned"):"Not returned"):
+   item[0]==="Outcome prices"?(reported?(Array.isArray(m.outcomePrices)&&m.outcomePrices.length?m.outcomePrices.map(o=>String(o.name||"Outcome")+": "+(o.p===null||o.p===undefined?"price not returned":Number(o.p).toFixed(1)+"%")).join(" · "):"Returned odds available"):"Not returned"):
    item[0]==="Lifetime volume"?(reported?compactUSD(f.value):"Not reported"):
    item[0]==="Reported liquidity"?(reported?compactUSD(f.value):"Not reported"):
    item[0]==="Verification"?(reported?String(f.value):"Not returned"):
