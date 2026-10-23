@@ -346,8 +346,8 @@ jobs:
                     if (await forensicsPanel.count() !== 1) {
                       report.failures.push("desktop/dark/app: Source Change Forensics panel is missing from the market inspector");
                     } else {
-                      const forensicsText = await forensicsPanel.innerText();
-                      if (!forensicsText.includes("SOURCE CHANGE FORENSICS / V1") || !forensicsText.includes("normalized source fields") || !forensicsText.includes("not an explanation")) {
+                      const forensicsText = (await forensicsPanel.innerText()).toLowerCase();
+                      if (!forensicsText.includes("source change forensics / v1") || !forensicsText.includes("normalized source fields") || !forensicsText.includes("not an explanation")) {
                         report.failures.push("desktop/dark/app: source forensics does not explain provenance and non-causal interpretation");
                       }
                       const captureInfo = await page.evaluate(key => {
