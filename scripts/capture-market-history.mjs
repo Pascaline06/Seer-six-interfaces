@@ -61,7 +61,7 @@ async function main() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
   let response, payload;
-  const observedAt = new Date().toISOString();
+  let observedAt;
   try {
     response = await fetch(ENDPOINT, {
       method: "POST",
@@ -80,6 +80,7 @@ async function main() {
     if (!response.ok) throw new Error("Seer API returned HTTP " + response.status);
     payload = await response.json();
     if (!payload || !Array.isArray(payload.markets)) throw new Error("Seer API returned no markets array");
+    observedAt = new Date().toISOString();
   } finally {
     clearTimeout(timeout);
   }
