@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<meta name="theme-color" content="#101013">
+<meta name="theme-color" content="#f5f0ff">
 <meta name="description" content="Seer Six: six decision interfaces for exploring market signals, conditional forecasts, opportunity selection and comparative risk.">
 <meta property="og:title" content="Seer Six — Markets for better decisions">
 <meta property="og:description" content="Explore the signal. Inspect the evidence. Understand the limits.">
@@ -1206,14 +1206,359 @@ body[data-theme="light"] .nav button.active{background:linear-gradient(100deg,#e
 .derived-frame-notice strong{color:var(--signal-gold,var(--amber))}
 body[data-theme="light"] .derived-frame-notice{background:linear-gradient(110deg,#fff4e3,#f4f0ff);border-color:#eed8b6;color:#5d5265}
 
+
+/* LAVENDER BRAND DIRECTION — light lavender is the default; dark mode stays in the plum family. */
+:root{
+  color-scheme:light;
+  --bg:#f5f0ff;
+  --surface:#fcf9ff;
+  --panel:#ffffff;
+  --panel-raised:#eee5ff;
+  --line:#d9ccf3;
+  --text:#2c2043;
+  --muted:#635576;
+  --dim:#85779c;
+  --violet:#9b7ce6;
+  --violet-strong:#7b55d2;
+  --purple:#6943b4;
+  --green:#277b62;
+  --amber:#99650d;
+  --red:#b94761;
+  --signal-cyan:#8e76dc;
+  --signal-blue:#9c89e8;
+  --signal-mint:#c6b2f5;
+  --signal-gold:#ba83cb;
+  --signal-rose:#d08ac4;
+}
+body[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f5f0ff;
+  --surface:#fcf9ff;
+  --panel:#ffffff;
+  --panel-raised:#eee5ff;
+  --line:#d9ccf3;
+  --text:#2c2043;
+  --muted:#635576;
+  --dim:#85779c;
+  --violet:#9b7ce6;
+  --violet-strong:#7b55d2;
+  --purple:#6943b4;
+  --green:#277b62;
+  --amber:#99650d;
+  --red:#b94761;
+  --signal-cyan:#8e76dc;
+  --signal-blue:#9c89e8;
+  --signal-mint:#c6b2f5;
+  --signal-gold:#ba83cb;
+  --signal-rose:#d08ac4;
+  background:
+    radial-gradient(ellipse at 83% -8%,rgba(174,145,245,.23),transparent 38%),
+    radial-gradient(ellipse at 5% 30%,rgba(218,198,255,.25),transparent 40%),
+    linear-gradient(180deg,#f7f3ff 0%,#f3edff 57%,#f8f5ff 100%);
+  color:var(--text);
+}
+body[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#1a1227;
+  --surface:#21172f;
+  --panel:#291d3b;
+  --panel-raised:#38264f;
+  --line:#4a3865;
+  --text:#f8f3ff;
+  --muted:#d0c2e7;
+  --dim:#a090b8;
+  --violet:#d1bcff;
+  --violet-strong:#b294f0;
+  --purple:#9977e6;
+  --green:#83d9b5;
+  --amber:#f4cf91;
+  --red:#ff9bad;
+  --signal-cyan:#ccbaff;
+  --signal-blue:#b6a0f3;
+  --signal-mint:#d6c6f7;
+  --signal-gold:#e2bee9;
+  --signal-rose:#efb4e0;
+  background:
+    radial-gradient(ellipse at 83% -8%,rgba(143,103,211,.22),transparent 39%),
+    radial-gradient(ellipse at -8% 37%,rgba(95,57,140,.17),transparent 36%),
+    linear-gradient(180deg,#1a1227 0%,#20152f 50%,#1b142a 100%);
+  color:var(--text);
+}
+body[data-theme="light"] .top{
+  background:rgba(250,247,255,.91);
+  border-bottom-color:#ded2f5;
+  box-shadow:0 8px 28px rgba(74,47,124,.07);
+}
+body[data-theme="light"] .side{
+  background:linear-gradient(180deg,rgba(228,213,255,.79),rgba(243,236,255,.83) 53%,rgba(248,244,255,.55));
+  border-right-color:#ded2f5;
+}
+body[data-theme="light"] .main:before{
+  background:
+    radial-gradient(ellipse at 83% 8%,rgba(181,151,247,.16),transparent 48%),
+    radial-gradient(ellipse at 4% 42%,rgba(211,191,255,.14),transparent 40%),
+    repeating-linear-gradient(137deg,transparent 0 42px,rgba(129,91,190,.022) 43px 44px);
+}
+body[data-theme="light"] .nav button.active{
+  background:linear-gradient(100deg,#e5d8ff,#f0e8ff 75%);
+  border-color:#cdb9f4;
+  box-shadow:inset 3px 0 #8d6cda;
+  color:#4e337e;
+}
+body[data-theme="light"] .panel{
+  background:linear-gradient(145deg,#ffffff 0%,#f8f4ff 82%)!important;
+  border-color:#dfd3f5;
+  box-shadow:inset 0 1px rgba(255,255,255,.95),0 13px 32px rgba(69,43,118,.065);
+}
+body[data-theme="light"] .stats .panel{
+  background:linear-gradient(145deg,#fff,#f0e8ff 100%)!important;
+}
+body[data-theme="light"] .stats .panel:nth-child(2){
+  background:linear-gradient(145deg,#fff,#eee8ff 100%)!important;
+}
+body[data-theme="light"] .stats .panel:nth-child(3){
+  background:linear-gradient(145deg,#fff,#f6eaff 100%)!important;
+}
+body[data-theme="light"] .stats .panel:after{
+  height:2px;
+  background:linear-gradient(90deg,#9d7ae6,#c2a8f5,transparent 92%);
+}
+body[data-theme="light"] .market-record{
+  background:linear-gradient(145deg,#fff,#f4edff 100%)!important;
+  border-color:#ddd0f5!important;
+  box-shadow:inset 0 1px #fff,0 14px 32px rgba(75,48,129,.07)!important;
+}
+body[data-theme="light"] .market-record:nth-child(4n+1){background:linear-gradient(145deg,#fff,#f0e7ff 100%)!important}
+body[data-theme="light"] .market-record:nth-child(4n+2){background:linear-gradient(145deg,#fff,#f2ecff 100%)!important}
+body[data-theme="light"] .market-record:nth-child(4n+3){background:linear-gradient(145deg,#fff,#eeeaff 100%)!important}
+body[data-theme="light"] .market-record:nth-child(4n){background:linear-gradient(145deg,#fff,#f8ebfb 100%)!important}
+body[data-theme="light"] .market-record:hover{
+  border-color:#bca2f0!important;
+  box-shadow:inset 0 1px #fff,0 20px 40px rgba(79,49,139,.13)!important;
+}
+body[data-theme="light"] .market-probability-block{
+  background:linear-gradient(115deg,#f0e7ff,#f9f4ff 74%);
+  border-color:#dfd1f8;
+}
+body[data-theme="light"] .market-probability-track{background:#dfd4f2}
+body[data-theme="light"] .market-probability-track>span{background:linear-gradient(90deg,#9e7bea,#bb9cf2,#d1b7fb)}
+body[data-theme="light"] .market-side-picker{
+  border-color:#d9c9f3;
+  background:linear-gradient(125deg,#f0e7ff,#fbf8ff 78%);
+}
+body[data-theme="light"] .market-side-choice{background:linear-gradient(145deg,#fff,#f6f1ff)}
+body[data-theme="light"] .market-detail{
+  background:linear-gradient(130deg,#e9deff,#fbf8ff 68%)!important;
+  border-color:#cdb9f4;
+}
+body[data-theme="light"] .compare-workbench{
+  background:linear-gradient(130deg,#eee5ff,#fff 52%,#f4e8ff)!important;
+  border-color:#d5c3f3;
+}
+body[data-theme="light"] .explorer-controls{
+  background:linear-gradient(135deg,#ece1ff,#fff 59%,#f7efff)!important;
+}
+body[data-theme="light"] .market-journey{
+  background:linear-gradient(120deg,#ece1ff,#fbf8ff 54%,#f2e8ff)!important;
+  border-color:#ded0f5;
+}
+body[data-theme="light"] .market-wire{
+  background:linear-gradient(110deg,#ede2ff,#e3d3ff 48%,#f1e6ff)!important;
+  border-color:#d1bdf2!important;
+  box-shadow:inset 0 1px #fff,0 10px 28px rgba(74,46,128,.08);
+}
+body[data-theme="light"] .market-wire .market-wire-head,
+body[data-theme="light"] .market-wire .market-wire-tools{
+  background:rgba(248,243,255,.84);
+  border-color:#d8c8f3;
+}
+body[data-theme="light"] .market-wire .wire-item{
+  border-right-color:rgba(132,93,202,.2);
+}
+body[data-theme="light"] .market-wire .wire-item:hover{background:rgba(176,146,239,.22)}
+body[data-theme="light"] .signal-desk{
+  background:linear-gradient(135deg,#eee5ff,#fbf9ff 56%,#f4eaff)!important;
+  border-color:#d9ccf3;
+}
+body[data-theme="light"] .signal-desk-head{
+  background:linear-gradient(105deg,#e5d8ff,#f0e7ff 80%,transparent);
+}
+body[data-theme="light"] .signal-story-lead{
+  background:linear-gradient(140deg,#eee4ff,#faf6ff 78%);
+  border-top-color:#a98be9;
+}
+body[data-theme="light"] .signal-story:nth-child(2){border-top-color:#b5a0ee}
+body[data-theme="light"] .signal-story:nth-child(3){border-top-color:#c0a4e8}
+body[data-theme="light"] .signal-story:nth-child(4){border-top-color:#d4a3db}
+body[data-theme="light"] .market-pulse{
+  background:linear-gradient(105deg,#eee4ff,#f7f1ff 64%,#f3e8ff)!important;
+  border-color:#ded0f5;
+}
+body[data-theme="light"] .home-feature-market{
+  background:linear-gradient(145deg,#f0e6ff,#f8f3ff 78%)!important;
+  border-color:#d8c7f4!important;
+}
+body[data-theme="light"] .pill.violet{
+  color:#5b3a98;
+  background:#ece2ff;
+  border-color:#d4c1f4;
+}
+body[data-theme="light"] .button.primary{
+  color:#fff;
+  background:linear-gradient(115deg,#7952cc,#8b67dc 50%,#a183e8);
+  border-color:#9775df;
+  box-shadow:0 8px 22px rgba(109,71,181,.22);
+}
+body[data-theme="light"] .button.primary:hover{
+  background:linear-gradient(115deg,#7049c1,#805bd2 50%,#9674e1);
+}
+body[data-theme="light"] .top-app-cta{
+  background:linear-gradient(120deg,#8058d4,#9b78e6);
+  border-color:#9d7ce7;
+  color:#fff;
+  box-shadow:0 6px 18px rgba(106,67,180,.17);
+}
+body[data-theme="light"] .market-avatar-fallback{
+  background:radial-gradient(circle at 28% 22%,#e2d4ff 0%,#9e7de7 35%,#7250ba 100%);
+  color:#fff;
+}
+body[data-theme="light"] .site-footer{
+  background:linear-gradient(180deg,#f4efff,#f8f5ff);
+  border-top-color:#ded2f4;
+}
+body[data-theme="light"] .site-footer-bottom{border-color:#ded2f4}
+/* The Market Tape is a distinct lavender instrument panel, not another generic card. */
+body[data-theme="light"] .signal-ticker.market-tape{
+  background:linear-gradient(108deg,#f0e7ff 0%,#dfd0ff 30%,#d4c2fc 62%,#ecddff 100%)!important;
+  border-top:1px solid #b9a0ed;
+  border-bottom:1px solid #cab7f1;
+  box-shadow:inset 0 1px #fff,0 7px 22px rgba(91,60,151,.11);
+}
+body[data-theme="light"] .signal-ticker.market-tape:before{
+  background:linear-gradient(90deg,#7650c9 0%,#9671df 34%,#bd9cf1 70%,#dcb2e7 100%);
+}
+body[data-theme="light"] .signal-ticker.market-tape .signal-ticker-label{
+  background:linear-gradient(180deg,#ded0ff,#e9deff)!important;
+  border-right-color:#c8b4f1;
+  color:#4a3178;
+}
+body[data-theme="light"] .signal-ticker.market-tape .signal-ticker-label small{color:#6c4da9}
+body[data-theme="light"] .signal-ticker.market-tape .signal-ticker-live-dot{
+  background:#7d52ca;
+  box-shadow:0 0 0 4px rgba(125,82,202,.1),0 0 13px rgba(125,82,202,.22);
+}
+body[data-theme="light"] .signal-ticker.market-tape .signal-ticker-viewport{
+  background:linear-gradient(90deg,rgba(142,107,217,.09),transparent 25%,rgba(190,160,242,.1));
+}
+body[data-theme="light"] .signal-ticker.market-tape .market-tape-item{
+  min-height:58px;
+  border-right:1px solid rgba(112,78,174,.2);
+  background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.07));
+}
+body[data-theme="light"] .signal-ticker.market-tape .market-tape-item:nth-child(3n+2){
+  background:linear-gradient(180deg,rgba(175,143,235,.17),rgba(175,143,235,.04));
+}
+body[data-theme="light"] .signal-ticker.market-tape .signal-ticker-copy .signal-ticker-kind{color:#7653bb}
+body[data-theme="light"] .signal-ticker.market-tape .signal-ticker-copy strong{color:#302046}
+body[data-theme="light"] .signal-ticker.market-tape .signal-ticker-copy .signal-ticker-detail{color:#6a577e}
+body[data-theme="light"] .signal-ticker.market-tape .market-avatar{
+  border-color:rgba(111,74,181,.35);
+  box-shadow:0 0 0 3px rgba(111,74,181,.075),0 0 13px rgba(111,74,181,.09);
+}
+body[data-theme="light"] .signal-ticker.market-tape .market-tape-item:hover{background:rgba(164,129,229,.17)}
+body[data-theme="light"] .market-side-choice.market-side-yes>span,
+body[data-theme="light"] .market-side-choice.market-side-yes>strong{color:#237860}
+body[data-theme="light"] .market-side-choice.market-side-no>span,
+body[data-theme="light"] .market-side-choice.market-side-no>strong{color:#b83e5c}
+body[data-theme="light"] .derived-frame-notice{
+  background:linear-gradient(110deg,#f8eaff,#f1e9ff);
+  border-color:#ddc4ef;
+  color:#655276;
+}
+body[data-theme="light"] .derived-frame-notice strong{color:#8958b0}
+/* Dark mode keeps contrast while using plum/lilac rather than navy/teal. */
+body[data-theme="dark"] .top{background:rgba(26,18,39,.93);border-bottom-color:#4a3865}
+body[data-theme="dark"] .side{background:linear-gradient(180deg,rgba(133,92,194,.16),rgba(48,32,67,.3) 56%,transparent);border-right-color:#4a3865}
+body[data-theme="dark"] .main:before{
+  background:radial-gradient(ellipse at 83% 8%,rgba(153,116,224,.14),transparent 48%),radial-gradient(ellipse at 4% 42%,rgba(108,70,156,.1),transparent 40%),repeating-linear-gradient(137deg,transparent 0 42px,rgba(245,233,255,.014) 43px 44px);
+}
+body[data-theme="dark"] .nav button.active{background:linear-gradient(100deg,rgba(161,125,225,.22),rgba(116,79,161,.1));border-color:#604b7d;box-shadow:inset 3px 0 #c5a8ff;color:#fbf7ff}
+body[data-theme="dark"] .panel{
+  background:linear-gradient(145deg,#2e2044,#251a36 82%)!important;
+  border-color:#4a3865;
+  box-shadow:inset 0 1px rgba(255,255,255,.04),0 16px 38px rgba(0,0,0,.17);
+}
+body[data-theme="dark"] .stats .panel{background:linear-gradient(145deg,#35234e,#291d3b 100%)!important}
+body[data-theme="dark"] .stats .panel:nth-child(2){background:linear-gradient(145deg,#352748,#291d3b 100%)!important}
+body[data-theme="dark"] .stats .panel:nth-child(3){background:linear-gradient(145deg,#392444,#291d3b 100%)!important}
+body[data-theme="dark"] .market-record,
+body[data-theme="dark"] .market-record:nth-child(4n+1),
+body[data-theme="dark"] .market-record:nth-child(4n+2),
+body[data-theme="dark"] .market-record:nth-child(4n+3),
+body[data-theme="dark"] .market-record:nth-child(4n){
+  background:linear-gradient(145deg,#302144,#251a35 100%)!important;
+  border-color:#4a3865!important;
+}
+body[data-theme="dark"] .market-probability-block{background:linear-gradient(115deg,#3a2950,#2d2043 78%);border-color:#5a4476}
+body[data-theme="dark"] .market-side-picker{background:linear-gradient(125deg,#38274f,#2b1f40 75%);border-color:#57416f}
+body[data-theme="dark"] .market-side-choice{background:linear-gradient(145deg,#38294d,#2b203e)}
+body[data-theme="dark"] .market-detail{background:linear-gradient(130deg,#3b2853,#281d3b 68%)!important;border-color:#664c86}
+body[data-theme="dark"] .compare-workbench{background:linear-gradient(130deg,#352449,#291d3b 53%,#3a2548)!important;border-color:#62497d}
+body[data-theme="dark"] .explorer-controls{background:linear-gradient(135deg,#3a2853,#2a1e3d 59%,#332141)!important}
+body[data-theme="dark"] .market-journey{background:linear-gradient(120deg,#392650,#291d3b 54%,#372346)!important;border-color:#4a3865}
+body[data-theme="dark"] .market-wire{background:linear-gradient(110deg,#352448,#472f65 48%,#39244c)!important;border-color:#674a85!important;box-shadow:inset 0 1px rgba(255,255,255,.06),0 10px 28px rgba(0,0,0,.17)}
+body[data-theme="dark"] .market-wire .market-wire-head,
+body[data-theme="dark"] .market-wire .market-wire-tools{background:rgba(35,23,51,.86);border-color:#4b3865}
+body[data-theme="dark"] .market-wire .wire-item{border-right-color:rgba(205,180,248,.18)}
+body[data-theme="dark"] .market-wire .wire-item:hover{background:rgba(191,157,248,.12)}
+body[data-theme="dark"] .signal-desk{background:linear-gradient(135deg,#302144,#261b37 56%,#342044)!important;border-color:#4d3a69}
+body[data-theme="dark"] .signal-desk-head{background:linear-gradient(105deg,rgba(165,126,234,.14),rgba(122,85,174,.07) 80%,transparent)}
+body[data-theme="dark"] .signal-story-lead{background:linear-gradient(140deg,#392650,#2c203f 78%);border-top-color:#9775d8}
+body[data-theme="dark"] .signal-story:nth-child(2){border-top-color:#b6a0f0}
+body[data-theme="dark"] .signal-story:nth-child(3){border-top-color:#c8b2f3}
+body[data-theme="dark"] .signal-story:nth-child(4){border-top-color:#daa4d4}
+body[data-theme="dark"] .market-pulse{background:linear-gradient(105deg,#37244b,#2c2041 64%,#3a254b)!important;border-color:#4f3b6c}
+body[data-theme="dark"] .home-feature-market{background:linear-gradient(145deg,#39254f,#2a1e40 78%)!important;border-color:#614780!important}
+body[data-theme="dark"] .button.primary{background:linear-gradient(115deg,#7f56c8,#9468db 52%,#a980e4);border-color:#ab87eb;color:#fff}
+body[data-theme="dark"] .top-app-cta{background:linear-gradient(120deg,#8156c9,#9b74df);border-color:#a88bde;color:#fff}
+body[data-theme="dark"] .pill.violet{color:#eadfff;background:rgba(150,112,215,.18);border-color:rgba(192,164,241,.36)}
+body[data-theme="dark"] .site-footer{background:linear-gradient(180deg,#21172f,#1a1227);border-top-color:#4a3865}
+body[data-theme="dark"] .signal-ticker.market-tape{
+  background:linear-gradient(108deg,#37264f 0%,#4b3268 30%,#402b5c 62%,#312141 100%)!important;
+  border-top:1px solid #a68ae3;border-bottom:1px solid #664b83;
+  box-shadow:inset 0 1px rgba(255,255,255,.07),0 8px 24px rgba(8,3,16,.22);
+}
+body[data-theme="dark"] .signal-ticker.market-tape:before{background:linear-gradient(90deg,#9e79e0,#c0a3f3,#e0bbeb)}
+body[data-theme="dark"] .signal-ticker.market-tape .signal-ticker-label{background:linear-gradient(180deg,#2c1e40,#3b2754)!important;color:#f4ecff;border-right-color:#674a83}
+body[data-theme="dark"] .signal-ticker.market-tape .signal-ticker-label small{color:#c7adf5}
+body[data-theme="dark"] .signal-ticker.market-tape .signal-ticker-copy .signal-ticker-kind{color:#d5bcff}
+body[data-theme="dark"] .signal-ticker.market-tape .signal-ticker-copy strong{color:#fcf8ff}
+body[data-theme="dark"] .signal-ticker.market-tape .signal-ticker-copy .signal-ticker-detail{color:#dbcdea}
+body[data-theme="dark"] .signal-ticker.market-tape .market-avatar{border-color:#a887d9;box-shadow:0 0 0 3px rgba(194,163,241,.09),0 0 14px rgba(194,163,241,.12)}
+body[data-theme="dark"] .signal-ticker.market-tape .market-tape-item{border-right-color:rgba(213,191,245,.18);background:linear-gradient(180deg,rgba(255,255,255,.035),transparent)}
+body[data-theme="dark"] .signal-ticker.market-tape .market-tape-item:hover{background:rgba(200,170,244,.11)}
+body[data-theme="dark"] .market-side-choice.market-side-yes>span,
+body[data-theme="dark"] .market-side-choice.market-side-yes>strong{color:#83d9b5}
+body[data-theme="dark"] .market-side-choice.market-side-no>span,
+body[data-theme="dark"] .market-side-choice.market-side-no>strong{color:#ff9bad}
+body[data-theme="dark"] .derived-frame-notice{background:linear-gradient(110deg,rgba(190,151,236,.11),rgba(150,112,215,.06));border-color:#62487d;color:#d0c2e7}
+body[data-theme="dark"] .derived-frame-notice strong{color:#e2bee9}
+body[data-theme="light"] .theme-toggle{background:#fff;border-color:#d7c8f2;color:#4d3778}
+body[data-theme="dark"] .theme-toggle{background:#2d203f;border-color:#4a3865;color:#f8f3ff}
+body[data-theme="light"] .theme-toggle:hover{background:#f0e7ff}
+body[data-theme="dark"] .theme-toggle:hover{background:#3b2a52}
+body[data-theme="light"] :focus-visible{outline-color:#7b55d2}
+body[data-theme="dark"] :focus-visible{outline-color:#d1bcff}
+/* LAVENDER BRAND DIRECTION end. */
+
 </style>
 </head>
-<body>
+<body data-theme="light">
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="shell">
 <header class="top">
 <a class="brand" href="#/home" aria-label="Seer Six home" onclick="go('home');return false"><span class="logo" aria-hidden="true"><img alt="" src="data:image/png;base64,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"></span><span class="wordmark">seer</span><span class="brand-note">/ six interfaces</span></a>
-<div class="topright"><span class="chain">Every opinion has a price</span><button class="theme-toggle" id="themeToggle" type="button" onclick="toggleTheme()" aria-label="Switch to light theme" title="Switch theme">☼ <span>Light</span></button><span class="pill"><i class="live"></i>Preview environment</span><a class="top-app-cta" id="getAppButton" href="https://app.seer.pm/" target="_blank" rel="noopener noreferrer" aria-label="Visit the official Seer app in a new tab">Visit Seer <span aria-hidden="true">↗</span></a></div>
+<div class="topright"><span class="chain">Every opinion has a price</span><button class="theme-toggle" id="themeToggle" type="button" onclick="toggleTheme()" aria-label="Switch to dark theme" title="Switch theme">☾ <span>Dark</span></button><span class="pill"><i class="live"></i>Preview environment</span><a class="top-app-cta" id="getAppButton" href="https://app.seer.pm/" target="_blank" rel="noopener noreferrer" aria-label="Visit the official Seer app in a new tab">Visit Seer <span aria-hidden="true">↗</span></a></div>
 </header>
 <div id="marketWire" class="market-wire is-loading" aria-label="Seer market wire"></div>
 <div class="layout">
@@ -1942,7 +2287,7 @@ render();
 initializeMarketWire();
 loadLiveMarkets();
 
-function toggleTheme(){const next=document.body.dataset.theme==="light"?"dark":"light";document.body.dataset.theme=next;const b=document.getElementById("themeToggle");if(b){b.innerHTML=next==="light"?"☾ <span>Dark</span>":"☼ <span>Light</span>";b.setAttribute("aria-label","Switch to "+(next==="light"?"dark":"light")+" theme");b.title="Switch to "+(next==="light"?"dark":"light")+" theme";}}
+function toggleTheme(){const next=document.body.dataset.theme==="light"?"dark":"light";document.body.dataset.theme=next;const b=document.getElementById("themeToggle");if(b){b.innerHTML=next==="light"?"☾ <span>Dark</span>":"☼ <span>Light</span>";b.setAttribute("aria-label","Switch to "+(next==="light"?"dark":"light")+" theme");b.title="Switch to "+(next==="light"?"dark":"light")+" theme";}const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=next==="light"?"#f5f0ff":"#1a1227";}
 
 function syncRoute() {
   const page = location.hash.replace(/^#\/?/, "");
