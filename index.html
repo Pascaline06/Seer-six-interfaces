@@ -1715,6 +1715,35 @@ body[data-theme="dark"] .docs-callout{background:#241e33;border-color:#57466c;co
 @media(max-width:720px){.docs-grid{grid-template-columns:1fr}.docs-card{padding:19px}.docs-full{padding:18px}}
 @media(prefers-reduced-motion:reduce){.wire-item-updated,.signal-ticker-live-dot{animation:none!important}.signal-ticker.market-tape .signal-ticker-track{animation:none!important;transform:none!important}}
 
+
+/* Phase 1–2: source provenance, evidence ledger and durable observed-price history. */
+.market-evidence{margin:18px 0;padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.market-evidence-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:15px}
+.market-evidence-head h3{margin:4px 0 0;font-size:18px;line-height:1.35}
+.market-evidence-head p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.65}
+.evidence-state{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:10px;font-weight:700;white-space:nowrap}
+.evidence-state::before{content:"";display:block;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.evidence-state.aging::before{background:var(--amber)}.evidence-state.unknown::before{background:var(--dim)}
+.evidence-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.evidence-fact{min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.evidence-fact span{display:block;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.evidence-fact strong{display:block;margin-top:6px;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.evidence-ledger{width:100%;min-width:0;border-collapse:collapse}
+.evidence-ledger th{padding:10px 9px;background:transparent}
+.evidence-ledger td{padding:10px 9px;font-size:12px;vertical-align:top}
+.evidence-ledger td:first-child{font-weight:650}
+.evidence-ledger td:nth-child(2){color:var(--muted)}
+.evidence-resolution{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.evidence-resolution strong{display:block;font-size:12px}.evidence-resolution p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.75;overflow-wrap:anywhere}
+.evidence-source-link{display:inline-block;margin-top:11px;color:var(--violet);font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.market-trace-head-tools{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+.trace-export{min-height:30px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer}
+.trace-export:hover{border-color:var(--violet);color:var(--text)}
+.trace-outcome-control{display:flex;align-items:center;gap:8px;margin:11px 0 0;color:var(--muted);font-size:11px}
+.trace-outcome-control select{max-width:100%;min-height:32px;padding:5px 9px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font:inherit}
+.market-trace-storage{margin:8px 0 0;color:var(--dim);font-size:10px;line-height:1.6}
+@media(max-width:640px){.evidence-facts{grid-template-columns:1fr 1fr}.evidence-fact:last-child{grid-column:1/-1}.market-evidence{padding:14px}.market-evidence-head{flex-direction:column}.market-trace-head{align-items:flex-start}.market-trace-head-tools{justify-content:flex-start}.evidence-ledger{min-width:440px}}
+
 </style>
 </head>
 <body data-theme="light">
@@ -2478,5 +2507,303 @@ window.addEventListener("hashchange", syncRoute);
 syncRoute();
 
 </script>
+
+<script>
+/* Shared market evidence contract + durable browser-local history.
+   Captures source responses as observations; it never backfills trades or claims to provide server-wide history. */
+const SEER_EVIDENCE_ENDPOINT="https://app.seer.pm/.netlify/functions/markets-search";
+state.traceOutcomeSelections=state.traceOutcomeSelections||{};
+marketTrace.perMarketLimit=120;
+marketTrace.maxSamples=12000;
+marketTrace.db=null;
+marketTrace.persistence="initializing";
+marketTrace.dbWritesSinceCompact=0;
+marketTrace.writeQueue=Promise.resolve();
+function seerEvidenceText(value){
+ if(value===null||value===undefined)return "";
+ if(typeof value==="string"||typeof value==="number"||typeof value==="boolean")return String(value).trim();
+ if(Array.isArray(value))return value.map(seerEvidenceText).filter(Boolean).join("\n");
+ if(typeof value==="object"){
+  const preferred=["text","description","criteria","rules","resolution","source","url","name","title","value"];
+  for(const k of preferred)if(value[k]!==undefined){const s=seerEvidenceText(value[k]);if(s)return s;}
+ }
+ return "";
+}
+function seerResolutionField(raw){
+ const candidates=["resolutionCriteria","resolutionRules","resolutionDescription","resolutionSource","resolution_source","rules","description","marketDescription","market_description","criteria","oracle","resolution"];
+ for(const name of candidates){const value=raw&&raw[name];const text=seerEvidenceText(value);if(text)return {field:name,text:text};}
+ return {field:"",text:""};
+}
+function seerStructure(raw,outcomes,parent){
+ const count=outcomes.length,kind=String(raw&& (raw.marketType||raw.marketFormat||raw.type)||"").toLowerCase();
+ if(/futarchy/.test(kind))return "Futarchy";
+ if(parent)return "Conditional market";
+ if(count===2)return "Two-outcome";
+ if(count>2)return "Multi-outcome ("+count+")";
+ if(count===1)return "One returned outcome";
+ return "Outcome structure not returned";
+}
+function seerEvidenceField(value,present,origin,note){
+ return {value:value===undefined?null:value,status:present?"reported":"not-returned",origin:present?(origin||"Returned by Seer API"):"Not included in this response",note:note||""};
+}
+function seerBuildEvidence(raw,details){
+ const observedAt=details.observedAt||new Date().toISOString();
+ const chainId=Number(raw.chainId||0),fullId=String(raw.id||"");
+ const odds=Array.isArray(raw.odds)?raw.odds:[];
+ const outcomes=Array.isArray(raw.outcomes)?raw.outcomes:[];
+ const sourceUpdate=raw.updatedAt||raw.updated_at||raw.lastUpdatedAt||raw.lastUpdated||raw.last_updated||null;
+ const resolution=seerResolutionField(raw);
+ const hasVolume=raw.volumeUSD!==null&&raw.volumeUSD!==undefined&&String(raw.volumeUSD).trim()!=="";
+ const hasLiquidity=raw.liquidityUSD!==null&&raw.liquidityUSD!==undefined&&String(raw.liquidityUSD).trim()!=="";
+ const hasOdds=odds.some(v=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v)));
+ const verificationStatus=raw.verification&&raw.verification.status;
+ return {
+  schemaVersion:1,recordKey:String(chainId)+":"+fullId,
+  source:{name:"Seer public markets-search API",endpoint:SEER_EVIDENCE_ENDPOINT,recordId:fullId,marketUrl:String(raw.url||""),mode:"live-response"},
+  observation:{capturedAt:observedAt,captureMeaning:"Browser receipt time for a successful API response",sourceUpdatedAt:sourceUpdate?String(sourceUpdate):null},
+  marketStructure:{kind:seerStructure(raw,outcomes,raw.parentMarket||raw.parentMarketId||raw.parent?.id||raw.conditionalParentMarket||""),sourceType:String(raw.type||"Not returned as a market format"),outcomeCount:outcomes.length,outcomeNames:outcomes.map(outcomeName),isConditional:Boolean(raw.parentMarket||raw.parentMarketId||raw.parent?.id||raw.conditionalParentMarket)},
+  resolution:{criteria:resolution.text||null,sourceField:resolution.field||null,status:resolution.text?"criteria returned in response":"criteria not found in this response"},
+  fields:{
+   title:seerEvidenceField(raw.marketName,Boolean(raw.marketName),"Seer API marketName"),
+   outcomePrices:seerEvidenceField(odds,hasOdds,"Seer API odds aligned to the returned outcome list","Values are indicative outcome prices, not execution guarantees."),
+   volumeUSD:seerEvidenceField(hasVolume?raw.volumeUSD:null,hasVolume,"Seer API volumeUSD","Source-reported volume; its exact time window is not inferred."),
+   liquidityUSD:seerEvidenceField(hasLiquidity?raw.liquidityUSD:null,hasLiquidity,"Seer API liquidityUSD","Source-reported liquidity; executable depth is not guaranteed."),
+   verification:seerEvidenceField(verificationStatus,verificationStatus!==null&&verificationStatus!==undefined,"Seer API verification.status"),
+   resolution:seerEvidenceField(resolution.text||null,Boolean(resolution.text),resolution.field?"Seer API "+resolution.field:"No matching criteria field returned")
+  }
+ };
+}
+function normalizeLiveMarket(m,observedAt){
+ const at=observedAt||new Date().toISOString();
+ const odds=Array.isArray(m.odds)?m.odds:[];
+ const first=odds.find(v=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v)));
+ const probability=first===undefined?null:normalizeOutcomeProbability(first);
+ const opened=Number(m.openingTs||0);
+ const time=opened?new Date(opened*1000).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}):"Not specified";
+ const rawCategory=Array.isArray(m.categories)&&m.categories.length?m.categories[0]:"";
+ const category=rawCategory&&String(rawCategory).toUpperCase()!=="MISC"?rawCategory:(m.type==="Futarchy"?"Futarchy":"Prediction market");
+ const outcomes=Array.isArray(m.outcomes)?m.outcomes:[];
+ const outcomePrices=outcomes.map((o,i)=>({index:i,name:outcomeName(o),p:i<odds.length?normalizeOutcomeProbability(odds[i]):null})).filter(o=>o.name);
+ const parent=m.parentMarket||m.parentMarketId||m.parent?.id||m.conditionalParentMarket||"";
+ const evidence=seerBuildEvidence(m,{observedAt:at});
+ return {id:String(m.id||"").slice(0,10)+"…",fullId:String(m.id||""),type:category,title:String(m.marketName||"Untitled market"),p:probability,volume:reportedNumber(m.volumeUSD)===null?"Not reported":compactUSD(m.volumeUSD),depth:reportedNumber(m.liquidityUSD)===null?"Not reported":compactUSD(m.liquidityUSD),change:null,time,status:m.payoutReported?"Resolved":"Listed",chainId:Number(m.chainId||0),chain:chainLabel(m.chainId),url:String(m.url||""),imageUrl:marketImageUrl(m),images:m.images&&typeof m.images==="object"?m.images:null,liquidityUSD:reportedNumber(m.liquidityUSD),volumeUSD:reportedNumber(m.volumeUSD),outcomes,outcomePrices,verification:({verified:"Verified",verifying:"Verifying",challenged:"Challenged",not_verified:"Not verified"}[m.verification?.status]||"Not verified"),parentMarket:String(parent||""),parentOutcome:String(m.parentOutcome??m.parentOutcomeIndex??m.parent?.outcome??""),isConditional:Boolean(parent),isLive:true,evidence:evidence};
+}
+function seerNormalizeHistorySample(x){
+ if(!x||typeof x.key!=="string"||!x.key||!x.observedAt||!Number.isFinite(Date.parse(x.observedAt))||!Number.isFinite(Number(x.p))||Number(x.p)<0||Number(x.p)>100)return null;
+ const outcomeIndex=Number.isInteger(Number(x.outcomeIndex))&&Number(x.outcomeIndex)>=0?Number(x.outcomeIndex):0;
+ return Object.assign({},x,{id:String(x.id||x.key+"::"+outcomeIndex+"::"+x.observedAt),outcomeIndex,outcomeName:String(x.outcomeName||"Lead outcome"),p:Number(x.p),source:String(x.source||"legacy-browser-observation")});
+}
+function seerPruneHistory(input){
+ const byId=new Map();
+ for(const raw of input||[]){const sample=seerNormalizeHistorySample(raw);if(sample)byId.set(sample.id,sample);}
+ const all=[...byId.values()].sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+ const counts=new Map(),kept=[];
+ for(const sample of all.slice().reverse()){
+  const series=sample.key+"::"+sample.outcomeIndex;
+  const n=counts.get(series)||0;
+  if(n<marketTrace.perMarketLimit){kept.push(sample);counts.set(series,n+1);}
+ }
+ return kept.reverse().slice(-marketTrace.maxSamples);
+}
+function seerReadLocalHistory(){
+ try{const saved=JSON.parse(localStorage.getItem("seer-six-price-trace-v1")||"[]");return Array.isArray(saved)?saved.map(seerNormalizeHistorySample).filter(Boolean):[];}catch{return [];}
+}
+function seerWriteLocalHistory(){
+ try{localStorage.setItem("seer-six-price-trace-v1",JSON.stringify(marketTrace.samples));return true;}
+ catch(error){marketTrace.persistence=marketTrace.db?"IndexedDB (localStorage mirror full)":"Browser storage limit reached";return false;}
+}
+function seerRequest(req){return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error("IndexedDB request failed"));});}
+function seerTransactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error||new Error("IndexedDB transaction failed"));tx.onabort=()=>reject(tx.error||new Error("IndexedDB transaction aborted"));});}
+function seerInitializePriceHistory(){
+ marketTrace.samples=seerPruneHistory([...(marketTrace.samples||[]),...seerReadLocalHistory()]);
+ if(!("indexedDB" in window)){marketTrace.persistence="localStorage fallback";marketTrace.ready=Promise.resolve();seerWriteLocalHistory();return;}
+ marketTrace.persistence="opening durable history";
+ marketTrace.ready=new Promise(resolve=>{
+  let request;
+  try{request=indexedDB.open("seer-six-evidence-history",1);}catch(error){marketTrace.persistence="localStorage fallback";resolve();return;}
+  request.onupgradeneeded=event=>{
+   const db=event.target.result;
+   if(!db.objectStoreNames.contains("samples")){
+    const store=db.createObjectStore("samples",{keyPath:"id"});
+    store.createIndex("byMarket","key",{unique:false});
+    store.createIndex("byObservedAt","observedAt",{unique:false});
+   }
+  };
+  request.onerror=()=>{marketTrace.persistence="localStorage fallback";resolve();};
+  request.onblocked=()=>{marketTrace.persistence="localStorage fallback";resolve();};
+  request.onsuccess=async()=>{
+   const db=request.result;marketTrace.db=db;
+   db.onversionchange=()=>{db.close();marketTrace.db=null;marketTrace.persistence="localStorage fallback";};
+   try{
+    const tx=db.transaction("samples","readonly");
+    const stored=await seerRequest(tx.objectStore("samples").getAll());
+    const merged=seerPruneHistory([...(stored||[]),...seerReadLocalHistory(),...(marketTrace.samples||[])]);
+    marketTrace.samples=merged;
+    const write=db.transaction("samples","readwrite");
+    const store=write.objectStore("samples");store.clear();
+    for(const sample of merged)store.put(sample);
+    await seerTransactionDone(write);
+    marketTrace.persistence="IndexedDB · persistent on this browser";
+    seerWriteLocalHistory();
+   }catch(error){marketTrace.persistence="IndexedDB with local fallback";try{seerWriteLocalHistory();}catch{}}
+   resolve();
+  };
+ });
+}
+function seerQueueHistoryWrite(newSamples){
+ if(!newSamples||!newSamples.length)return;
+ marketTrace.writeQueue=marketTrace.writeQueue.catch(()=>{}).then(async()=>{
+  await marketTrace.ready;
+  const db=marketTrace.db;if(!db)return;
+  try{
+   const tx=db.transaction("samples","readwrite"),store=tx.objectStore("samples");
+   for(const sample of newSamples)store.put(sample);
+   await seerTransactionDone(tx);
+   marketTrace.dbWritesSinceCompact+=newSamples.length;
+   if(marketTrace.dbWritesSinceCompact>=250){
+    marketTrace.dbWritesSinceCompact=0;
+    const readTx=db.transaction("samples","readonly");
+    const all=await seerRequest(readTx.objectStore("samples").getAll());
+    const compacted=seerPruneHistory(all||[]);
+    if(compacted.length!==(all||[]).length){
+     const cleanTx=db.transaction("samples","readwrite"),clean=cleanTx.objectStore("samples");clean.clear();
+     for(const sample of compacted)clean.put(sample);
+     await seerTransactionDone(cleanTx);
+    }
+   }
+  }catch(error){marketTrace.persistence="IndexedDB write issue · local fallback";}
+ });
+}
+function recordMarketPriceSnapshots(records,snapshotObservedAt){
+ const defaultsAt=snapshotObservedAt||new Date().toISOString(),added=[];
+ for(const m of records||[]){
+  const key=marketKey(m);
+  if(!m||!key)continue;
+  const observedAt=(m.evidence&&m.evidence.observation&&m.evidence.observation.capturedAt)||defaultsAt;
+  const outcomes=Array.isArray(m.outcomePrices)?m.outcomePrices:[];
+  const values=outcomes.length?outcomes.map((o,i)=>({index:Number.isInteger(o.index)?o.index:i,name:String(o.name||("Outcome "+(i+1))),p:o.p})): [{index:0,name:"Lead outcome",p:m.p}];
+  for(const outcome of values){
+   const p=Number(outcome.p),outcomeIndex=Number(outcome.index)||0;
+   if(outcome.p===null||outcome.p===undefined||outcome.p===""||!Number.isFinite(p)||p<0||p>100)continue;
+   let previous=null;
+   for(let i=marketTrace.samples.length-1;i>=0;i--){
+    const candidate=marketTrace.samples[i];
+    if(candidate.key===key&&Number(candidate.outcomeIndex||0)===outcomeIndex){previous=candidate;break;}
+   }
+   const elapsed=previous?Date.parse(observedAt)-Date.parse(previous.observedAt):Infinity;
+   if(previous&&elapsed<45000&&Math.abs(p-Number(previous.p))<0.05&&String(previous.outcomeName||"")===outcome.name)continue;
+   const sample={id:key+"::"+outcomeIndex+"::"+observedAt,key,title:String(m.title||"Untitled market"),chain:String(m.chain||m.type||"Market"),p:p,observedAt:observedAt,outcomeIndex:outcomeIndex,outcomeName:outcome.name,source:"seer-markets-search-response",sourceEndpoint:SEER_EVIDENCE_ENDPOINT,marketUrl:String(m.url||""),schemaVersion:1};
+   marketTrace.samples.push(sample);added.push(sample);
+  }
+ }
+ marketTrace.samples=seerPruneHistory(marketTrace.samples);
+ seerWriteLocalHistory();
+ seerQueueHistoryWrite(added);
+}
+function seerFreshness(iso){
+ const ms=Date.parse(iso||"");if(!Number.isFinite(ms))return {label:"No observation time",className:"unknown",age:"Not available"};
+ const ageMs=Math.max(0,Date.now()-ms),minutes=Math.floor(ageMs/60000);
+ const age=minutes<1?"less than 1 minute ago":minutes<60?minutes+" minute"+(minutes===1?"":"s")+" ago":Math.floor(minutes/60)+" hour"+(Math.floor(minutes/60)===1?"":"s")+" ago";
+ return {label:ageMs<120000?"Recently observed":ageMs<600000?"Observation aging":"Older observation",className:ageMs<120000?"":ageMs<600000?"aging":"unknown",age:age};
+}
+function renderMarketEvidence(m){
+ const ev=m&&m.evidence;
+ if(!ev){
+  return '<section class="market-evidence" aria-label="Source and provenance ledger"><div class="market-evidence-head"><div><div class="category">SOURCE &amp; PROVENANCE</div><h3>Evidence record unavailable</h3><p>This record is illustrative or was saved without a source-evidence envelope. It is not being presented as a verified live quote.</p></div><span class="evidence-state unknown">No source envelope</span></div><div class="evidence-facts"><div class="evidence-fact"><span>Record type</span><strong>Illustrative / saved record</strong></div><div class="evidence-fact"><span>History persistence</span><strong>'+htmlEscape(marketTrace.persistence||"Browser-local")+'</strong></div><div class="evidence-fact"><span>Market structure</span><strong>Not verified from source metadata</strong></div></div></section>';
+ }
+ const fresh=seerFreshness(ev.observation&&ev.observation.capturedAt);
+ const fmt=value=>{const date=new Date(value||"");return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium"}):"Not returned";};
+ const fields=ev.fields||{};
+ const fieldRows=[
+  ["Market title",fields.title,"Title string returned by source"],
+  ["Outcome prices",fields.outcomePrices,"Returned odds mapped to the returned outcome order"],
+  ["Lifetime volume",fields.volumeUSD,"Source-reported volume; time window not inferred"],
+  ["Reported liquidity",fields.liquidityUSD,"Source-reported amount; not guaranteed executable depth"],
+  ["Verification",fields.verification,"Source verification field; absence is not treated as verified"],
+  ["Resolution criteria",fields.resolution,"Only available when a matching field is present"]
+ ];
+ const rows=fieldRows.map(item=>{
+  const f=item[1]||{},reported=f.status==="reported";
+  const val=item[0]==="Market title"?String(f.value||m.title||"Not returned"):
+   item[0]==="Outcome prices"?(reported?(Array.isArray(f.value)?f.value.map(v=>String(v)).join(", "):"Returned"):"Not returned"):
+   item[0]==="Lifetime volume"?(reported?compactUSD(f.value):"Not reported"):
+   item[0]==="Reported liquidity"?(reported?compactUSD(f.value):"Not reported"):
+   item[0]==="Verification"?(reported?String(f.value):"Not returned"):
+   (reported?"Returned":"Not returned");
+  return '<tr><td>'+htmlEscape(item[0])+'</td><td>'+htmlEscape(val)+'</td><td>'+htmlEscape(reported?(f.origin||"Returned by Seer API"):"Not included in this response")+'</td><td>'+htmlEscape(item[2])+'</td></tr>';
+ }).join("");
+ const sourceLink=ev.source&&ev.source.marketUrl?'<a class="evidence-source-link" href="'+htmlEscape(seerMarketHref(m))+'" target="_blank" rel="noopener noreferrer">Open original Seer record ↗</a>':'<a class="evidence-source-link" href="'+SEER_EVIDENCE_ENDPOINT+'" target="_blank" rel="noopener noreferrer">Open market-data endpoint ↗</a>';
+ const criteria=ev.resolution&&ev.resolution.criteria?'<div class="evidence-resolution"><strong>Resolution detail · returned field '+htmlEscape(ev.resolution.sourceField||"")+'</strong><p>'+htmlEscape(ev.resolution.criteria)+'</p></div>':'<div class="evidence-resolution"><strong>Resolution criteria not present in this response</strong><p>The inspector will not invent or infer settlement rules. Use the original market page to review its resolution source and conditions.</p></div>';
+ const outcomeNames=ev.marketStructure&&Array.isArray(ev.marketStructure.outcomeNames)?ev.marketStructure.outcomeNames.filter(Boolean).join(" · "):"Not returned";
+ const structure=ev.marketStructure?ev.marketStructure.kind:"Not returned";
+ const sourceUpdated=ev.observation&&ev.observation.sourceUpdatedAt?fmt(ev.observation.sourceUpdatedAt):"Not returned by source";
+ return '<section class="market-evidence" aria-label="Source and provenance ledger"><div class="market-evidence-head"><div><div class="category">EVIDENCE ENGINE / V1</div><h3>Source &amp; provenance ledger</h3><p>Each field is distinguished as source-returned or absent. “Freshness” below measures this browser’s observation age, not an upstream last-updated guarantee.</p></div><span class="evidence-state '+fresh.className+'">'+htmlEscape(fresh.label)+'</span></div><div class="evidence-facts"><div class="evidence-fact"><span>Source</span><strong>'+htmlEscape(ev.source&&ev.source.name||"Seer API")+'</strong></div><div class="evidence-fact"><span>Browser observed</span><strong>'+htmlEscape(fmt(ev.observation&&ev.observation.capturedAt))+'<br>'+htmlEscape(fresh.age)+'</strong></div><div class="evidence-fact"><span>Source-updated timestamp</span><strong>'+htmlEscape(sourceUpdated)+'</strong></div><div class="evidence-fact"><span>Market structure</span><strong>'+htmlEscape(structure)+'</strong></div><div class="evidence-fact"><span>Returned outcomes</span><strong>'+htmlEscape(String(ev.marketStructure&&ev.marketStructure.outcomeCount??0))+' · '+htmlEscape(outcomeNames||"Labels unavailable")+'</strong></div><div class="evidence-fact"><span>Evidence record</span><strong>Schema v'+htmlEscape(String(ev.schemaVersion||1))+' · '+htmlEscape(ev.source&&ev.source.recordId||m.fullId||"ID unavailable")+'</strong></div></div><div class="tablewrap"><table class="evidence-ledger"><thead><tr><th>Field</th><th>Observed value</th><th>Provenance</th><th>Interpretation</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+criteria+'<a class="evidence-source-link" href="'+SEER_EVIDENCE_ENDPOINT+'" target="_blank" rel="noopener noreferrer">Source endpoint ↗</a> '+sourceLink+'<p class="market-trace-storage">History storage: '+htmlEscape(marketTrace.persistence||"initializing")+'. Stored observations remain on this browser/device; they are not a server-wide or cross-device market archive.</p></section>';
+}
+function seerHistoryOutcomeList(m){
+ const arr=Array.isArray(m&&m.outcomePrices)?m.outcomePrices:[];
+ const list=arr.map((o,i)=>({index:Number.isInteger(o.index)?o.index:i,name:String(o.name||("Outcome "+(i+1))),p:o.p})).filter(o=>o.p!==null&&o.p!==undefined&&Number.isFinite(Number(o.p))&&Number(o.p)>=0&&Number(o.p)<=100);
+ return list.length?list:[{index:0,name:"Lead outcome",p:m&&m.p}].filter(o=>o.p!==null&&o.p!==undefined&&Number.isFinite(Number(o.p))&&Number(o.p)>=0&&Number(o.p)<=100);
+}
+function exportMarketHistoryCSV(key){
+ const rows=marketTrace.samples.filter(x=>x.key===String(key)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+ if(!rows.length){const host=document.getElementById("marketDetail");if(host){const p=document.createElement("p");p.className="market-trace-storage";p.textContent="No recorded observations are available to export yet.";host.appendChild(p);}return;}
+ const cols=["observed_at","market_key","market_title","chain","outcome_index","outcome","price_percent","source","source_endpoint","market_url"];
+ const quote=value=>'"'+String(value??"").replace(/"/g,'""')+'"';
+ const csv=[cols.join(","),...rows.map(x=>[x.observedAt,x.key,x.title,x.chain,x.outcomeIndex,x.outcomeName,x.p,x.source,x.sourceEndpoint,x.marketUrl].map(quote).join(","))].join("\r\n");
+ const blob=new Blob(["\ufeff",csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="seer-market-history-"+String(key).replace(/[^a-zA-Z0-9_-]/g,"-").slice(0,45)+".csv";
+ document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function renderObservedPriceTrace(m){
+ const key=marketKey(m),outcomes=seerHistoryOutcomeList(m),firstIndex=outcomes.length?outcomes[0].index:0;
+ const wanted=state.traceOutcomeSelections[key];
+ const selected=outcomes.find(o=>o.index===Number(wanted))||outcomes.find(o=>o.index===firstIndex)||null;
+ const selectedIndex=selected?selected.index:firstIndex;
+ const selectedName=selected?selected.name:"Lead outcome";
+ const rows=marketTrace.samples.filter(x=>x.key===key&&Number(x.outcomeIndex||0)===selectedIndex).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt)).slice(-120);
+ const count=rows.length,current=selected?Number(selected.p):null,first=count?rows[0]:null,last=count?rows[count-1]:null;
+ const formatTime=value=>value?new Date(value).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}):"—";
+ const controls=(outcomes.length>1?'<label class="trace-outcome-control">Plot outcome <select data-trace-outcome data-market-key="'+htmlEscape(key)+'" aria-label="Historical outcome to plot">'+outcomes.map(o=>'<option value="'+o.index+'" '+(o.index===selectedIndex?'selected':'')+'>'+htmlEscape(o.name)+'</option>').join("")+'</select></label>':'');
+ const head='<div class="market-trace-head"><div><div class="category">OBSERVED PRICE HISTORY</div><h3>'+htmlEscape(selectedName)+' · history captured here</h3></div><div class="market-trace-head-tools"><span class="market-trace-count">'+count+' snapshots</span><button class="trace-export" type="button" data-market-action="export-history" data-market-id="'+htmlEscape(key)+'">Export CSV ↓</button></div></div>'+controls;
+ const storage='<p class="market-trace-storage">Persistence: '+htmlEscape(marketTrace.persistence||"initializing")+'. Captured source observations only; no exchange trades or historical prices are backfilled.</p>';
+ if(count<2){
+  const value=count?Number(first.p).toFixed(1)+"%":"No samples yet";
+  const detail=count?"One successful observation is stored for this outcome. A later successful observation is needed before a line can be drawn.":"The trace begins with successful Seer API responses observed in this browser; no historic prices are fabricated.";
+  return '<div class="market-trace" role="region" aria-label="Observed market price history">'+head+'<div class="market-trace-empty"><strong>'+htmlEscape(value)+'</strong><p>'+htmlEscape(detail)+'</p><div class="market-trace-rail"><span></span><span></span><span></span><span></span><span></span></div><small>'+(first?'First observed '+htmlEscape(formatTime(first.observedAt)):'Waiting for a successful source snapshot')+'</small></div><p class="market-trace-note">Timestamps describe when the browser observed the source response, not when a trade occurred. The trace persists locally across reloads on this device.</p>'+storage+'</div>';
+ }
+ const values=rows.map(x=>Number(x.p));
+ const lowValue=Math.min.apply(null,values),highValue=Math.max.apply(null,values),spread=highValue-lowValue;
+ let low=Math.max(0,lowValue-Math.max(.5,spread*.16)),high=Math.min(100,highValue+Math.max(.5,spread*.16));
+ if(high-low<1){low=Math.max(0,Math.min(lowValue,highValue)-.5);high=Math.min(100,Math.max(lowValue,highValue)+.5);}
+ const points=values.map((p,i)=>({x:18+i*(604/(values.length-1)),y:76-((p-low)/(high-low||1))*56}));
+ const pointString=points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+ const areaPath='M'+points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L')+' L622,88 L18,88 Z';
+ const delta=Number(last.p)-Number(first.p),sign=delta>0?'+':'',deltaClass=delta>=0?'up':'down';
+ return '<div class="market-trace" role="region" aria-label="Observed market price history">'+head+'<div class="market-trace-chart"><svg viewBox="0 0 640 96" role="img" aria-label="'+htmlEscape(selectedName)+' observed prices across '+count+' successful snapshots, no fabricated history"><defs><linearGradient id="marketTraceFillPhase12" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7a0ff" stop-opacity=".28"/><stop offset="100%" stop-color="#b7a0ff" stop-opacity="0"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#marketTraceFillPhase12)"/><path d="M18,88 H622" stroke="var(--line)" stroke-width="1" fill="none"/><polyline points="'+pointString+'" stroke="var(--violet)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" fill="none"/><circle cx="'+points[points.length-1].x.toFixed(1)+'" cy="'+points[points.length-1].y.toFixed(1)+'" r="3.4" fill="var(--green)" stroke="var(--panel)" stroke-width="1.5"/></svg></div><div class="market-trace-meta"><span>FIRST <b>'+Number(first.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(first.observedAt))+'</small></span><span>LAST <b>'+Number(last.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(last.observedAt))+'</small></span><span>OBSERVED CHANGE <b class="'+deltaClass+'">'+sign+delta.toFixed(1)+' pp</b><small>Across captured snapshots</small></span></div><p class="market-trace-note">Observed change is the difference between first and last captured snapshots, not a trade P&amp;L or market-native historical series. '+(current===null?'Current record has no returned price for this outcome.':'Current returned price for '+htmlEscape(selectedName)+': '+current.toFixed(1)+'%.')+'</p>'+storage+'</div>';
+}
+function compactSavedMarket(m){
+ return {id:String(m.id||m.fullId||""),fullId:String(m.fullId||m.id||""),type:String(m.type||"Prediction market"),title:String(m.title||"Untitled market"),p:m.p??null,volume:String(m.volume||"—"),depth:String(m.depth||"—"),time:String(m.time||"Not specified"),status:String(m.status||"Listed"),chainId:Number(m.chainId||0),chain:String(m.chain||"Unknown network"),url:String(m.url||""),liquidityUSD:reportedNumber(m.liquidityUSD),volumeUSD:reportedNumber(m.volumeUSD),outcomes:Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v.name||v.title||v.outcome||"Outcome"):String(v)).slice(0,20):[],outcomePrices:Array.isArray(m.outcomePrices)?m.outcomePrices:[],parentMarket:String(m.parentMarket||""),parentOutcome:String(m.parentOutcome||""),isConditional:Boolean(m.isConditional),verification:String(m.verification||"Not verified"),evidence:m.evidence||null,isLive:false,isSnapshot:true};
+}
+function renderMarketDetail(m){
+ const outcomes=Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean).slice(0,8):[];
+ const href=seerMarketHref(m);
+ return '<section class="panel market-detail" id="marketDetail" tabindex="-1" aria-live="polite"><div class="market-detail-top"><div><div class="category">RECORD INSPECTOR / '+(m.isLive?"LIVE RECORD":m.isSnapshot?"SAVED SNAPSHOT":"SOURCE RECORD")+'</div><h2>'+htmlEscape(m.title)+'</h2><p class="muted">Inspect values, origin, observation time and limits before treating a quote as evidence.</p></div><button class="icon-close" type="button" data-market-action="close-detail" aria-label="Close market inspector">×</button></div><div class="market-detail-grid"><div class="market-detail-price"><span>Indicative price</span><strong>'+(m.p===null||m.p===undefined?"—":Math.round(m.p)+"%")+'</strong><div class="bar"><span style="width:'+(m.p===null||m.p===undefined?0:m.p)+'%"></span></div><small>'+htmlEscape(m.type||"Prediction market")+' · '+htmlEscape(m.chain||"Unknown network")+'</small></div><div class="market-detail-facts"><div><span>Lifetime volume</span><strong>'+htmlEscape(m.volume||"Not reported")+'</strong></div><div><span>Reported liquidity</span><strong>'+htmlEscape(m.depth||"Not reported")+'</strong></div><div><span>Record status</span><strong>'+htmlEscape(m.status||"Listed")+'</strong></div><div><span>Verification</span><strong>'+htmlEscape(m.verification||"Not returned")+'</strong></div><div><span>Opened</span><strong>'+htmlEscape(m.time||"Not specified")+'</strong></div><div><span>Market ID</span><strong class="market-id">'+htmlEscape(m.fullId||m.id||"Unavailable")+'</strong></div></div></div>'+renderMarketEvidence(m)+renderObservedPriceTrace(m)+(outcomes.length?'<div class="market-outcomes"><div class="category">RETURNED OUTCOMES</div><div class="outcome-chips">'+outcomes.map(o=>'<span>'+htmlEscape(o)+'</span>').join("")+'</div></div>':"")+'<div class="market-detail-actions"><button class="button secondary" data-market-action="save" data-market-id="'+htmlEscape(marketKey(m))+'" type="button">'+(isWatched(m)?"★ Saved to watchlist":"☆ Save to watchlist")+'</button>'+(href?'<a class="button primary" href="'+htmlEscape(href)+'" target="_blank" rel="noopener noreferrer">Open original market ↗</a>':"")+'</div><p class="market-detail-disclaimer">API fields can be stale or thinly traded. Reported liquidity is not guaranteed executable depth; this prototype does not execute trades. Browser observation history is local and is not an exchange history API.</p></section>';
+}
+document.getElementById("main").addEventListener("click",function(event){
+ const button=event.target.closest('[data-market-action="export-history"]');
+ if(button){event.preventDefault();exportMarketHistoryCSV(button.dataset.marketId);}
+});
+document.getElementById("main").addEventListener("change",function(event){
+ const select=event.target.closest("[data-trace-outcome]");
+ if(!select)return;
+ state.traceOutcomeSelections[String(select.dataset.marketKey||"")]=Number(select.value)||0;
+ const scrollY=window.scrollY;
+ render();
+ window.scrollTo({top:scrollY,behavior:window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+});
+seerInitializePriceHistory();
+</script>
+
 </body>
 </html>
