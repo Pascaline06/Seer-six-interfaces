@@ -180,6 +180,23 @@ jobs:
                   mobileNavRowCount: [...new Set([...document.querySelectorAll("#nav button")].map(el=>Math.round(el.getBoundingClientRect().top)))].length,
                   mobileNavFlexWrap: getComputedStyle(nav).flexWrap,
                   mobileHeadrowFlexDirection: main?.querySelector(".headrow") ? getComputedStyle(main.querySelector(".headrow")).flexDirection : "not-applicable",
+                  mobileContentOrderDiagnostics: (() => {
+                    const navRect = nav?.getBoundingClientRect();
+                    const mainRect = main?.getBoundingClientRect();
+                    const wire = document.querySelector("#marketWire");
+                    const wireRect = wire?.getBoundingClientRect();
+                    return {
+                      width: window.innerWidth,
+                      page: main?.dataset.page || null,
+                      theme: body.dataset.theme || "dark",
+                      navTop: navRect ? Math.round(navRect.top) : null,
+                      navBottom: navRect ? Math.round(navRect.bottom) : null,
+                      mainTop: mainRect ? Math.round(mainRect.top) : null,
+                      wireDisplay: wire ? getComputedStyle(wire).display : "missing",
+                      wireTop: wireRect ? Math.round(wireRect.top) : null,
+                      wireHeight: wireRect ? Math.round(wireRect.height) : null
+                    };
+                  })(),
                   mobileContentOrderValid: (() => {
                     if (window.innerWidth > 850) return true;
                     const navTop = nav?.getBoundingClientRect().top ?? Infinity;
@@ -527,7 +544,7 @@ jobs:
               if (viewport.name === "mobile" && metrics.mobileNavRowCount > 1) report.failures.push("mobile/"+theme+"/"+route+": navigation wrapped into multiple rows instead of remaining a horizontally scrollable tab rail");
               if (viewport.name === "mobile" && metrics.mobileNavFlexWrap !== "nowrap") report.failures.push("mobile/"+theme+"/"+route+": navigation rail is not configured for a single aligned row");
               if (viewport.name === "mobile" && metrics.mobileHeadrowFlexDirection !== "not-applicable" && metrics.mobileHeadrowFlexDirection !== "column") report.failures.push("mobile/"+theme+"/"+route+": page title and status/CTA are not stacked cleanly");
-              if (viewport.name === "mobile" && !metrics.mobileContentOrderValid) report.failures.push("mobile/"+theme+"/"+route+": navigation, market wire and page content are not in the intended order");
+              if (viewport.name === "mobile" && !metrics.mobileContentOrderValid) report.failures.push("mobile/"+theme+"/"+route+": navigation, market wire and page content are not in the intended order "+JSON.stringify(metrics.mobileContentOrderDiagnostics));
               if (metrics.activeRoute !== route) report.failures.push(`${viewport.name}/${theme}/${route}: active navigation route was ${metrics.activeRoute}`);
               if (metrics.theme !== theme) report.failures.push(`${viewport.name}/${theme}/${route}: theme state mismatch (${metrics.theme})`);
               if (!metrics.heading) report.failures.push(`${viewport.name}/${theme}/${route}: missing page heading`);
