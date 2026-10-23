@@ -307,10 +307,13 @@ jobs:
                     if (hasLiveEvidence && await evidencePanel.count() !== 1) {
                       report.failures.push("desktop/dark/app: live market inspector is missing its Source & Provenance ledger");
                     } else if (hasLiveEvidence) {
-                      const evidenceText = await evidencePanel.innerText();
-                      if (!evidenceText.includes("Source & provenance ledger") || !evidenceText.includes("Outcome prices") || !evidenceText.includes("Browser observed") || !evidenceText.includes("Provenance")) {
-                        report.failures.push("desktop/dark/app: field-level source/absence provenance is incomplete");
-                      }
+                      const ledgerTitle = (await evidencePanel.locator(".market-evidence-head h3").innerText().catch(() => "")).toLowerCase();
+                    const provenanceRows = await evidencePanel.locator(".evidence-ledger tbody tr").count();
+                    const evidenceLabels = (await evidencePanel.locator(".evidence-fact span").allTextContents()).map(value => value.trim().toLowerCase());
+                    const evidenceHeaders = (await evidencePanel.locator(".evidence-ledger thead th").allTextContents()).map(value => value.trim().toLowerCase());
+                    if (!ledgerTitle.includes("source & provenance ledger") || provenanceRows < 5 || !evidenceLabels.includes("browser observed") || !evidenceHeaders.includes("provenance")) {
+                      report.failures.push("desktop/dark/app: field-level source/absence provenance is incomplete (title=" + ledgerTitle + ", fieldRows=" + provenanceRows + ", labels=" + evidenceLabels.join("|") + ", headers=" + evidenceHeaders.join("|") + ")");
+                    }
                     }
                     await page.waitForFunction(() => typeof marketTrace !== "undefined" && marketTrace.sharedStatus !== "loading", null, { timeout: 15000 }).catch(() => {});
                     const archiveState = await page.evaluate(() => ({ status: marketTrace.sharedStatus, count: (marketTrace.sharedSamples || []).length }));
