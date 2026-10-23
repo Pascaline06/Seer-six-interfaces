@@ -9,9 +9,9 @@ import path from "node:path";
 const ENDPOINT = "https://app.seer.pm/.netlify/functions/markets-search";
 const OUTPUT = path.resolve(process.cwd(), "data/market-history.json");
 const CHAINS = [100, 10, 8453, 1];
-const PAGE_LIMIT = 24;
+const PER_CHAIN_LIMIT = 8;
 const PER_SERIES_LIMIT = 96; // About 48 hours at a 30-minute schedule.
-const GLOBAL_LIMIT = 20000;
+const GLOBAL_LIMIT = 12000;
 const SCHEMA_VERSION = 1;
 
 function normalizePrice(raw) {
@@ -58,56 +58,73 @@ async function main() {
     if (error.code !== "ENOENT") throw error;
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  let response, payload;
-  let observedAt;
-  try {
-    response = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({
-        chainsList: CHAINS.map(String),
-        marketStatusList: ["open", "answer_not_final", "in_dispute"],
-        limit: PAGE_LIMIT,
-        page: 1,
-        orderBy: "liquidityUSD",
-        orderDirection: "desc",
-        showConditionalMarkets: false
-      }),
-      signal: controller.signal
-    });
-    if (!response.ok) throw new Error("Seer API returned HTTP " + response.status);
-    payload = await response.json();
-    if (!payload || !Array.isArray(payload.markets)) throw new Error("Seer API returned no markets array");
-    observedAt = new Date().toISOString();
-  } finally {
-    clearTimeout(timeout);
-  }
-
-  const captured = [];
-  for (const market of payload.markets) {
-    if (!market || market.id === null || market.id === undefined) continue;
-    const key = String(market.id);
-    const chainId = Number(market.chainId || 0);
-    const outcomes = safeArray(market.outcomes);
-    const odds = safeArray(market.odds);
-    const rowCount = Math.max(outcomes.length, odds.length);
-    for (let i = 0; i < rowCount; i++) {
-      const p = normalizePrice(odds[i]);
-      if (p === null) continue;
-      const outcomeName = nameOf(outcomes[i], i);
-      const id = key + "::" + i + "::" + observedAt;
-      captured.push({
-        id, key, title: String(market.marketName || "Untitled market"),
-        chain: ({ 100: "Gnosis", 10: "Optimism", 8453: "Base", 1: "Ethereum" })[chainId] || ("Chain " + chainId),
-        chainId, outcomeIndex: i, outcomeName, p, observedAt,
-        source: "seer-scheduled-capture", sourceEndpoint: ENDPOINT,
-        marketUrl: String(market.url || ""), schemaVersion: SCHEMA_VERSION,
-        sourceMode: "periodic-read-only-api-snapshot"
+  async function captureChain(chainId) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          chainsList: [String(chainId)],
+          marketStatusList: ["open", "answer_not_final", "in_dispute"],
+          limit: PER_CHAIN_LIMIT,
+          page: 1,
+          orderBy: "liquidityUSD",
+          orderDirection: "desc",
+          showConditionalMarkets: false
+        }),
+        signal: controller.signal
       });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const payload = await response.json();
+      if (!payload || !Array.isArray(payload.markets)) throw new Error("response has no markets array");
+      const observedAt = new Date().toISOString();
+      const markets = payload.markets.filter(m => m && m.id !== null && m.id !== undefined && Number(m.chainId) === Number(chainId));
+      if (!markets.length) throw new Error("no market records for requested chain " + chainId);
+      return { chainId, observedAt, reportedCount: Number(payload.count) || markets.length, markets };
+    } finally {
+      clearTimeout(timeout);
     }
   }
+
+  const results = await Promise.allSettled(CHAINS.map(captureChain));
+  const chainResponses = [];
+  const chainErrors = [];
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.status === "fulfilled") chainResponses.push(result.value);
+    else chainErrors.push({ chainId: CHAINS[i], error: result.reason && result.reason.message ? result.reason.message : String(result.reason) });
+  }
+  if (!chainResponses.length) throw new Error("All per-chain Seer requests failed: " + chainErrors.map(x => x.chainId + ": " + x.error).join("; "));
+
+  const captured = [];
+  for (const chainResponse of chainResponses) {
+    for (const market of chainResponse.markets) {
+      if (!market || market.id === null || market.id === undefined) continue;
+      const key = String(market.id);
+      const chainId = Number(market.chainId || 0);
+      const observedAt = chainResponse.observedAt;
+      const outcomes = safeArray(market.outcomes);
+      const odds = safeArray(market.odds);
+      const rowCount = Math.max(outcomes.length, odds.length);
+      for (let i = 0; i < rowCount; i++) {
+        const p = normalizePrice(odds[i]);
+        if (p === null) continue;
+        const outcomeName = nameOf(outcomes[i], i);
+        const id = key + "::" + i + "::" + observedAt;
+        captured.push({
+          id, key, title: String(market.marketName || "Untitled market"),
+          chain: ({ 100: "Gnosis", 10: "Optimism", 8453: "Base", 1: "Ethereum" })[chainId] || ("Chain " + chainId),
+          chainId, outcomeIndex: i, outcomeName, p, observedAt,
+          source: "seer-scheduled-capture", sourceEndpoint: ENDPOINT,
+          marketUrl: String(market.url || ""), schemaVersion: SCHEMA_VERSION,
+          sourceMode: "periodic-read-only-api-snapshot"
+        });
+      }
+    }
+  }
+  const observedAt = chainResponses.reduce((latest, row) => !latest || Date.parse(row.observedAt) > Date.parse(latest) ? row.observedAt : latest, null);
   if (!captured.length) throw new Error("The returned market payload had no valid outcome-price observations; archive not modified.");
 
   const previous = safeArray(existing.samples);
@@ -118,6 +135,12 @@ async function main() {
     cadence: "approximately every 30 minutes (GitHub Actions schedule; actual timing may drift)",
     sourceEndpoint: ENDPOINT,
     sourceMeaning: "Scheduled browser-independent observations of the Seer public API. Not historical trades, an exchange tape, or executable quotes.",
+    captureStatus: chainErrors.length ? "partial" : "all-requested-chains-captured",
+    chainsRequested: CHAINS,
+    chainsCaptured: chainResponses.map(row => row.chainId),
+    chainErrors,
+    perChainRequestLimit: PER_CHAIN_LIMIT,
+    responseObservations: chainResponses.map(row => ({ chainId: row.chainId, observedAt: row.observedAt, reportedCount: row.reportedCount, returnedRecords: row.markets.length })),
     retention: { maxObservationsPerMarketOutcome: PER_SERIES_LIMIT, maxObservationsTotal: GLOBAL_LIMIT },
     marketsCaptured: new Set(captured.map(x => x.key)).size,
     observationsAdded: captured.length,
