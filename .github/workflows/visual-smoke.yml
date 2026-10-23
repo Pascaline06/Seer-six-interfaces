@@ -167,7 +167,7 @@ jobs:
                   paletteAccent: getComputedStyle(body).getPropertyValue("--violet").trim().toLowerCase(),
                   siteBackgroundImage: getComputedStyle(body).backgroundImage,
                   mainPanelBackgroundImage: getComputedStyle(main?.querySelector(".panel") || body).backgroundImage,
-                  themeToggleLabel: (document.querySelector("#themeToggle")?.innerText || "").replace(/\\s+/g," ").trim(),
+                  themeToggleLabel: (document.querySelector("#themeToggle span")?.textContent || "").trim(),
                   unhandledEnabledButtons: [...document.querySelectorAll("button:not(:disabled)")].filter(button => {
                     if (button.hasAttribute("onclick")) return false;
                     return !["data-market-action","data-opportunity-side","data-page","data-wire-action","data-explorer-view"].some(attribute => button.hasAttribute(attribute));
