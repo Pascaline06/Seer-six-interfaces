@@ -276,6 +276,32 @@ jobs:
                     if (!refreshRecovered) report.failures.push("desktop/dark/app: Market Wire Refresh did not return to an actionable state");
                   }
                 }
+                const explorerRefresh = page.locator("#main button.refresh-markets");
+                if (await explorerRefresh.count() !== 1) {
+                  report.failures.push("desktop/dark/app: Explorer Refresh results control is missing");
+                } else {
+                  await explorerRefresh.click();
+                  const explorerRefreshRecovered = await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).then(() => true).catch(() => false);
+                  if (!explorerRefreshRecovered) report.failures.push("desktop/dark/app: Explorer Refresh results did not complete");
+                }
+                const searchInput = page.locator("#marketSearch");
+                await searchInput.fill("SEER_SMOKE_NO_MATCH_71d44da0192148f5b64d4cc289ab1c3a");
+                await page.waitForFunction(() => document.querySelector("#explorerStatus")?.dataset.status === "loading", null, { timeout: 5000 }).catch(() => {});
+                await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+                const clearFilters = page.locator('#main .explorer-empty button:has-text("Clear filters")');
+                if (await clearFilters.count() !== 1) {
+                  report.failures.push("desktop/dark/app: empty results did not provide a Clear filters action");
+                } else {
+                  await clearFilters.click();
+                  const filtersCleared = await page.waitForFunction(() => {
+                    const input = document.querySelector("#marketSearch");
+                    const filter = document.querySelector("#marketFilter");
+                    const network = document.querySelector("#marketNetwork");
+                    return !!input && input.value === "" && filter?.value === "All markets" && network?.value === "all";
+                  }, null, { timeout: 6000 }).then(() => true).catch(() => false);
+                  if (!filtersCleared) report.failures.push("desktop/dark/app: Clear filters did not restore default Explorer controls");
+                  await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+                }
               }
 
               const screenshot = `artifacts/${viewport.name}-${theme}-${route}.png`;
@@ -329,6 +355,17 @@ jobs:
                     await page.waitForFunction(() => document.querySelector("#explorerStatus")?.dataset.status === "live" && document.querySelector("#pageStatus")?.innerText.trim().startsWith("2"), null, { timeout: 20000 }).catch(() => {});
                     const pageTwo = (await page.locator("#pageStatus").innerText().catch(() => "")).trim().startsWith("2");
                     if (!pageTwo) report.failures.push(viewport.name+"/"+theme+"/app: next-page control did not advance the live index");
+                    if (pageTwo) {
+                      const previousButton = page.locator("#previousMarkets");
+                      if (await previousButton.count() !== 1 || !(await previousButton.isEnabled())) {
+                        report.failures.push(viewport.name+"/"+theme+"/app: Previous-page control was not enabled on page two");
+                      } else {
+                        await previousButton.click();
+                        await page.waitForFunction(() => document.querySelector("#explorerStatus")?.dataset.status === "live" && document.querySelector("#pageStatus")?.innerText.trim().startsWith("1"), null, { timeout: 20000 }).catch(() => {});
+                        const returnedToPageOne = (await page.locator("#pageStatus").innerText().catch(() => "")).trim().startsWith("1");
+                        if (!returnedToPageOne) report.failures.push(viewport.name+"/"+theme+"/app: Previous-page control did not return to page one");
+                      }
+                    }
                   }
                 } else {
                   report.warnings.push(viewport.name+"/"+theme+"/app: full-index search fell back ("+(searchMode || "no final status")+")");
@@ -557,6 +594,40 @@ jobs:
                 }
               }
 
+              if (route === "opportunity") {
+                const ledgerInspect = page.locator('#main .opportunity-model-actions button[data-market-action="inspect"]').first();
+                const inspectCount = await page.locator('#main .opportunity-model-actions button[data-market-action="inspect"]').count();
+                if (!inspectCount) {
+                  report.failures.push(viewport.name+"/"+theme+"/opportunity: market ledger rows have no Inspect action");
+                } else {
+                  const wantedTitle = (await ledgerInspect.locator("xpath=ancestor::tr").locator(".opportunity-market-title").innerText()).replace(/^\\s*0?\\d+\\s*/, "").trim();
+                  await ledgerInspect.click();
+                  const matchingInspector = await page.waitForFunction((wanted) => {
+                    const detail = document.querySelector("#marketDetail");
+                    return !!detail && detail.querySelector("h2")?.innerText.trim() === wanted;
+                  }, wantedTitle, { timeout: 8000 }).then(() => true).catch(() => false);
+                  if (!matchingInspector) report.failures.push(viewport.name+"/"+theme+"/opportunity: Inspect did not open the matching ledger market");
+                  if (matchingInspector) {
+                    await page.locator('#main #marketDetail button[data-market-action="close-detail"]').click();
+                    if (await page.locator("#main #marketDetail").count() !== 0) report.failures.push(viewport.name+"/"+theme+"/opportunity: closing the ledger inspector left stale detail visible");
+                  }
+                }
+                const modelButton = page.locator('#main button[data-market-action="model-opportunity"]:not([disabled])').first();
+                const modelCount = await page.locator('#main button[data-market-action="model-opportunity"]:not([disabled])').count();
+                if (modelCount) {
+                  const modelKey = await modelButton.getAttribute("data-market-id");
+                  await modelButton.click();
+                  const modelOpened = await page.waitForFunction((key) => {
+                    const lab = document.querySelector("#opportunityLab");
+                    const select = document.querySelector("#oppMarketSelect");
+                    return !!lab && !!select && select.value === key;
+                  }, modelKey, { timeout: 8000 }).then(() => true).catch(() => false);
+                  if (!modelOpened) report.failures.push(viewport.name+"/"+theme+"/opportunity: Model did not open the Decision Lab for the exact selected market");
+                } else {
+                  report.warnings.push(viewport.name+"/"+theme+"/opportunity: no returned binary market was eligible for the Model action");
+                }
+              }
+
               if (route === "home") {
                 const getApp = page.locator("#getAppButton");
                 if (await getApp.count() !== 1) {
@@ -717,6 +788,17 @@ jobs:
                 await page.goto(base+"#/home", { waitUntil: "domcontentloaded", timeout: 45000 });
                 await page.waitForSelector("#main h1", { timeout: 15000 });
                 await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#main .hero-signal")?.dataset.marketStatus || ""), null, { timeout: 20000 }).catch(() => {});
+                for (const selector of ["#main .signal-desk-action", "#main .market-journey .journey-open"]) {
+                  const ctas = page.locator(selector);
+                  const count = await ctas.count();
+                  for (let n = 0; n < count; n++) {
+                    await ctas.nth(n).click();
+                    const openedExplorer = await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "app", null, { timeout: 6000 }).then(() => true).catch(() => false);
+                    if (!openedExplorer) report.failures.push("desktop/dark/home: "+selector+" did not navigate to the Market Explorer");
+                    await page.locator('#nav button[data-page="home"]').click();
+                    await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "home", null, { timeout: 6000 }).catch(() => {});
+                  }
+                }
               }
 
               const nextRoute = routes[(routes.indexOf(route) + 1) % routes.length];
