@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": null,
+  "cadence": "approximately every 30 minutes",
+  "sourceEndpoint": "https://app.seer.pm/.netlify/functions/markets-search",
+  "sourceMeaning": "Scheduled read-only API observations; not historical trades or executable quotes.",
+  "marketsCaptured": 0,
+  "observationsAdded": 0,
+  "samples": []
+}
