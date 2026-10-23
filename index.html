@@ -462,7 +462,7 @@ body[data-theme="light"] .wire-ledger-empty{background:#ffffff80}
 .market-wire-head small{font:500 9px "JetBrains Mono",monospace;letter-spacing:.08em;color:var(--dim);white-space:nowrap}
 .market-wire-viewport{align-self:center;min-width:0;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 3%,black 97%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 3%,black 97%,transparent)}
 .market-wire-track{display:flex;width:max-content;align-items:stretch;will-change:transform;animation:marketWireRun 44s linear infinite}
-.market-wire.is-paused .market-wire-track,.market-wire-viewport:hover .market-wire-track,.market-wire-viewport:focus-within .market-wire-track{animation-play-state:paused}
+.market-wire.is-paused .market-wire-track,.market-wire-viewport:focus-within .market-wire-track{animation-play-state:paused}
 .market-wire-set{display:flex;flex:none;align-items:stretch}
 .wire-item{appearance:none;display:flex;align-items:center;gap:9px;min-height:65px;padding:10px 17px;border:0;border-right:1px solid var(--line);white-space:nowrap;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;transition:background .18s ease,border-color .18s ease}.wire-item:hover{background:rgba(166,139,255,.07)}.wire-item:focus-visible{outline:2px solid var(--violet);outline-offset:-3px;border-radius:4px}
 .wire-chain{font:600 9px "JetBrains Mono",monospace;letter-spacing:.08em;color:var(--violet);text-transform:uppercase}
@@ -1569,6 +1569,152 @@ body[data-theme="dark"]{
   --violet-strong:#b294f0;
 }
 
+
+/* Seer brand-kit surfaces + contrast normalization. Accent color is not a substitute for legible text. */
+:root,body[data-theme="dark"]{
+ color-scheme:dark;
+ --bg:#101013;--surface:#1a1a1c;--panel:#1a1a1c;--panel-raised:#2f2f34;--line:#34343f;
+ --text:#ededf2;--muted:#ababb3;--dim:#92929d;--violet:#b7a0ff;--violet-strong:#9c6ff2;--purple:#6c2bd9;
+ --brand-lavender:#241e33;--green:#77ddb0;--amber:#f4ca83;--red:#ff9eaa;
+}
+body[data-theme="light"]{
+ color-scheme:light;
+ --bg:#f7f7f9;--surface:#ffffff;--panel:#ffffff;--panel-raised:#f2f2f4;--line:#e1dfe8;
+ --text:#17171c;--muted:#5c5c66;--dim:#6d6d78;--violet:#6c2bd9;--violet-strong:#6c2bd9;--purple:#6c2bd9;
+ --brand-lavender:#efe9fc;--green:#206d57;--amber:#815400;--red:#b3324c;
+ background:radial-gradient(ellipse at 84% -10%,rgba(208,190,247,.34),transparent 40%),radial-gradient(ellipse at 6% 32%,rgba(239,233,252,.48),transparent 42%),linear-gradient(180deg,#f7f7f9 0%,#efe9fc 52%,#f7f7f9 100%);
+ color:var(--text);
+}
+body[data-theme="dark"]{
+ background:radial-gradient(ellipse at 82% 0%,rgba(108,43,217,.12),transparent 43%),linear-gradient(180deg,#101013 0%,#141218 58%,#101013 100%);
+ color:var(--text);
+}
+body[data-theme="light"] .top{background:rgba(247,247,249,.96);border-color:var(--line)}
+body[data-theme="dark"] .top{background:rgba(16,16,19,.96);border-color:var(--line)}
+body[data-theme="light"] .side{background:rgba(247,247,249,.94);border-color:var(--line)}
+body[data-theme="dark"] .side{background:rgba(16,16,19,.82);border-color:var(--line)}
+body[data-theme="light"] .nav button{color:var(--muted)}
+body[data-theme="light"] .nav button:hover{background:#f2f2f4;border-color:var(--line);color:var(--text)}
+body[data-theme="light"] .nav button.active{background:#efe9fc;border-color:#d3c3f2;box-shadow:inset 3px 0 #6c2bd9;color:#4c1fa6}
+body[data-theme="dark"] .nav button.active{background:linear-gradient(100deg,rgba(156,111,242,.2),rgba(36,30,51,.42));border-color:#5d4b78;box-shadow:inset 3px 0 #b7a0ff;color:#ededf2}
+body[data-theme="light"] .side-note{background:linear-gradient(145deg,#efe9fc,#fff);border-color:#d9c9f1;color:var(--muted)}
+body[data-theme="dark"] .side-note{background:linear-gradient(145deg,#241e33,#1a1a1c);border-color:#443850;color:var(--muted)}
+body[data-theme="light"] .pill{background:#f2f2f4;border-color:var(--line);color:var(--muted)}
+body[data-theme="light"] .pill.violet{background:#efe9fc;border-color:#d6c7f4;color:#4c1fa6}
+body[data-theme="dark"] .pill{background:#2f2f34;border-color:var(--line);color:var(--muted)}
+body[data-theme="dark"] .pill.violet{background:#241e33;border-color:#5c477a;color:#d8caff}
+body[data-theme="light"] .button{background:#fff;border-color:var(--line);color:var(--text)}
+body[data-theme="light"] .button.primary{background:#6c2bd9;border-color:#6c2bd9;color:#fff}
+body[data-theme="dark"] .button{background:#2f2f34;border-color:#454550;color:var(--text)}
+body[data-theme="dark"] .button.primary{background:#6c2bd9;border-color:#9c6ff2;color:#fff}
+body[data-theme="light"] .panel,body[data-theme="light"] .market,body[data-theme="light"] .risk-market-record,body[data-theme="light"] .market-record,body[data-theme="light"] .explorer-controls,body[data-theme="light"] .compare-workbench,body[data-theme="light"] .market-detail,body[data-theme="light"] .market-journey{
+ background:linear-gradient(145deg,#ffffff,#f8f5ff 100%);border-color:var(--line);box-shadow:0 5px 20px rgba(33,18,56,.045);
+}
+body[data-theme="light"] .stats .panel{background:linear-gradient(145deg,#fff,#f2f2f4);border-color:var(--line)}
+body[data-theme="dark"] .panel,body[data-theme="dark"] .market,body[data-theme="dark"] .risk-market-record,body[data-theme="dark"] .market-record,body[data-theme="dark"] .explorer-controls,body[data-theme="dark"] .compare-workbench,body[data-theme="dark"] .market-detail,body[data-theme="dark"] .market-journey{
+ background:linear-gradient(145deg,#2f2f34,#1a1a1c 88%)!important;border-color:#34343f!important;box-shadow:inset 0 1px rgba(255,255,255,.025),0 10px 28px rgba(0,0,0,.12);
+}
+body[data-theme="dark"] .stats .panel{background:linear-gradient(145deg,#2f2f34,#1a1a1c 100%)!important}
+body[data-theme="light"] .market-probability-block,body[data-theme="light"] .market-side-picker,body[data-theme="light"] .market-side-choice{background:#f2f2f4;border-color:var(--line)}
+body[data-theme="dark"] .market-probability-block,body[data-theme="dark"] .market-side-picker,body[data-theme="dark"] .market-side-choice{background:#2f2f34;border-color:#34343f}
+body[data-theme="light"] .market-detail{background:linear-gradient(125deg,#efe9fc,#fff 62%)!important}
+body[data-theme="dark"] .market-detail{background:linear-gradient(125deg,#241e33,#1a1a1c 62%)!important}
+body[data-theme="light"] .bar{background:#e4e1e9}
+body[data-theme="dark"] .bar{background:#34343f}
+body[data-theme="light"] .chart{background:repeating-linear-gradient(to bottom,transparent 0,transparent 53px,#e1dfe8 54px,#e1dfe8 55px)}
+body[data-theme="dark"] .chart{background:repeating-linear-gradient(to bottom,transparent 0,transparent 53px,#34343f 54px,#34343f 55px)}
+body[data-theme="light"] th{background:#f2f2f4;color:#5c5c66}
+body[data-theme="dark"] th{background:#2f2f34;color:#ababb3}
+body[data-theme="light"] td{border-bottom-color:#e1dfe8;color:#17171c}
+body[data-theme="dark"] td{border-bottom-color:#34343f;color:#ededf2}
+body[data-theme="light"] .field select,body[data-theme="light"] .field input{background:#fff;border-color:#c9c7d1;color:#17171c}
+body[data-theme="dark"] .field select,body[data-theme="dark"] .field input{background:#2f2f34;border-color:#494953;color:#ededf2}
+body[data-theme="light"] .notice{background:#fff9ed;border-color:#ead8b2;color:#684c18}
+body[data-theme="dark"] .notice{background:rgba(244,202,131,.07);border-color:rgba(244,202,131,.34);color:#f4d9a6}
+body[data-theme="light"] .site-footer{background:#f7f7f9;border-color:var(--line)}
+body[data-theme="dark"] .site-footer{background:#101013;border-color:var(--line)}
+body[data-theme="light"] .interface-link{color:#5c5c66}
+body[data-theme="light"] .interface-link:hover,body[data-theme="light"] .interface-link.current{color:#17171c}
+body[data-theme="dark"] .interface-link{color:#ababb3}
+body[data-theme="dark"] .interface-link:hover,body[data-theme="dark"] .interface-link.current{color:#ededf2}
+body[data-theme="light"] .site-footer-bottom{border-color:var(--line);color:#6d6d78}
+body[data-theme="dark"] .site-footer-bottom{border-color:var(--line);color:#92929d}
+/* Source ticker: the lavender tint is deliberate, but all copy remains high-contrast. */
+.market-wire{background:linear-gradient(105deg,#efe9fc 0%,#fff 48%,#f7f7f9 100%)!important;border-color:#d2c2ef!important;box-shadow:inset 0 1px rgba(255,255,255,.65),0 10px 28px rgba(65,35,105,.07)!important}
+body[data-theme="dark"] .market-wire{background:linear-gradient(105deg,#241e33 0%,#1a1a1c 54%,#2f2f34 100%)!important;border-color:#57466c!important;box-shadow:inset 0 1px rgba(255,255,255,.045),0 10px 28px rgba(0,0,0,.2)!important}
+body[data-theme="light"] .market-wire .market-wire-head,body[data-theme="light"] .market-wire .market-wire-tools{background:rgba(239,233,252,.88);border-color:#d9c9f1}
+body[data-theme="dark"] .market-wire .market-wire-head,body[data-theme="dark"] .market-wire .market-wire-tools{background:#241e33;border-color:#443850}
+.market-wire .market-wire-brand{color:var(--text)}
+.market-wire .market-wire-head small{font-size:10px;color:var(--muted);letter-spacing:.055em}
+.market-wire .wire-title{color:var(--text);font-size:12px;font-weight:550}
+.market-wire .wire-chain{color:var(--violet);font-size:9px}
+.market-wire .wire-price{color:var(--text);font-size:13px}
+.market-wire .wire-metric{color:var(--muted);font-size:10px}
+.market-wire .wire-tools-meta{gap:9px;color:var(--muted);font-size:9px;line-height:1.5;white-space:normal}
+.market-wire .wire-tools-meta span:last-child{font-weight:700;color:var(--text)}
+.market-wire .wire-ledger-note,.market-wire .wire-ledger-time{color:var(--muted)}
+.market-wire .wire-tools-actions{gap:6px;flex-wrap:wrap}
+.market-wire .wire-tools-actions button{min-height:32px;padding:6px 9px;background:var(--panel);color:var(--muted);font-size:11px;border-color:var(--line)}
+body[data-theme="light"] .market-wire .wire-tools-actions button{background:#fff;color:#4f4a5a;border-color:#d2c6e7}
+body[data-theme="dark"] .market-wire .wire-tools-actions button{background:#2f2f34;color:#d3d1dc;border-color:#494052}
+.market-wire .wire-tools-actions button:hover{color:var(--text);border-color:var(--violet);background:var(--panel-raised)}
+body[data-theme="light"] .market-wire .wire-tools-actions .wire-refresh{color:#4c1fa6;border-color:#b9a4e3}
+body[data-theme="dark"] .market-wire .wire-tools-actions .wire-refresh{color:#d8caff;border-color:#6c5590}
+.market-wire .wire-item{background:rgba(255,255,255,.3);border-right-color:rgba(108,43,217,.16)}
+body[data-theme="light"] .market-wire .wire-item:nth-child(even){background:rgba(239,233,252,.58)}
+body[data-theme="dark"] .market-wire .wire-item{background:rgba(255,255,255,.025);border-right-color:rgba(205,180,248,.18)}
+body[data-theme="dark"] .market-wire .wire-item:nth-child(even){background:rgba(156,111,242,.055)}
+.market-wire .wire-item:hover{background:rgba(156,111,242,.15)}
+.market-wire .wire-item:active{background:rgba(156,111,242,.24)}
+.market-wire .wire-item-updated{animation:wireReprice 1.35s ease-out}
+.market-wire .wire-empty{color:var(--text);font-size:12px}
+.market-wire :focus-visible{outline-color:var(--violet)}
+body[data-theme="light"] .market-wire .wire-status-led{background:#277b62}
+body[data-theme="dark"] .market-wire .wire-status-led{background:#77ddb0}
+/* Homepage tape item is a button and shares the same brand surface. */
+.signal-ticker.market-tape{background:linear-gradient(100deg,#efe9fc 0%,#fff 44%,#f7f7f9 100%)!important;border-bottom-color:#d8c8f0!important}
+body[data-theme="dark"] .signal-ticker.market-tape{background:linear-gradient(100deg,#241e33 0%,#1a1a1c 53%,#2f2f34 100%)!important;border-bottom-color:#443850!important}
+.signal-ticker.market-tape .signal-ticker-label{background:rgba(239,233,252,.92);color:#17171c;border-right-color:#d8c8f0}
+body[data-theme="dark"] .signal-ticker.market-tape .signal-ticker-label{background:#241e33;color:#ededf2;border-right-color:#443850}
+.signal-ticker.market-tape .signal-ticker-label small{font-size:9px;color:var(--muted)}
+.signal-ticker.market-tape .signal-ticker-copy .signal-ticker-kind{color:var(--violet);font-size:9px}
+.signal-ticker.market-tape .signal-ticker-copy strong{color:var(--text);font-size:11px}
+.signal-ticker.market-tape .signal-ticker-copy .signal-ticker-detail{color:var(--muted);font-size:9px}
+.signal-ticker.market-tape .signal-ticker-item{appearance:none;display:flex;align-items:center;gap:9px;min-height:58px;padding:9px 16px;border:0;border-right:1px solid rgba(108,43,217,.18);background:rgba(255,255,255,.32);color:var(--text);font:inherit;text-align:left;white-space:nowrap;cursor:pointer;transition:background .16s,border-color .16s}
+body[data-theme="dark"] .signal-ticker.market-tape .signal-ticker-item{background:rgba(255,255,255,.025);border-right-color:rgba(205,180,248,.18)}
+body[data-theme="light"] .signal-ticker.market-tape .signal-ticker-item:nth-child(3n+2){background:rgba(239,233,252,.6)}
+.signal-ticker.market-tape .signal-ticker-item:hover{background:rgba(156,111,242,.16)}
+.signal-ticker.market-tape .signal-ticker-item:focus-visible{outline:2px solid var(--violet);outline-offset:-3px}
+.signal-ticker.market-tape .signal-ticker-item .market-avatar{flex:0 0 auto}
+.signal-ticker.market-tape .signal-ticker-track{animation-play-state:running}
+/* Pull important secondary copy out of decorative low-contrast tones. */
+.crumb,.side-label,.num,.brand-note,.statlabel,.statfoot,.marketfoot,.sectionhead p,.muted,.intro,.evidenceitem span,.market-trace-note,.market-trace-count,.market-trace-meta>span,.market-trace-empty p,.wire-ledger-note,.wire-ledger-time,.risk-record-foot,.site-footer-bottom{color:var(--muted)}
+.crumb,.side-label,.category,.statlabel,.wire-tools-meta,.wire-ledger-title{font-weight:650}
+.docs-lead{background:linear-gradient(120deg,#efe9fc,#fff 68%);border-color:#d9c9f1}
+body[data-theme="dark"] .docs-lead{background:linear-gradient(120deg,#241e33,#1a1a1c 70%);border-color:#443850}
+.docs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:24px}
+.docs-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:23px 24px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 5px 18px rgba(28,20,48,.035)}
+.docs-card h2{margin:10px 0 8px;font-size:21px;line-height:1.28;color:var(--text)}
+.docs-card p{margin:0 0 10px;color:var(--muted);font-size:14px;line-height:1.8}
+.docs-card ul{margin:3px 0 18px;padding-left:19px;color:var(--muted);font-size:13px;line-height:1.85}
+.docs-number{color:var(--violet);font:700 10px "JetBrains Mono",monospace;letter-spacing:.12em}
+.docs-open{display:inline-flex;align-items:center;gap:8px;margin-top:auto;padding:8px 0 0;color:var(--violet);font-size:12px;font-weight:700}
+.docs-open:hover{text-decoration:underline;text-underline-offset:4px}
+.docs-full{margin-top:24px}
+.docs-full h2{margin:0 0 9px;font-size:22px;line-height:1.35;color:var(--text)}
+.docs-full h3{margin:20px 0 6px;font-size:15px;color:var(--text)}
+.docs-full p,.docs-full li{color:var(--muted);font-size:14px;line-height:1.85}
+.docs-full p{margin:8px 0 13px}
+.docs-full ul,.docs-full ol{padding-left:20px}
+.docs-callout{margin-top:17px;padding:14px 16px;border:1px solid #d7c6f2;border-radius:10px;background:#efe9fc;color:#3d2b5f;font-size:13px;line-height:1.8}
+body[data-theme="dark"] .docs-callout{background:#241e33;border-color:#57466c;color:#e0d4f8}
+.docs-pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.docs-pill{display:inline-flex;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel-raised);color:var(--muted);font-size:11px;font-weight:600}
+.docs-open:focus-visible,.docs-card a:focus-visible{outline:2px solid var(--violet);outline-offset:4px;border-radius:4px}
+#nav button[data-page="docs"] .num{width:31px;flex-basis:31px;font-size:8px;letter-spacing:.02em}
+@media(max-width:720px){.docs-grid{grid-template-columns:1fr}.docs-card{padding:19px}.docs-full{padding:18px}}
+@media(prefers-reduced-motion:reduce){.wire-item-updated,.signal-ticker-live-dot{animation:none!important}.signal-ticker.market-tape .signal-ticker-track{animation:none!important;transform:none!important}}
+
 </style>
 </head>
 <body data-theme="light">
@@ -1581,7 +1727,7 @@ body[data-theme="dark"]{
 <div id="marketWire" class="market-wire is-loading" aria-label="Seer market wire"></div>
 <div class="layout">
 <aside class="side">
-<div class="side-label">Six interfaces</div>
+<div class="side-label">Interfaces &amp; documentation</div>
 <nav class="nav" id="nav">
 <button class="active" data-page="home"><span class="num">01</span>Overview</button>
 <button data-page="app"><span class="num">02</span>Market explorer</button>
@@ -1589,6 +1735,7 @@ body[data-theme="dark"]{
 <button data-page="futarchy"><span class="num">04</span>Futarchy</button>
 <button data-page="opportunity"><span class="num">05</span>Opportunities</button>
 <button data-page="risk"><span class="num">06</span>Risk pricing</button>
+<button data-page="docs"><span class="num">DOC</span>Documentation</button>
 </nav>
 <div class="side-note"><div class="eyebrow">The Seer principle</div><p>Markets aggregate beliefs. Evidence helps people decide what those beliefs are worth.</p></div>
 </aside>
@@ -1677,10 +1824,10 @@ function renderMarketWire(){
   const key=marketKey(m),rawP=m.p===null||m.p===undefined?null:Number(m.p),validP=rawP!==null&&Number.isFinite(rawP)&&rawP>=0&&rawP<=100,price=validP?Math.round(rawP)+"%":"—";
   return '<button type="button" class="wire-item '+(wireState.changedIds.has(key)?"wire-item-updated":"")+'" data-wire-action="inspect" data-market-id="'+htmlEscape(key)+'" aria-label="Inspect market: '+htmlEscape(m.title)+', price '+htmlEscape(price)+'">'+marketAvatarHTML(m,27)+'<span class="wire-market-copy"><span class="wire-chain">'+htmlEscape(m.chain||m.type||"Market")+'</span><span class="wire-title" title="'+htmlEscape(m.title)+'">'+htmlEscape(m.title)+'</span></span><strong class="wire-price">'+price+'</strong><span class="wire-metric">VOL '+htmlEscape(m.volume||"—")+'</span><span class="wire-metric">LIQ '+htmlEscape(m.depth||"—")+'</span></button>';
  }).join(""):'<span class="wire-empty">No market records have been returned yet.</span>';
- const snapshot=marketFeed.updatedAt?"UPDATED "+marketWireTime(marketFeed.updatedAt):"NO VERIFIED SNAPSHOT";
- const sweep=wireState.lastSweep?(wireState.hasComparedSnapshot?wireState.lastSweep.checked+" checked · "+(wireState.lastSweep.changed?wireState.lastSweep.changed+" repriced":"no repricing"):""+wireState.lastSweep.checked+" records · first comparison pending"):"Awaiting first sync";
- const pausedLabel=wireState.paused?"▶ Resume ticker":"Ⅱ Pause ticker";
- const historyButtonLabel="↕ Movements ("+wireState.history.length+")";
+ const snapshot=marketFeed.updatedAt?"LAST SNAPSHOT · "+marketWireTime(marketFeed.updatedAt):"WAITING FOR FIRST SNAPSHOT";
+ const sweep=wireState.lastSweep?(wireState.hasComparedSnapshot?wireState.lastSweep.checked+" markets checked · "+(wireState.lastSweep.changed?wireState.lastSweep.changed+" price changes":"no repricing"):""+wireState.lastSweep.checked+" records · first comparison pending"):"Awaiting first sync";
+ const pausedLabel=wireState.paused?"▶ Resume motion":"Ⅱ Pause motion";
+ const historyButtonLabel="↕ Price changes ("+wireState.history.length+")";
  const historyRows=wireState.history.slice(0,8).map(ev=>{
   const delta=Number(ev.toP)-Number(ev.fromP),sign=delta>0?"+":"";
   const cls=delta>=0?"up":"down",time=marketWireTime(new Date(ev.observedAt));
@@ -1689,7 +1836,7 @@ function renderMarketWire(){
  const historyPanel=wireState.ledgerOpen?'<section class="wire-ledger" aria-label="Observed repricing history"><div class="wire-ledger-head"><div><div class="wire-ledger-title">OBSERVED REPRICING</div><div class="wire-ledger-note">Browser-local record of before/after prices returned by successful Seer API snapshots · not an execution or trade history</div></div><div class="wire-ledger-note">LATEST '+Math.min(8,wireState.history.length)+' / '+wireState.history.length+'</div></div>'+(historyRows?'<div class="wire-ledger-list">'+historyRows+'</div>':'<div class="wire-ledger-empty"><strong>No repricing observed yet.</strong>This log only records a market when two successful Seer responses differ by at least 0.2 percentage points. It never invents trades or fills.</div>')+'</section>':"";
  host.className="market-wire "+statusClass+(wireState.paused?" is-paused":"");
  host.setAttribute("aria-label","Seer market wire. "+status+". "+sweep+"."+(marketFeed.error?" Refresh warning: "+marketFeed.error+".":""));
- host.innerHTML=`<div class="market-wire-head"><div class="market-wire-brand"><i class="wire-status-led"></i><span>SEER WIRE</span></div><small>${status} · AUTO-REFRESH 60S</small></div><div class="market-wire-viewport" aria-label="Market snapshot tape"><div class="market-wire-track"><div class="market-wire-set">${items}</div><div class="market-wire-set" aria-hidden="true" inert>${items}</div></div></div><div class="market-wire-tools"><div class="wire-tools-meta"><span>${snapshot}</span><span title="${htmlEscape(marketFeed.error||sweep)}">${htmlEscape(marketFeed.error?"REFRESH WARNING":sweep)}</span></div><div class="wire-tools-actions"><button class="wire-history-toggle" type="button" data-wire-action="history" aria-expanded="${wireState.ledgerOpen}">${historyButtonLabel}</button><button class="wire-refresh" type="button" data-wire-action="refresh" ${marketFeed.refreshing?"disabled":""} aria-label="Refresh market snapshot now">${marketFeed.refreshing?"↻ Syncing…":"↻ Refresh"}</button><button type="button" data-wire-action="pause" aria-pressed="${wireState.paused}">${pausedLabel}</button></div></div>${historyPanel}`;
+ host.innerHTML=`<div class="market-wire-head"><div class="market-wire-brand"><i class="wire-status-led"></i><span>SEER WIRE</span></div><small>${status} · AUTO-REFRESH 60S</small></div><div class="market-wire-viewport" aria-label="Market snapshot tape"><div class="market-wire-track"><div class="market-wire-set">${items}</div><div class="market-wire-set" aria-hidden="true" inert>${items}</div></div></div><div class="market-wire-tools"><div class="wire-tools-meta"><span>${snapshot}</span><span title="${htmlEscape(marketFeed.error||sweep)}">${htmlEscape(marketFeed.error?"REFRESH WARNING":sweep)}</span></div><div class="wire-tools-actions">${wireState.history.length?'<button class="wire-history-toggle" type="button" data-wire-action="history" aria-expanded="'+wireState.ledgerOpen+'">'+historyButtonLabel+'</button>':""}<button class="wire-refresh" type="button" data-wire-action="refresh" ${marketFeed.refreshing?"disabled":""} aria-label="Refresh market snapshot now">${marketFeed.refreshing?"↻ Syncing…":"↻ Refresh now"}</button><button type="button" data-wire-action="pause" aria-pressed="${wireState.paused}" title="Pauses visual motion only; market data still refreshes">${pausedLabel}</button></div></div>${historyPanel}`;
 }
 async function loadLiveMarkets(){
  if(marketFeed.refreshing)return;
@@ -1729,7 +1876,7 @@ async function loadLiveMarkets(){
 function openWireMarket(key){
  const found=markets.find(m=>marketKey(m)===String(key));
  if(!found)return;
- state.selectedMarketId=String(key);
+ state.selectedMarketId=marketKey(found);
  state.watchlistOnly=false;
  state.search="";
  state.filter="All markets";
@@ -1737,7 +1884,9 @@ function openWireMarket(key){
  state.sort="liquidityUSD";
  state.explorerPage=1;
  go("app");
+ requestAnimationFrame(focusMarketDetail);
 }
+
 function initializeMarketWire(){
  renderMarketWire();
  const host=document.getElementById("marketWire");
@@ -1760,7 +1909,8 @@ function compactSavedMarket(m){return {id:String(m.id||m.fullId||""),fullId:Stri
 function isWatched(m){return state.watchlist.some(x=>marketKey(x)===marketKey(m))}
 function toggleMarketWatchlist(key){const pool=[...explorerMarkets,...markets,...state.watchlist],found=pool.find(m=>marketKey(m)===String(key));if(!found)return;state.watchlist=isWatched(found)?state.watchlist.filter(m=>marketKey(m)!==String(key)):[compactSavedMarket(found),...state.watchlist].filter((m,i,a)=>a.findIndex(x=>marketKey(x)===marketKey(m))===i).slice(0,100);try{localStorage.setItem("seer-six-watchlist-v1",JSON.stringify(state.watchlist))}catch{}render()}
 function toggleWatchlistView(){state.watchlistOnly=!state.watchlistOnly;state.explorerPage=1;render();if(!state.watchlistOnly&&state.page==="app")loadExplorerMarkets()}
-function toggleMarketDetail(key){state.selectedMarketId=state.selectedMarketId===String(key)?null:String(key);render();if(state.selectedMarketId)requestAnimationFrame(()=>document.getElementById("marketDetail")?.scrollIntoView({behavior:"smooth",block:"start"}))}
+function focusMarketDetail(){const detail=document.getElementById("marketDetail");if(!detail)return;detail.setAttribute("tabindex","-1");detail.focus({preventScroll:true});detail.scrollIntoView({behavior:window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});}
+function toggleMarketDetail(key){const wanted=String(key);const pool=[...explorerMarkets,...markets,...state.watchlist,...state.compareMarkets];const found=pool.find(m=>marketKey(m)===wanted);const current=state.selectedMarketId===wanted;state.selectedMarketId=current?null:(found?marketKey(found):wanted);render();if(state.selectedMarketId)requestAnimationFrame(focusMarketDetail);}
 
 function marketIsCompared(m){return state.compareMarkets.some(x=>marketKey(x)===marketKey(m))}
 function toggleMarketCompare(key){const pool=[...explorerMarkets,...markets,...state.watchlist,...state.compareMarkets];const found=pool.find(m=>marketKey(m)===String(key));if(!found){state.compareNotice="That market is no longer in the loaded results. Refresh the index and try again.";render();return;}if(marketIsCompared(found)){state.compareMarkets=state.compareMarkets.filter(m=>marketKey(m)!==String(key));state.compareNotice="Market removed from comparison."; }else if(state.compareMarkets.length>=3){state.compareNotice="Compare up to three markets at once. Remove one before adding another.";}else{state.compareMarkets.push(compactSavedMarket(found));state.compareNotice="Market added. Choose another market to compare side by side.";}render();if(state.compareMarkets.length)requestAnimationFrame(()=>document.getElementById("marketCompare")?.scrollIntoView({behavior:"smooth",block:"start"}));}
@@ -1787,7 +1937,7 @@ function renderObservedPriceTrace(m){
  const deltaClass=delta>=0?'up':'down';
  return '<div class="market-trace" role="region" aria-label="Observed market price trace"><div class="market-trace-head"><div><div class="category">OBSERVED PRICE TRACE</div><h3>History captured here</h3></div><span class="market-trace-count">'+count+' snapshots</span></div><div class="market-trace-chart"><svg viewBox="0 0 640 96" role="img" aria-label="Observed market prices from '+count+' successful snapshots, not fabricated historical prices"><defs><linearGradient id="marketTraceFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7a0ff" stop-opacity=".28"/><stop offset="100%" stop-color="#b7a0ff" stop-opacity="0"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#marketTraceFill)"/><path d="M18,88 H622" stroke="var(--line)" stroke-width="1" fill="none"/><polyline points="'+pointString+'" stroke="var(--violet)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" fill="none"/><circle cx="'+points[points.length-1].x.toFixed(1)+'" cy="'+points[points.length-1].y.toFixed(1)+'" r="3.4" fill="var(--green)" stroke="var(--panel)" stroke-width="1.5"/></svg></div><div class="market-trace-meta"><span>FIRST <b>'+Number(first.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(first.observedAt))+'</small></span><span>LAST <b>'+Number(last.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(last.observedAt))+'</small></span><span>OBSERVED CHANGE <b class="'+deltaClass+'">'+sign+delta.toFixed(1)+' pp</b><small>Across captured snapshots</small></span></div><p class="market-trace-note">This browser-local trace connects actual successful source snapshots only. It is not exchange history, a trade tape, or an executable quote. '+(current===null?'The current record has no returned price.':'Current returned price: '+current.toFixed(1)+'%.')+'</p></div>';
 }
-function renderMarketDetail(m){const outcomes=Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean).slice(0,8):[];const href=seerMarketHref(m);return `<section class="panel market-detail" id="marketDetail" aria-live="polite"><div class="market-detail-top"><div><div class="category">RECORD INSPECTOR / ${m.isLive?"LIVE RECORD":"SAVED SNAPSHOT"}</div><h2>${htmlEscape(m.title)}</h2><p class="muted">Inspect the returned record and source context before treating its price as evidence.</p></div><button class="icon-close" type="button" data-market-action="close-detail" aria-label="Close market inspector">×</button></div><div class="market-detail-grid"><div class="market-detail-price"><span>Indicative price</span><strong>${m.p===null||m.p===undefined?"—":Math.round(m.p)+"%"}</strong><div class="bar"><span style="width:${m.p===null||m.p===undefined?0:m.p}%"></span></div><small>${htmlEscape(m.type||"Prediction market")} · ${htmlEscape(m.chain||"Unknown network")}</small></div><div class="market-detail-facts"><div><span>Lifetime volume</span><strong>${htmlEscape(m.volume||"—")}</strong></div><div><span>Reported liquidity</span><strong>${htmlEscape(m.depth||"—")}</strong></div><div><span>Record status</span><strong>${htmlEscape(m.status||"Listed")}</strong></div><div><span>Verification</span><strong>${htmlEscape(m.verification||"Not verified")}</strong></div><div><span>Opened</span><strong>${htmlEscape(m.time||"Not specified")}</strong></div><div><span>Market ID</span><strong class="market-id">${htmlEscape(m.fullId||m.id||"Unavailable")}</strong></div></div></div>${renderObservedPriceTrace(m)}${outcomes.length?`<div class="market-outcomes"><div class="category">RETURNED OUTCOMES</div><div class="outcome-chips">${outcomes.map(o=>`<span>${htmlEscape(o)}</span>`).join("")}</div></div>`:""}<div class="market-detail-actions"><button class="button secondary" data-market-action="save" data-market-id="${htmlEscape(marketKey(m))}" type="button">${isWatched(m)?"★ Saved to watchlist":"☆ Save to watchlist"}</button>${href?`<a class="button primary" href="${htmlEscape(href)}" target="_blank" rel="noopener noreferrer">Open original market ↗</a>`:""}</div><p class="market-detail-disclaimer">API fields can be stale or thinly traded. Reported liquidity is not guaranteed executable depth; this prototype does not execute trades.</p></section>`}
+function renderMarketDetail(m){const outcomes=Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean).slice(0,8):[];const href=seerMarketHref(m);return `<section class="panel market-detail" id="marketDetail" tabindex="-1" aria-live="polite"><div class="market-detail-top"><div><div class="category">RECORD INSPECTOR / ${m.isLive?"LIVE RECORD":"SAVED SNAPSHOT"}</div><h2>${htmlEscape(m.title)}</h2><p class="muted">Inspect the returned record and source context before treating its price as evidence.</p></div><button class="icon-close" type="button" data-market-action="close-detail" aria-label="Close market inspector">×</button></div><div class="market-detail-grid"><div class="market-detail-price"><span>Indicative price</span><strong>${m.p===null||m.p===undefined?"—":Math.round(m.p)+"%"}</strong><div class="bar"><span style="width:${m.p===null||m.p===undefined?0:m.p}%"></span></div><small>${htmlEscape(m.type||"Prediction market")} · ${htmlEscape(m.chain||"Unknown network")}</small></div><div class="market-detail-facts"><div><span>Lifetime volume</span><strong>${htmlEscape(m.volume||"—")}</strong></div><div><span>Reported liquidity</span><strong>${htmlEscape(m.depth||"—")}</strong></div><div><span>Record status</span><strong>${htmlEscape(m.status||"Listed")}</strong></div><div><span>Verification</span><strong>${htmlEscape(m.verification||"Not verified")}</strong></div><div><span>Opened</span><strong>${htmlEscape(m.time||"Not specified")}</strong></div><div><span>Market ID</span><strong class="market-id">${htmlEscape(m.fullId||m.id||"Unavailable")}</strong></div></div></div>${renderObservedPriceTrace(m)}${outcomes.length?`<div class="market-outcomes"><div class="category">RETURNED OUTCOMES</div><div class="outcome-chips">${outcomes.map(o=>`<span>${htmlEscape(o)}</span>`).join("")}</div></div>`:""}<div class="market-detail-actions"><button class="button secondary" data-market-action="save" data-market-id="${htmlEscape(marketKey(m))}" type="button">${isWatched(m)?"★ Saved to watchlist":"☆ Save to watchlist"}</button>${href?`<a class="button primary" href="${htmlEscape(href)}" target="_blank" rel="noopener noreferrer">Open original market ↗</a>`:""}</div><p class="market-detail-disclaimer">API fields can be stale or thinly traded. Reported liquidity is not guaranteed executable depth; this prototype does not execute trades.</p></section>`}
 function marketImageUrl(m){
  const candidates=[
   m&&m.images&&m.images.market,
@@ -1903,9 +2053,9 @@ function renderSignalDesk(){
  const tapeItems=records.length?records.slice(0,12).map(m=>{
   const rawP=m.p===null||m.p===undefined?null:Number(m.p),validP=rawP!==null&&Number.isFinite(rawP)&&rawP>=0&&rawP<=100;
   const price=validP?Math.round(rawP)+"%":"Price unavailable";
-  return '<span class="signal-ticker-item market-tape-item">'+marketAvatarHTML(m,31)+'<span class="signal-ticker-copy"><span class="signal-ticker-kind">'+htmlEscape(String(m.chain||m.type||"SEER MARKET").toUpperCase())+'</span><strong title="'+htmlEscape(m.title)+'">'+htmlEscape(m.title)+'</strong><span class="signal-ticker-detail">'+price+' · VOL '+htmlEscape(m.volume||"—")+' · LIQ '+htmlEscape(m.depth||"—")+'</span></span></span>';
+  return '<button type="button" class="signal-ticker-item market-tape-item" data-market-action="open-wire" data-market-id="'+htmlEscape(marketKey(m))+'" aria-label="Open market in explorer: '+htmlEscape(m.title)+'">'+marketAvatarHTML(m,31)+'<span class="signal-ticker-copy"><span class="signal-ticker-kind">'+htmlEscape(String(m.chain||m.type||"SEER MARKET").toUpperCase())+'</span><strong title="'+htmlEscape(m.title)+'">'+htmlEscape(m.title)+'</strong><span class="signal-ticker-detail">'+price+' · VOL '+htmlEscape(m.volume||"—")+' · LIQ '+htmlEscape(m.depth||"—")+'</span></span></button>';
  }).join(""):'<span class="signal-ticker-item market-tape-item"><span class="signal-ticker-copy"><span class="signal-ticker-kind">WAITING FOR SOURCE</span><strong>No market records returned yet</strong><span class="signal-ticker-detail">The tape will fill with source records after a successful fetch.</span></span></span>';
- const ticker='<div class="signal-ticker market-tape" role="region" aria-label="Scrolling Seer market tape"><div class="signal-ticker-label"><i class="signal-ticker-live-dot"></i><span>MARKET TAPE</span><small>'+(live?"LIVE INDEX":"PREVIEW")+'</small></div><div class="signal-ticker-viewport"><div class="signal-ticker-track"><div class="signal-ticker-set">'+tapeItems+'</div><div class="signal-ticker-set" aria-hidden="true">'+tapeItems+'</div></div></div></div>';
+ const ticker='<div class="signal-ticker market-tape" role="region" aria-label="Scrolling Seer market tape"><div class="signal-ticker-label"><i class="signal-ticker-live-dot"></i><span>MARKET TAPE</span><small>'+(live?"LIVE INDEX":"PREVIEW")+'</small></div><div class="signal-ticker-viewport"><div class="signal-ticker-track"><div class="signal-ticker-set">'+tapeItems+'</div><div class="signal-ticker-set" aria-hidden="true" inert>'+tapeItems+'</div></div></div></div>';
  return '<section class="signal-desk" aria-label="Signal Desk market briefing"><div class="signal-desk-head"><div><div class="signal-desk-kicker"><i class="dot pulse-live-dot"></i>Signal Desk / Source-backed briefing</div><h2>What the market is saying right now.</h2></div><div class="signal-desk-stamp">'+(live?"LIVE SNAPSHOT":"PREVIEW DATA")+' · UPDATED '+htmlEscape(stamp)+'</div></div>'+ticker+'<div class="signal-desk-grid">'+movement+liquidityCard+volumeCard+'</div></section>';
 }
 
@@ -2260,8 +2410,10 @@ function renderRisk(){
 
 function updateRisk(){const a=Number(state.riskA),b=Number(state.riskB),g=Math.abs(a-b);const gapNode=document.getElementById("riskGap"),textNode=document.getElementById("riskText"),aNode=document.getElementById("riskALabel"),bNode=document.getElementById("riskBLabel");if(gapNode)gapNode.textContent=g+" points";if(textNode)textNode.textContent=g>=25?"Material gap between the two input assumptions.":"Narrow gap between the two input assumptions.";if(aNode)aNode.textContent=a+"/100";if(bNode)bNode.textContent=b+"/100";}
 
+function renderDocumentation(){return "<div class=\"crumb\">SEER / DOCUMENTATION</div>\n<div class=\"headrow\"><div><div class=\"eyebrow\">FIELD GUIDE / HOW TO READ SEER</div><h1 class=\"heading\">A guide to the signal, the evidence, and the limits.</h1><p class=\"intro\">Use this guide to understand what each interface shows, where its numbers come from, which actions change the view, and what this prototype deliberately does not claim.</p></div><span class=\"pill violet\">Read-only market data</span></div>\n<section class=\"panel docs-lead\"><div class=\"category\">START HERE</div><h2 style=\"margin:8px 0 7px;font-size:23px\">A forecast is a signal, not a guarantee.</h2><p class=\"muted\" style=\"font-size:14px;line-height:1.85;margin:0\">Seer Six is a front-end concept for exploring prediction-market information in six decision contexts. Live values are returned by Seer's public market endpoint when available. Explanatory charts, user inputs, and scenario results are labelled so they are not confused with source data.</p><div class=\"docs-pill-row\"><span class=\"docs-pill\">Source-backed quotes</span><span class=\"docs-pill\">Local paper scenarios</span><span class=\"docs-pill\">No wallet or order execution</span></div></section>\n<div class=\"docs-grid\">\n<section class=\"docs-card\"><div class=\"docs-number\">01 / OVERVIEW</div><h2>Overview &amp; Signal Desk</h2><p>The overview brings the market pulse, the Market Wire, and a source-backed briefing together. It helps you decide what to inspect next; it does not declare why an event will happen.</p><ul><li>The market pulse is a compact sample of returned market records.</li><li>The Signal Desk compares observed repricing, reported liquidity, and reported volume.</li><li>A repricing headline appears only when two successful snapshots differ by at least 0.2 percentage points.</li></ul><a class=\"docs-open\" href=\"#/home\">Open Overview <span aria-hidden=\"true\">→</span></a></section>\n<section class=\"docs-card\"><div class=\"docs-number\">02 / MARKET EXPLORER</div><h2>Market Explorer</h2><p>Search the returned index, narrow results by category or network, and sort by liquidity, volume, or opening time. Use cards for context or the terminal table to scan records densely.</p><ul><li><strong>Inspect</strong> opens a specific record, returned outcomes, status, source facts, and an observation trace.</li><li><strong>Watchlist</strong> saves snapshots in this browser only. It is not an account-synced subscription.</li><li><strong>Compare</strong> places up to three records side by side. Values remain snapshots, not execution quotes.</li></ul><a class=\"docs-open\" href=\"#/app\">Open Market Explorer <span aria-hidden=\"true\">→</span></a></section>\n<section class=\"docs-card\"><div class=\"docs-number\">03 / DEEP FORECASTS</div><h2>Deep Forecasts</h2><p>This view examines returned outcomes alongside reported source depth and volume. It favours explicit source gaps over invented precision.</p><ul><li>Outcome prices are values available in the current returned record.</li><li>An uncertainty interval is not drawn when the source payload cannot support one.</li><li>Liquidity comparisons describe the loaded sample; they do not prove executable trade size.</li></ul><a class=\"docs-open\" href=\"#/deep\">Open Deep Forecasts <span aria-hidden=\"true\">→</span></a></section>\n<section class=\"docs-card\"><div class=\"docs-number\">04 / FUTARCHY</div><h2>Futarchy</h2><p>Futarchy compares a user-defined pass/fail scenario around a measurable metric, using a returned market price as its reference where available.</p><ul><li>Choose a reference market and a hypothetical shift to see the scenario update.</li><li>The shift is an assumption, not an estimate of a proposal's causal effect.</li><li>Scenario output does not establish that a proposal will succeed or fail.</li></ul><a class=\"docs-open\" href=\"#/futarchy\">Open Futarchy <span aria-hidden=\"true\">→</span></a></section>\n<section class=\"docs-card\"><div class=\"docs-number\">05 / OPPORTUNITIES</div><h2>Opportunity Markets &amp; Decision Lab</h2><p>Market activity can be one input into review. It does not replace expert judgment or the final grant, funding, or selection decision.</p><ul><li>The Decision Lab models a user-entered belief and stake for eligible binary scenarios.</li><li>Share count, gross payout, profit/loss, maximum loss, and expected P&amp;L are local paper calculations.</li><li>Fees, spread, slippage, and settlement are not modelled. No wallet is connected and no order is sent.</li></ul><a class=\"docs-open\" href=\"#/opportunity\">Open Opportunities <span aria-hidden=\"true\">→</span></a></section>\n<section class=\"docs-card\"><div class=\"docs-number\">06 / RISK PRICING</div><h2>Risk Pricing</h2><p>Risk Pricing separates observable market dimensions instead of presenting a synthetic security score.</p><ul><li>Returned price is the current indicative outcome price.</li><li>Reported liquidity and volume are relative to the other records in the loaded sample.</li><li>Distance from 50% is a descriptive price-distance indicator, not loss severity or protocol risk.</li><li>Assumption A and B are user-defined inputs; they never alter Seer market data.</li></ul><a class=\"docs-open\" href=\"#/risk\">Open Risk Pricing <span aria-hidden=\"true\">→</span></a></section>\n</div>\n<section class=\"panel docs-full\"><div class=\"category\">THE MOVING TICKER</div><h2>Market Wire: status, motion, and market selection</h2><p>The Market Wire is a refresh-based snapshot ticker, not a WebSocket stream or trade tape. It requests up to 12 returned records and refreshes automatically about every 60 seconds while the page is visible. If a later fetch fails, the last successful snapshot remains available and a refresh warning is shown.</p><h3>What does “Last snapshot · 10:53” mean?</h3><p>It is the time of the last successful source response in your browser's local time. “12 markets checked · no repricing” means a successful snapshot was compared with the previous successful one and none of the checked prices changed by at least 0.2 percentage points. It does not mean no trades occurred. The first successful snapshot establishes a baseline; movement cannot be confirmed until a later successful snapshot is compared against it.</p><h3>What do the controls do?</h3><ul><li><strong>Refresh now</strong> requests a fresh source snapshot immediately. The normal auto-refresh schedule continues separately.</li><li><strong>Pause motion / Resume motion</strong> pauses or resumes only the visual scroll. It does not stop data polling. Keyboard focus and reduced-motion preferences are also respected.</li><li><strong>Price changes</strong> appears only after the browser has observed genuine before/after price differences. It is hidden while history is empty rather than displaying a “0” control.</li></ul><h3>Click a market to inspect it</h3><p>Every market item in the top Market Wire and homepage Market Tape is interactive. Selecting one opens Market Explorer with that exact returned record selected, moves keyboard focus to the record inspector, and scrolls the inspector into view. The duplicate visual loop is removed from keyboard navigation so a repeated item is not tabbed twice.</p><div class=\"docs-callout\"><strong>History provenance:</strong> observed changes are stored locally in this browser and represent differences between successful source snapshots. They are not fills, executions, or backfilled trade history.</div></section>\n<section class=\"panel docs-full\"><div class=\"category\">DATA &amp; LIMITATIONS</div><h2>How to interpret numbers on this site</h2><ul><li><strong>Indicative price:</strong> an outcome price returned by the source. It may be stale or thinly traded and is not a guaranteed execution quote.</li><li><strong>Reported volume and liquidity:</strong> source-supplied values. They may not represent a specific time window or the amount executable for an order.</li><li><strong>Browser observation trace:</strong> charted only from successful snapshots captured while this browser is in use; timestamps are observation times, not exchange trade times.</li><li><strong>Demo fallback:</strong> records may be labelled as preview/sample data if a live response has not succeeded. Do not treat these values as current quotes.</li><li><strong>Illustrative summaries:</strong> a visual summary or local scenario is not additional source evidence unless explicitly identified as a returned field.</li></ul><h3>What the prototype does not do</h3><p>It does not connect a wallet, place an order, execute an on-chain action, provide a protocol security audit, or guarantee the truth of a resolution. Verify market rules and resolution criteria before relying on any signal. Nothing on this site is financial, security, funding, or governance advice.</p></section>\n<section class=\"panel docs-full\"><div class=\"category\">THEME &amp; ACCESSIBILITY</div><h2>Readable by design in light and dark modes</h2><p>The interface follows the supplied Seer kit's neutral surface hierarchy, with violet reserved for emphasis. Light mode uses page <strong>#F7F7F9</strong>, card <strong>#FFFFFF</strong>, nested surface <strong>#F2F2F4</strong>, pale lavender <strong>#EFE9FC</strong>, and action violet <strong>#6C2BD9</strong>. Dark mode uses near-black <strong>#101013</strong>, charcoal <strong>#1A1A1C</strong>, nested surface <strong>#2F2F34</strong>, primary text <strong>#EDEDF2</strong>, and secondary text <strong>#ABABB3</strong>.</p><p>Small labels use a slightly stronger neutral tint when the decorative muted swatch would be too faint at small sizes. Focus indicators remain visible, ticker actions are keyboard-operable, and reduced-motion preferences disable decorative movement. Switching themes changes presentation only, not the market data.</p><h3>A practical reading order</h3><ol><li>Read the question and market resolution criteria.</li><li>Check returned price, volume, and reported liquidity independently.</li><li>Inspect source status and observation time, then compare related records where useful.</li><li>Treat local scenario values as assumptions, not as forecasts supplied by Seer.</li></ol></section>";}
+
 function go(page) {
-  const validPages = ["home", "app", "deep", "futarchy", "opportunity", "risk"];
+  const validPages = ["home", "app", "deep", "futarchy", "opportunity", "risk", "docs"];
 
   if (!validPages.includes(page)) return;
 
@@ -2278,16 +2430,16 @@ function go(page) {
 }
 
 function render(){
-  const pageTitles={home:"Overview",app:"Market explorer",deep:"Deep forecasts",futarchy:"Futarchy",opportunity:"Opportunity markets",risk:"Risk pricing"};
+  const pageTitles={home:"Overview",app:"Market explorer",deep:"Deep forecasts",futarchy:"Futarchy",opportunity:"Opportunity markets",risk:"Risk pricing",docs:"Documentation"};
   document.title="Seer Six — "+(pageTitles[state.page]||"Markets for better decisions");
   document.getElementById("main").dataset.page=state.page;
   const focusedId = document.activeElement && document.activeElement.id === "marketSearch" ? "marketSearch" : null;
   const caret = focusedId ? document.activeElement.selectionStart : null;
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===state.page));
-  const views={home:renderHome,app:renderApp,deep:renderDeep,futarchy:renderFutarchy,opportunity:renderOpportunity,risk:renderRisk};
-  const interfaceItems=[["home","Overview"],["app","Market explorer"],["deep","Deep forecasts"],["futarchy","Futarchy"],["opportunity","Opportunities"],["risk","Risk pricing"]];
+  const views={home:renderHome,app:renderApp,deep:renderDeep,futarchy:renderFutarchy,opportunity:renderOpportunity,risk:renderRisk,docs:renderDocumentation};
+  const interfaceItems=[["home","Overview"],["app","Market explorer"],["deep","Deep forecasts"],["futarchy","Futarchy"],["opportunity","Opportunities"],["risk","Risk pricing"],["docs","Documentation"]];
   const logoSrc=document.querySelector(".top .logo img")?.getAttribute("src")||"";
-  const footerMarkup=`<div class="site-footer-inner"><div class="footer-brand"><a class="footer-brand-lockup" href="#/home" aria-label="Seer Six home" onclick="go('home');return false"><img src="${logoSrc}" alt=""><span class="wordmark">seer</span></a><p class="footer-tagline">Every opinion has a price.<br>One protocol, six decision interfaces.</p></div><nav class="interface-nav" aria-label="Seer interfaces">${interfaceItems.map(([key,title])=>`<a class="interface-link ${key===state.page?"current":""}" href="#/${key}" data-suite-page="${key}" ${key===state.page?'aria-current="page"':""}>${title}</a>`).join("")}</nav></div><div class="site-footer-bottom"><span>SEER SIX / INTERFACE CONCEPT</span><span>${marketFeed.status==="live"?"Seer API market records · specialist scenarios remain illustrative":"Demo fallback until live market data is available"} · Not financial or governance advice</span></div>`;
+  const footerMarkup=`<div class="site-footer-inner"><div class="footer-brand"><a class="footer-brand-lockup" href="#/home" aria-label="Seer Six home" onclick="go('home');return false"><img src="${logoSrc}" alt=""><span class="wordmark">seer</span></a><p class="footer-tagline">Every opinion has a price.<br>One protocol, six decision interfaces.</p></div><nav class="interface-nav" aria-label="Seer interfaces and documentation">${interfaceItems.map(([key,title])=>`<a class="interface-link ${key===state.page?"current":""}" href="#/${key}" data-suite-page="${key}" ${key===state.page?'aria-current="page"':""}>${title}</a>`).join("")}</nav></div><div class="site-footer-bottom"><span>SEER SIX / INTERFACE CONCEPT</span><span>${marketFeed.status==="live"?"Seer API market records · specialist scenarios remain illustrative":"Demo fallback until live market data is available"} · Not financial or governance advice</span></div>`;
   document.getElementById("main").innerHTML=views[state.page]();
   document.getElementById("siteFooter").innerHTML=footerMarkup;
   if(focusedId){
@@ -2295,7 +2447,7 @@ function render(){
     if(next){next.focus();if(typeof caret==="number")next.setSelectionRange(caret,caret);}
   }
 }
-document.getElementById("main").addEventListener("click",e=>{const side=e.target.closest("button[data-opportunity-side]");if(side){state.opportunitySide=side.dataset.opportunitySide==="no"?"no":"yes";render();return;}const b=e.target.closest("button[data-market-action]");if(!b)return;const action=b.dataset.marketAction;if(action==="save")toggleMarketWatchlist(b.dataset.marketId);else if(action==="inspect")toggleMarketDetail(b.dataset.marketId);else if(action==="model-opportunity"){const key=String(b.dataset.marketId||"");const chosen=[...explorerMarkets,...markets].find(m=>marketKey(m)===key);const framed=chosen?makeBinaryPaperProjection(chosen):null;if(framed){state.opportunityMarketId=marketKey(framed);state.opportunityMarketSnapshot=framed;const p=opportunityOutcomePrice(framed,0);state.opportunityBelief=Number.isFinite(p)?p:50;state.opportunitySide="yes";go("opportunity");requestAnimationFrame(()=>document.getElementById("opportunityLab")?.scrollIntoView({behavior:"smooth",block:"start"}));}}else if(action==="analyze-side"){const key=String(b.dataset.marketId||"");const chosen=[...explorerMarkets,...markets,...state.watchlist].find(m=>marketKey(m)===key);const framed=chosen?makeBinaryPaperProjection(chosen):null;if(framed){state.opportunityMarketId=marketKey(framed);state.opportunityMarketSnapshot=framed;state.opportunitySide=b.dataset.outcomeIndex==="1"?"no":"yes";const p=opportunityOutcomePrice(framed,0);state.opportunityBelief=Number.isFinite(p)?p:50;go("opportunity");requestAnimationFrame(()=>document.getElementById("opportunityLab")?.scrollIntoView({behavior:"smooth",block:"start"}));}}else if(action==="compare")toggleMarketCompare(b.dataset.marketId);else if(action==="remove-compare"){state.compareMarkets=state.compareMarkets.filter(m=>marketKey(m)!==b.dataset.marketId);state.compareNotice="";render();}else if(action==="clear-compare"){state.compareMarkets=[];state.compareNotice="";render();}else if(action==="close-detail"){state.selectedMarketId=null;render();}});
+document.getElementById("main").addEventListener("click",e=>{const side=e.target.closest("button[data-opportunity-side]");if(side){state.opportunitySide=side.dataset.opportunitySide==="no"?"no":"yes";render();return;}const b=e.target.closest("button[data-market-action]");if(!b)return;const action=b.dataset.marketAction;if(action==="open-wire"){openWireMarket(b.dataset.marketId);return;}if(action==="save")toggleMarketWatchlist(b.dataset.marketId);else if(action==="inspect")toggleMarketDetail(b.dataset.marketId);else if(action==="model-opportunity"){const key=String(b.dataset.marketId||"");const chosen=[...explorerMarkets,...markets].find(m=>marketKey(m)===key);const framed=chosen?makeBinaryPaperProjection(chosen):null;if(framed){state.opportunityMarketId=marketKey(framed);state.opportunityMarketSnapshot=framed;const p=opportunityOutcomePrice(framed,0);state.opportunityBelief=Number.isFinite(p)?p:50;state.opportunitySide="yes";go("opportunity");requestAnimationFrame(()=>document.getElementById("opportunityLab")?.scrollIntoView({behavior:"smooth",block:"start"}));}}else if(action==="analyze-side"){const key=String(b.dataset.marketId||"");const chosen=[...explorerMarkets,...markets,...state.watchlist].find(m=>marketKey(m)===key);const framed=chosen?makeBinaryPaperProjection(chosen):null;if(framed){state.opportunityMarketId=marketKey(framed);state.opportunityMarketSnapshot=framed;state.opportunitySide=b.dataset.outcomeIndex==="1"?"no":"yes";const p=opportunityOutcomePrice(framed,0);state.opportunityBelief=Number.isFinite(p)?p:50;go("opportunity");requestAnimationFrame(()=>document.getElementById("opportunityLab")?.scrollIntoView({behavior:"smooth",block:"start"}));}}else if(action==="compare")toggleMarketCompare(b.dataset.marketId);else if(action==="remove-compare"){state.compareMarkets=state.compareMarkets.filter(m=>marketKey(m)!==b.dataset.marketId);state.compareNotice="";render();}else if(action==="clear-compare"){state.compareMarkets=[];state.compareNotice="";render();}else if(action==="close-detail"){state.selectedMarketId=null;render();}});
 document.getElementById("main").addEventListener("input",e=>{const field=e.target.closest("[data-opportunity-field]");if(!field)return;if(field.dataset.opportunityField==="stake")state.opportunityStake=field.value;if(field.dataset.opportunityField==="belief")state.opportunityBelief=Number(field.value);updateOpportunityScenario();});
 function refreshOpportunityMarketSelection(requestedKey){const source=[...new Map([...sortedSpecialistMarkets(markets),...explorerMarkets,...(state.opportunityMarketSnapshot?[state.opportunityMarketSnapshot]:[])].filter(m=>m&&m.title).map(m=>[marketKey(m),m])).values()];const sourceEligible=[...new Map(source.filter(canPaperFrameOutcome).map(m=>makeBinaryPaperProjection(m)).filter(Boolean).map(m=>[marketKey(m),m])).values()];const eligible=sourceEligible.length?sourceEligible:demoMarkets.filter(isBinaryOpportunityMarket);const selected=eligible.find(m=>marketKey(m)===String(requestedKey))||opportunityScenarioMarket(eligible);if(!selected){render();return;}state.opportunityMarketId=marketKey(selected);const p=opportunityOutcomePrice(selected,0);state.opportunityBelief=Number.isFinite(p)?p:50;const lab=document.getElementById("opportunityLab");if(lab)lab.outerHTML=renderOpportunityLab(source);else render();}
 document.getElementById("main").addEventListener("change",e=>{const field=e.target.closest("[data-opportunity-field]");if(!field||field.dataset.opportunityField!=="market")return;refreshOpportunityMarketSelection(String(field.value||""));});
@@ -2305,13 +2457,13 @@ render();
 initializeMarketWire();
 loadLiveMarkets();
 
-function toggleTheme(){const next=document.body.dataset.theme==="light"?"dark":"light";document.body.dataset.theme=next;const b=document.getElementById("themeToggle");if(b){b.innerHTML=next==="light"?"☾ <span>Dark</span>":"☼ <span>Light</span>";b.setAttribute("aria-label","Switch to "+(next==="light"?"dark":"light")+" theme");b.title="Switch to "+(next==="light"?"dark":"light")+" theme";}const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=next==="light"?"#f5f0ff":"#1a1227";}
+function toggleTheme(){const next=document.body.dataset.theme==="light"?"dark":"light";document.body.dataset.theme=next;const b=document.getElementById("themeToggle");if(b){b.innerHTML=next==="light"?"☾ <span>Dark</span>":"☼ <span>Light</span>";b.setAttribute("aria-label","Switch to "+(next==="light"?"dark":"light")+" theme");b.title="Switch to "+(next==="light"?"dark":"light")+" theme";}const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=next==="light"?"#f7f7f9":"#101013";}
 
 function syncRoute() {
   const page = location.hash.replace(/^#\/?/, "");
   const validPages = [
     "home", "app", "deep",
-    "futarchy", "opportunity", "risk"
+    "futarchy", "opportunity", "risk", "docs"
   ];
 
   state.page = validPages.includes(page) ? page : "home";
