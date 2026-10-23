@@ -353,7 +353,7 @@ jobs:
                       const captureInfo = await page.evaluate(key => {
                         const market = [...markets, ...explorerMarkets].find(m => marketKey(m) === key);
                         const chainId = market && Number(market.chainId);
-                        const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && (!Number.isFinite(chainId) || Number(row.chainId) === chainId));
+                        const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.source === "seer-scheduled-capture" && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && row.observedAt && (!Number.isFinite(chainId) || !Number.isFinite(Number(row.chainId)) || Number(row.chainId) === chainId));
                         return { snapshots: [...new Set(rows.map(row => row.snapshotId || row.observedAt))].length, rows: rows.length };
                       }, detailKey);
                       if (captureInfo.snapshots >= 2 && !forensicsText.includes("What changed between captures?")) {
