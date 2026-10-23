@@ -1961,10 +1961,11 @@ function renderObservedPriceTrace(m){
  if(high-low<1){low=Math.max(0,Math.min(lowValue,highValue)-.5);high=Math.min(100,Math.max(lowValue,highValue)+.5);}
  const points=values.map((p,i)=>({x:18+i*(604/(values.length-1)),y:76-((p-low)/(high-low||1))*56}));
  const pointString=points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+ const archiveDots=rows.map((row,i)=>row.source==="seer-scheduled-capture"&&points[i]?'<circle cx="'+points[i].x.toFixed(1)+'" cy="'+points[i].y.toFixed(1)+'" r="2.6" fill="var(--violet-strong)" stroke="var(--panel)" stroke-width="1"/>':"").join("");
  const areaPath='M'+points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L')+' L622,88 L18,88 Z';
  const delta=Number(last.p)-Number(first.p),sign=delta>0?'+':'';
  const deltaClass=delta>=0?'up':'down';
- return '<div class="market-trace" role="region" aria-label="Observed market price trace"><div class="market-trace-head"><div><div class="category">OBSERVED PRICE TRACE</div><h3>History captured here</h3></div><span class="market-trace-count">'+count+' snapshots</span></div><div class="market-trace-chart"><svg viewBox="0 0 640 96" role="img" aria-label="Observed market prices from '+count+' successful snapshots, not fabricated historical prices"><defs><linearGradient id="marketTraceFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7a0ff" stop-opacity=".28"/><stop offset="100%" stop-color="#b7a0ff" stop-opacity="0"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#marketTraceFill)"/><path d="M18,88 H622" stroke="var(--line)" stroke-width="1" fill="none"/><polyline points="'+pointString+'" stroke="var(--violet)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" fill="none"/><circle cx="'+points[points.length-1].x.toFixed(1)+'" cy="'+points[points.length-1].y.toFixed(1)+'" r="3.4" fill="var(--green)" stroke="var(--panel)" stroke-width="1.5"/></svg></div><div class="market-trace-meta"><span>FIRST <b>'+Number(first.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(first.observedAt))+'</small></span><span>LAST <b>'+Number(last.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(last.observedAt))+'</small></span><span>OBSERVED CHANGE <b class="'+deltaClass+'">'+sign+delta.toFixed(1)+' pp</b><small>Across captured snapshots</small></span></div><p class="market-trace-note">This browser-local trace connects actual successful source snapshots only. It is not exchange history, a trade tape, or an executable quote. '+(current===null?'The current record has no returned price.':'Current returned price: '+current.toFixed(1)+'%.')+'</p></div>';
+ return '<div class="market-trace" role="region" aria-label="Observed market price trace"><div class="market-trace-head"><div><div class="category">OBSERVED PRICE TRACE</div><h3>History captured here</h3></div><span class="market-trace-count">'+count+' snapshots</span></div><div class="market-trace-chart"><svg viewBox="0 0 640 96" role="img" aria-label="Observed market prices from '+count+' successful snapshots, not fabricated historical prices"><defs><linearGradient id="marketTraceFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7a0ff" stop-opacity=".28"/><stop offset="100%" stop-color="#b7a0ff" stop-opacity="0"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#marketTraceFill)"/><path d="M18,88 H622" stroke="var(--line)" stroke-width="1" fill="none"/><polyline points="'+pointString+'" stroke="var(--violet)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" fill="none"/>'+archiveDots+'<circle cx="'+points[points.length-1].x.toFixed(1)+'" cy="'+points[points.length-1].y.toFixed(1)+'" r="3.4" fill="var(--green)" stroke="var(--panel)" stroke-width="1.5"/></svg></div><div class="market-trace-meta"><span>FIRST <b>'+Number(first.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(first.observedAt))+'</small></span><span>LAST <b>'+Number(last.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(last.observedAt))+'</small></span><span>OBSERVED CHANGE <b class="'+deltaClass+'">'+sign+delta.toFixed(1)+' pp</b><small>Across captured snapshots</small></span></div><p class="market-trace-note">This browser-local trace connects actual successful source snapshots only. It is not exchange history, a trade tape, or an executable quote. '+(current===null?'The current record has no returned price.':'Current returned price: '+current.toFixed(1)+'%.')+'</p></div>';
 }
 function renderMarketDetail(m){const outcomes=Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v?.name||v?.title||v?.outcome||"Outcome"):String(v)).filter(Boolean).slice(0,8):[];const href=seerMarketHref(m);return `<section class="panel market-detail" id="marketDetail" tabindex="-1" aria-live="polite"><div class="market-detail-top"><div><div class="category">RECORD INSPECTOR / ${m.isLive?"LIVE RECORD":"SAVED SNAPSHOT"}</div><h2>${htmlEscape(m.title)}</h2><p class="muted">Inspect the returned record and source context before treating its price as evidence.</p></div><button class="icon-close" type="button" data-market-action="close-detail" aria-label="Close market inspector">×</button></div><div class="market-detail-grid"><div class="market-detail-price"><span>Indicative price</span><strong>${m.p===null||m.p===undefined?"—":Math.round(m.p)+"%"}</strong><div class="bar"><span style="width:${m.p===null||m.p===undefined?0:m.p}%"></span></div><small>${htmlEscape(m.type||"Prediction market")} · ${htmlEscape(m.chain||"Unknown network")}</small></div><div class="market-detail-facts"><div><span>Lifetime volume</span><strong>${htmlEscape(m.volume||"—")}</strong></div><div><span>Reported liquidity</span><strong>${htmlEscape(m.depth||"—")}</strong></div><div><span>Record status</span><strong>${htmlEscape(m.status||"Listed")}</strong></div><div><span>Verification</span><strong>${htmlEscape(m.verification||"Not verified")}</strong></div><div><span>Opened</span><strong>${htmlEscape(m.time||"Not specified")}</strong></div><div><span>Market ID</span><strong class="market-id">${htmlEscape(m.fullId||m.id||"Unavailable")}</strong></div></div></div>${renderObservedPriceTrace(m)}${outcomes.length?`<div class="market-outcomes"><div class="category">RETURNED OUTCOMES</div><div class="outcome-chips">${outcomes.map(o=>`<span>${htmlEscape(o)}</span>`).join("")}</div></div>`:""}<div class="market-detail-actions"><button class="button secondary" data-market-action="save" data-market-id="${htmlEscape(marketKey(m))}" type="button">${isWatched(m)?"★ Saved to watchlist":"☆ Save to watchlist"}</button>${href?`<a class="button primary" href="${htmlEscape(href)}" target="_blank" rel="noopener noreferrer">Open original market ↗</a>`:""}</div><p class="market-detail-disclaimer">API fields can be stale or thinly traded. Reported liquidity is not guaranteed executable depth; this prototype does not execute trades.</p></section>`}
 function marketImageUrl(m){
@@ -2519,6 +2520,7 @@ marketTrace.db=null;
 marketTrace.persistence="initializing";
 marketTrace.dbWritesSinceCompact=0;
 marketTrace.writeQueue=Promise.resolve();
+marketTrace.sharedSamples=[];marketTrace.sharedStatus="loading";marketTrace.sharedCollectedAt=null;marketTrace.sharedCadence="scheduled API snapshots";
 function seerEvidenceText(value){
  if(value===null||value===undefined)return "";
  if(typeof value==="string"||typeof value==="number"||typeof value==="boolean")return String(value).trim();
@@ -2617,6 +2619,37 @@ function seerWriteLocalHistory(){
  try{localStorage.setItem("seer-six-price-trace-v1",JSON.stringify(marketTrace.samples));return true;}
  catch(error){marketTrace.persistence=marketTrace.db?"IndexedDB (localStorage mirror full)":"Browser storage limit reached";return false;}
 }
+
+async function seerLoadSharedArchive(){
+ marketTrace.sharedStatus="loading";marketTrace.sharedSamples=marketTrace.sharedSamples||[];
+ const urls=[
+  "https://raw.githubusercontent.com/Pascaline06/Seer-six-interfaces/main/data/market-history.json?capture="+Date.now(),
+  "data/market-history.json?capture="+Date.now()
+ ];
+ let lastError=null;
+ for(const url of urls){
+  try{
+   const response=await fetch(url,{cache:"no-store",headers:{Accept:"application/json"}});
+   if(!response.ok)throw new Error("Archive returned HTTP "+response.status);
+   const archive=await response.json();
+   if(!archive||!Array.isArray(archive.samples))throw new Error("Archive schema is not recognized");
+   marketTrace.sharedSamples=seerPruneHistory(archive.samples.map(sample=>Object.assign({},sample,{
+    source:sample.source||"seer-scheduled-capture",
+    sourceEndpoint:sample.sourceEndpoint||archive.sourceEndpoint||SEER_EVIDENCE_ENDPOINT,
+    sourceMode:sample.sourceMode||"periodic-read-only-api-snapshot"
+   })));
+   marketTrace.sharedCollectedAt=archive.collectedAt||null;
+   marketTrace.sharedStatus=marketTrace.sharedSamples.length?"available":"empty";
+   marketTrace.sharedCadence=String(archive.cadence||"scheduled API snapshots");
+   if(state.selectedMarketId)render();
+   return;
+  }catch(error){lastError=error;}
+ }
+ marketTrace.sharedStatus="unavailable";
+ marketTrace.sharedError=lastError&&lastError.message?lastError.message:"Archive could not be fetched";
+ if(state.selectedMarketId)render();
+}
+
 function seerRequest(req){return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error("IndexedDB request failed"));});}
 function seerTransactionDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error||new Error("IndexedDB transaction failed"));tx.onabort=()=>reject(tx.error||new Error("IndexedDB transaction aborted"));});}
 function seerInitializePriceHistory(){
@@ -2750,11 +2783,11 @@ function seerHistoryOutcomeList(m){
  return list.length?list:[{index:0,name:"Lead outcome",p:m&&m.p}].filter(o=>o.p!==null&&o.p!==undefined&&Number.isFinite(Number(o.p))&&Number(o.p)>=0&&Number(o.p)<=100);
 }
 function exportMarketHistoryCSV(key){
- const rows=marketTrace.samples.filter(x=>x.key===String(key)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
+ const rows=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]).filter(x=>x.key===String(key)).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt));
  if(!rows.length){const host=document.getElementById("marketDetail");if(host){const p=document.createElement("p");p.className="market-trace-storage";p.textContent="No recorded observations are available to export yet.";host.appendChild(p);}return;}
- const cols=["observed_at","market_key","market_title","chain","outcome_index","outcome","price_percent","source","source_endpoint","market_url"];
+ const cols=["observed_at","market_key","market_title","chain","outcome_index","outcome","price_percent","source","source_mode","source_endpoint","market_url"];
  const quote=value=>'"'+String(value??"").replace(/"/g,'""')+'"';
- const csv=[cols.join(","),...rows.map(x=>[x.observedAt,x.key,x.title,x.chain,x.outcomeIndex,x.outcomeName,x.p,x.source,x.sourceEndpoint,x.marketUrl].map(quote).join(","))].join("\r\n");
+ const csv=[cols.join(","),...rows.map(x=>[x.observedAt,x.key,x.title,x.chain,x.outcomeIndex,x.outcomeName,x.p,x.source,x.sourceMode||"browser-local-observation",x.sourceEndpoint,x.marketUrl].map(quote).join(","))].join("\r\n");
  const blob=new Blob(["\ufeff",csv],{type:"text/csv;charset=utf-8"});
  const url=URL.createObjectURL(blob),a=document.createElement("a");
  a.href=url;a.download="seer-market-history-"+String(key).replace(/[^a-zA-Z0-9_-]/g,"-").slice(0,45)+".csv";
@@ -2766,12 +2799,15 @@ function renderObservedPriceTrace(m){
  const selected=outcomes.find(o=>o.index===Number(wanted))||outcomes.find(o=>o.index===firstIndex)||null;
  const selectedIndex=selected?selected.index:firstIndex;
  const selectedName=selected?selected.name:"Lead outcome";
- const rows=marketTrace.samples.filter(x=>x.key===key&&Number(x.outcomeIndex||0)===selectedIndex).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt)).slice(-120);
+ const rows=seerPruneHistory([...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])]).filter(x=>x.key===key&&Number(x.outcomeIndex||0)===selectedIndex).sort((a,b)=>Date.parse(a.observedAt)-Date.parse(b.observedAt)).slice(-120);
  const count=rows.length,current=selected?Number(selected.p):null,first=count?rows[0]:null,last=count?rows[count-1]:null;
  const formatTime=value=>value?new Date(value).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}):"—";
  const controls=(outcomes.length>1?'<label class="trace-outcome-control">Plot outcome <select data-trace-outcome data-market-key="'+htmlEscape(key)+'" aria-label="Historical outcome to plot">'+outcomes.map(o=>'<option value="'+o.index+'" '+(o.index===selectedIndex?'selected':'')+'>'+htmlEscape(o.name)+'</option>').join("")+'</select></label>':'');
  const head='<div class="market-trace-head"><div><div class="category">OBSERVED PRICE HISTORY</div><h3>'+htmlEscape(selectedName)+' · history captured here</h3></div><div class="market-trace-head-tools"><span class="market-trace-count">'+count+' snapshots</span><button class="trace-export" type="button" data-market-action="export-history" data-market-id="'+htmlEscape(key)+'">Export CSV ↓</button></div></div>'+controls;
- const storage='<p class="market-trace-storage">Persistence: '+htmlEscape(marketTrace.persistence||"initializing")+'. Captured source observations only; no exchange trades or historical prices are backfilled.</p>';
+ const sharedCount=rows.filter(x=>x.source==="seer-scheduled-capture").length;
+ const sharedLast=marketTrace.sharedCollectedAt?new Date(marketTrace.sharedCollectedAt).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"}):"";
+ const sharedSummary=marketTrace.sharedStatus==="available"?"Shared archive: "+sharedCount+" scheduled observations in this selected series"+(sharedLast?"; archive last captured "+sharedLast:"")+".":marketTrace.sharedStatus==="empty"?"Shared archive is reachable but does not yet contain captured observations.":marketTrace.sharedStatus==="loading"?"Checking the shared scheduled archive…": "Shared archive unavailable right now; the durable browser-local trace remains available.";
+ const storage='<p class="market-trace-storage">Persistence: '+htmlEscape(marketTrace.persistence||"initializing")+'. '+htmlEscape(sharedSummary)+' Source API observations only—not exchange trades, settlement history, or executable quotes.</p>';
  if(count<2){
   const value=count?Number(first.p).toFixed(1)+"%":"No samples yet";
   const detail=count?"One successful observation is stored for this outcome. A later successful observation is needed before a line can be drawn.":"The trace begins with successful Seer API responses observed in this browser; no historic prices are fabricated.";
@@ -2785,7 +2821,7 @@ function renderObservedPriceTrace(m){
  const pointString=points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
  const areaPath='M'+points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L')+' L622,88 L18,88 Z';
  const delta=Number(last.p)-Number(first.p),sign=delta>0?'+':'',deltaClass=delta>=0?'up':'down';
- return '<div class="market-trace" role="region" aria-label="Observed market price history">'+head+'<div class="market-trace-chart"><svg viewBox="0 0 640 96" role="img" aria-label="'+htmlEscape(selectedName)+' observed prices across '+count+' successful snapshots, no fabricated history"><defs><linearGradient id="marketTraceFillPhase12" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7a0ff" stop-opacity=".28"/><stop offset="100%" stop-color="#b7a0ff" stop-opacity="0"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#marketTraceFillPhase12)"/><path d="M18,88 H622" stroke="var(--line)" stroke-width="1" fill="none"/><polyline points="'+pointString+'" stroke="var(--violet)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" fill="none"/><circle cx="'+points[points.length-1].x.toFixed(1)+'" cy="'+points[points.length-1].y.toFixed(1)+'" r="3.4" fill="var(--green)" stroke="var(--panel)" stroke-width="1.5"/></svg></div><div class="market-trace-meta"><span>FIRST <b>'+Number(first.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(first.observedAt))+'</small></span><span>LAST <b>'+Number(last.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(last.observedAt))+'</small></span><span>OBSERVED CHANGE <b class="'+deltaClass+'">'+sign+delta.toFixed(1)+' pp</b><small>Across captured snapshots</small></span></div><p class="market-trace-note">Observed change is the difference between first and last captured snapshots, not a trade P&amp;L or market-native historical series. '+(current===null?'Current record has no returned price for this outcome.':'Current returned price for '+htmlEscape(selectedName)+': '+current.toFixed(1)+'%.')+'</p>'+storage+'</div>';
+ return '<div class="market-trace" role="region" aria-label="Observed market price history">'+head+'<div class="market-trace-chart"><svg viewBox="0 0 640 96" role="img" aria-label="'+htmlEscape(selectedName)+' observed prices across '+count+' successful snapshots, no fabricated history"><defs><linearGradient id="marketTraceFillPhase12" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7a0ff" stop-opacity=".28"/><stop offset="100%" stop-color="#b7a0ff" stop-opacity="0"/></linearGradient></defs><path d="'+areaPath+'" fill="url(#marketTraceFillPhase12)"/><path d="M18,88 H622" stroke="var(--line)" stroke-width="1" fill="none"/><polyline points="'+pointString+'" stroke="var(--violet)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" fill="none"/><circle cx="'+points[points.length-1].x.toFixed(1)+'" cy="'+points[points.length-1].y.toFixed(1)+'" r="3.4" fill="var(--green)" stroke="var(--panel)" stroke-width="1.5"/></svg></div><div class="market-trace-meta"><span>FIRST <b>'+Number(first.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(first.observedAt))+'</small></span><span>LAST <b>'+Number(last.p).toFixed(1)+'%</b><small>'+htmlEscape(formatTime(last.observedAt))+'</small></span><span>OBSERVED CHANGE <b class="'+deltaClass+'">'+sign+delta.toFixed(1)+' pp</b><small>Across captured snapshots</small></span></div><p class="market-trace-note">Observed change is the difference between first and last captured snapshots, not a trade P&amp;L or market-native historical series. '+(current===null?'Current record has no returned price for this outcome.':'Current returned price for '+htmlEscape(selectedName)+': '+current.toFixed(1)+'%.')+'</p><p class="market-trace-storage"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--violet-strong);margin-right:5px"></span>Violet dots mark shared scheduled captures; unmarked line segments may include browser-local observations.</p>'+storage+'</div>';
 }
 function compactSavedMarket(m){
  return {id:String(m.id||m.fullId||""),fullId:String(m.fullId||m.id||""),type:String(m.type||"Prediction market"),title:String(m.title||"Untitled market"),p:m.p??null,volume:String(m.volume||"—"),depth:String(m.depth||"—"),time:String(m.time||"Not specified"),status:String(m.status||"Listed"),chainId:Number(m.chainId||0),chain:String(m.chain||"Unknown network"),url:String(m.url||""),liquidityUSD:reportedNumber(m.liquidityUSD),volumeUSD:reportedNumber(m.volumeUSD),outcomes:Array.isArray(m.outcomes)?m.outcomes.map(v=>typeof v==="object"?(v.name||v.title||v.outcome||"Outcome"):String(v)).slice(0,20):[],outcomePrices:Array.isArray(m.outcomePrices)?m.outcomePrices:[],parentMarket:String(m.parentMarket||""),parentOutcome:String(m.parentOutcome||""),isConditional:Boolean(m.isConditional),verification:String(m.verification||"Not verified"),evidence:m.evidence||null,isLive:false,isSnapshot:true};
@@ -2808,6 +2844,7 @@ document.getElementById("main").addEventListener("change",function(event){
  window.scrollTo({top:scrollY,behavior:window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
 });
 seerInitializePriceHistory();
+seerLoadSharedArchive();
 </script>
 
 </body>
