@@ -1,0 +1,45 @@
+name: Capture Seer market history
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/market-history.yml"
+      - "scripts/capture-market-history.mjs"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: seer-market-history
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Capture and merge current source observations
+        run: node scripts/capture-market-history.mjs
+      - name: Commit archive when observations changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/market-history.json
+          if git diff --cached --quiet; then
+            echo "No archive changes to commit."
+          else
+            git commit -m "Update scheduled Seer market history"
+            git push origin HEAD:main
+          fi
