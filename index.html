@@ -2999,7 +2999,7 @@ function seerF34Freshness(m){
  const sourceTime=m&&m.evidence&&m.evidence.observation&&m.evidence.observation.capturedAt;
  const all=[...(marketTrace.samples||[]),...(marketTrace.sharedSamples||[])].filter(x=>x.key===marketKey(m));
  const historic=all.sort((a,b)=>Date.parse(b.observedAt)-Date.parse(a.observedAt))[0];
- const at=historic&&Date.parse(historic.observedAt)>Date.parse(sourceTime||"")?historic.observedAt:sourceTime;
+ const sourceMs=Date.parse(sourceTime||""),historicMs=historic?Date.parse(historic.observedAt):NaN;const at=historic&&(!Number.isFinite(sourceMs)||(Number.isFinite(historicMs)&&historicMs>sourceMs))?historic.observedAt:sourceTime;
  if(!at||!Number.isFinite(Date.parse(at)))return {ageMs:Infinity,label:"Observation time unavailable",at:null};
  const ageMs=Math.max(0,Date.now()-Date.parse(at));
  const label=ageMs<30*60000?"Observed within 30 min":ageMs<2*3600000?"Observed within 2 hours":ageMs<24*3600000?"Older than 2 hours":"Older than 24 hours";
@@ -3073,8 +3073,8 @@ function seerF34ScoreCandidate(m,history){
  const evidence=m.evidence||{},fields=evidence.fields||{},criteria=!!(evidence.resolution&&evidence.resolution.criteria);
  const missing=[];
  if(!criteria)missing.push("Resolution criteria not returned");
- if(!(fields.volumeUSD&&fields.volumeUSD.status==="reported")&&(m.volumeUSD===null||m.volumeUSD===undefined||!Number.isFinite(Number(m.volumeUSD))))missing.push("Volume not reported");
- if(!(fields.liquidityUSD&&fields.liquidityUSD.status==="reported")&&(m.liquidityUSD===null||m.liquidityUSD===undefined||!Number.isFinite(Number(m.liquidityUSD))))missing.push("Liquidity not reported");
+ if(fields.volumeUSD?fields.volumeUSD.status!=="reported":(m.volumeUSD===null||m.volumeUSD===undefined||!Number.isFinite(Number(m.volumeUSD))))missing.push("Volume not reported");
+ if(fields.liquidityUSD?fields.liquidityUSD.status!=="reported":(m.liquidityUSD===null||m.liquidityUSD===undefined||!Number.isFinite(Number(m.liquidityUSD))))missing.push("Liquidity not reported");
  if(fields.verification&&fields.verification.status!=="reported")missing.push("Verification field absent");
  const movementPoints=move?Math.min(40,Math.abs(move.delta)*4):0;
  const uncertaintyPoints=Math.min(25,(missing.includes("Resolution criteria not returned")?10:0)+(missing.includes("Volume not reported")?5:0)+(missing.includes("Liquidity not reported")?5:0)+(missing.includes("Verification field absent")?5:0));
@@ -3083,7 +3083,7 @@ function seerF34ScoreCandidate(m,history){
  const fresh=seerF34Freshness(m),agePoints=fresh.ageMs<=30*60000?0:fresh.ageMs<=2*3600000?5:fresh.ageMs<=24*3600000?10:20;
  const score=Math.max(0,Math.min(100,Math.round(movementPoints+uncertaintyPoints+structurePoints+agePoints)));
  const reasons=[];
- if(move&&Math.abs(move.delta)>=1)reasons.push("Observed move "+(move.delta>0?"+":"")+move.delta.toFixed(1)+" pp · "+htmlEscape(move.outcomeName||"outcome"));
+ if(move&&Math.abs(move.delta)>=1)reasons.push("Observed move "+(move.delta>0?"+":"")+move.delta.toFixed(1)+" pp · "+String(move.outcomeName||"outcome"));
  for(const item of missing)reasons.push(item);
  if(isComplex)reasons.push("Outcome structure needs a careful read ("+outs.length+" returned prices)");
  if(agePoints>=5)reasons.push("Refresh gap: "+fresh.label.toLowerCase());
