@@ -94,10 +94,14 @@ jobs:
                   document.fonts.load('400 14px "JetBrains Mono"')
                 ]);
                 await document.fonts.ready;
-                // Smooth route transitions should not produce mid-scroll screenshots.
-                window.scrollTo({ top: 0, behavior: "instant" });
+                // Disable site smooth-scroll CSS for deterministic test screenshots; jumping from a long page with smooth scrolling can otherwise take 30 seconds.
+                document.documentElement.style.scrollBehavior = "auto";
+                document.body.style.scrollBehavior = "auto";
+                window.scrollTo(0, 0);
               }, theme);
-              await page.waitForFunction(() => window.scrollY === 0);
+              await page.waitForFunction(() => Math.abs(window.scrollY) < 2, null, { timeout: 5000 }).catch(async () => {
+                await page.evaluate(() => { document.documentElement.style.scrollBehavior = "auto"; document.body.style.scrollBehavior = "auto"; window.scrollTo(0, 0); });
+              });
               pageErrors.length = 0;
               await page.waitForFunction(() => /Live Seer record|live records|Demo fallback|live endpoint unavailable|Data status\s*(Connected|Fallback)/.test(document.body.innerText), null, { timeout: 12000 }).catch(() => {});
               // Do not capture the hero or explorer while their live-data requests are still in flight.
