@@ -2295,8 +2295,10 @@ async function loadExplorerMarkets(){
  if(state.search.trim())body.marketName=state.search.trim();
  if(state.filter!=="All markets")body.categoryList=[state.filter];
  if(state.page==="app")render();
+ const requestController=new AbortController();
+ const requestTimeoutId=window.setTimeout(()=>requestController.abort(),12000);
  try{
-  const response=await fetch("https://app.seer.pm/.netlify/functions/markets-search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const response=await fetch("https://app.seer.pm/.netlify/functions/markets-search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal:requestController.signal});
   if(!response.ok)throw new Error("Seer search returned HTTP "+response.status);
   const payload=await response.json();
   if(!Array.isArray(payload.markets))throw new Error("Unexpected market-search response");
@@ -2307,7 +2309,11 @@ async function loadExplorerMarkets(){
   if(state.explorerPage>explorerFeed.pages){state.explorerPage=explorerFeed.pages;loadExplorerMarkets();return;}
  }catch(error){
   if(requestId!==explorerFeed.requestId)return;
-  explorerFeed.status="fallback";explorerFeed.error=error&&error.message?error.message:"The full market index could not be loaded";explorerFeed.count=markets.length;explorerFeed.pages=1;explorerMarkets=[];
+  explorerFeed.status="fallback";
+  explorerFeed.error=requestController.signal.aborted?"Seer search timed out after 12 seconds; using preview fallback":(error&&error.message?error.message:"The full market index could not be loaded");
+  explorerFeed.count=markets.length;explorerFeed.pages=1;explorerMarkets=[];
+ }finally{
+  window.clearTimeout(requestTimeoutId);
  }
  if(state.page==="app")render();
 }const forecasts=[{name:"Submission A · Open-source tooling",p:72,low:60,high:81,signal:"Strongest forecast"},{name:"Submission B · Public-goods analytics",p:61,low:47,high:72,signal:"Competitive"},{name:"Submission C · Developer education",p:48,low:34,high:62,signal:"High uncertainty"},{name:"Submission D · Infrastructure research",p:39,low:25,high:54,signal:"High uncertainty"}];
