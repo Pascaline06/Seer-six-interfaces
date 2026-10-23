@@ -3314,7 +3314,7 @@ function seerF5Snapshots(m){
  const key=marketKey(m);
  const source=Array.isArray(marketTrace.sharedSamples)?marketTrace.sharedSamples:[];
  const marketChainId=m.chainId===null||m.chainId===undefined||m.chainId===""?null:Number(m.chainId);
- const filtered=source.filter(x=>x&&x.key===key&&marketChainId!==null&&Number.isFinite(marketChainId)&&x.chainId!==null&&x.chainId!==undefined&&x.chainId!==""&&Number.isFinite(Number(x.chainId))&&Number(x.chainId)===marketChainId&&x.source==="seer-scheduled-capture"&&Number(x.schemaVersion)>=2&&x.sourceFingerprint&&x.snapshotId&&x.observedAt);
+ const filtered=source.filter(x=>x&&x.key===key&&marketChainId!==null&&Number.isFinite(marketChainId)&&marketChainId!==0&&x.chainId!==null&&x.chainId!==undefined&&x.chainId!==""&&Number.isFinite(Number(x.chainId))&&Number(x.chainId)!==0&&Number(x.chainId)===marketChainId&&x.source==="seer-scheduled-capture"&&Number(x.schemaVersion)>=2&&x.sourceFingerprint&&x.snapshotId&&x.observedAt);
  const grouped=new Map();
  for(const row of filtered){
   const snapshotKey=String(row.snapshotId||row.observedAt);
