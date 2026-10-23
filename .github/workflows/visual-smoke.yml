@@ -356,7 +356,7 @@ jobs:
                         const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.source === "seer-scheduled-capture" && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && row.snapshotId && row.observedAt && Number.isFinite(chainId) && row.chainId !== null && row.chainId !== undefined && row.chainId !== "" && Number.isFinite(Number(row.chainId)) && Number(row.chainId) === chainId);
                         const forensicSnapshots = market && typeof seerF5Snapshots === "function" ? seerF5Snapshots(market) : [];
                         const mixedChainSnapshots = Number.isFinite(chainId) ? forensicSnapshots.filter(snapshot => !Number.isFinite(Number(snapshot.chainId)) || Number(snapshot.chainId) !== chainId).length : forensicSnapshots.length;
-                        return { snapshots: [...new Set(rows.map(row => row.snapshotId)).filter(Boolean)].length, rows: rows.length, mixedChainSnapshots };
+                        return { snapshots: [...new Set(rows.map(row => row.snapshotId).filter(Boolean))].length, rows: rows.length, mixedChainSnapshots };
                       }, detailKey);
                       if (captureInfo.mixedChainSnapshots > 0) {
                         report.failures.push("desktop/dark/app: Source Change Forensics included a snapshot without an exact matching chain identity");
