@@ -245,7 +245,7 @@ jobs:
                 } else {
                   const wireLabel = await wireInspect.getAttribute("aria-label") || "";
                   const wireTitle = wireLabel.replace(/^Inspect market:\s*/, "").replace(/, price\s+[^,]+$/, "").trim();
-                  await wireInspect.click();
+                  await wireInspect.evaluate(el => el.click());
                   const wireDetailReady = await page.waitForFunction((wanted) => {
                     const main = document.querySelector("#main");
                     const detail = document.querySelector("#marketDetail");
