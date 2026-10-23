@@ -42,7 +42,7 @@ jobs:
             try {
               const response = await fetch(url, { cache: "no-store" });
               const html = await response.text();
-              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Seer search timed out after 12 seconds; using preview fallback") && html.includes("requestTimeoutId") && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("marketAvatarHTML(m,44)") && html.includes("market-tape") && html.includes('id="getAppButton" href="https://app.seer.pm/" target="_blank" rel="noopener noreferrer"') && html.includes('body[data-theme="light"] .signal-ticker.market-tape{background:linear-gradient') && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("async function seerLoadSharedArchive") && html.includes("Source &amp; provenance ledger") && html.includes("seer-scheduled-capture") && html.includes("Export CSV ↓") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes('id="getAppButton"') && html.includes("top-app-cta") && html.includes("PHASE 03 / SIGNAL &amp; FORECAST LAB") && html.includes("PHASE 04 / OPPORTUNITY DECISION DESK") && html.includes("SOURCE CHANGE FORENSICS / V1") && html.includes("sourceFingerprint") && html.includes("marketChainId!==null&&Number.isFinite(marketChainId)&&marketChainId!==0") && html.includes("Number(x.chainId)!==0") && html.includes("function matchesSelectedMarket(m)") && html.includes("function toggleMarketDetail(key,chainId)") && html.includes("function marketIdentity(m)") && html.includes("function historyChainMatches(sampleChainId,marketChainId)") && html.includes("function toggleMarketWatchlist(key,chainId)") && html.includes("function toggleMarketCompare(key,chainId)") && html.includes("data-market-chain-id") && html.includes("data-f34-decision-chain-id") && html.includes("resolution_criteria_field") && html.includes("seerF34ScoreCandidate") && html.includes("seer-six-forecast-journal-v1") && html.includes("seer-six-decision-desk-v1") && html.includes('data-f34-save-forecast') && html.includes('data-f34-decision-save') && html.includes("const reportedNumber=") && html.includes("liquidityUSD:reportedNumber(m.liquidityUSD)") && html.includes("function marketSideControls(m)") && html.includes("market-side-picker") && html.includes('data-market-action="analyze-side"') && html.includes("function canPaperFrameOutcome(m)") && html.includes("function makeBinaryPaperProjection(m)") && html.includes("hasNativeBinaryPrices(m)") && html.includes("derived-frame-notice") && html.includes("NO represents all remaining listed outcomes") && html.includes("not a returned NO quote") && html.includes("DERIVED PAPER FRAME") && html.includes("Premium art direction refresh") && html.includes("LAVENDER BRAND DIRECTION") && html.includes('body data-theme="light"') && html.includes("--bg:#f7f7f9") && html.includes("--bg:#101013") && html.includes("--panel-raised:#f2f2f4") && html.includes("--panel-raised:#2f2f34") && html.includes("--violet:#6c2bd9") && html.includes("--violet:#b7a0ff") && html.includes("linear-gradient(180deg,#f7f7f9 0%,#efe9fc 52%,#f7f7f9 100%)") && html.includes("--text:#17171c") && html.includes("--dim:#6d6d78") && html.includes("signal-cyan:#67e6ee") && html.includes(".signal-ticker.market-tape:before") && html.includes("no squeezed headers or six tiny wrapped nav buttons") && html.includes("Mobile information hierarchy: navigation always follows the header, with the market wire below it.") && html.includes("function renderLiquidityLandscape") && html.includes("Liquidity landscape") && html.includes("landscape-rail is-unreported") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:focus-within .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
+              if (response.ok && html.includes(marker) && html.includes('marketStatusList:["open","answer_not_final","in_dispute"]') && html.includes("Seer search timed out after 12 seconds; using preview fallback") && html.includes("requestTimeoutId") && html.includes("Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800") && html.includes("DM+Sans:wght@400;500;600;700") && html.includes("JetBrains+Mono:wght@400;500;600;700") && html.includes('id="siteFooter"') && html.includes("function interfaceArt") && html.includes('id="marketNetwork"') && html.includes("Risk is multidimensional.") && html.includes("Market activity ledger") && html.includes("loadFutarchyMarkets") && html.includes('id="marketWire"') && html.includes("function renderMarketWire") && html.includes("function renderSignalDesk") && html.includes("Signal Desk / Source-backed briefing") && html.includes("signal-ticker-track") && html.includes("marketAvatarHTML(m,44)") && html.includes("market-tape") && html.includes('id="getAppButton" href="https://app.seer.pm/" target="_blank" rel="noopener noreferrer"') && html.includes('body[data-theme="light"] .signal-ticker.market-tape{background:linear-gradient') && html.includes("No repricing confirmed between snapshots.") && html.includes("function renderObservedPriceTrace") && html.includes("seer-six-price-trace-v1") && html.includes("async function seerLoadSharedArchive") && html.includes("Source &amp; provenance ledger") && html.includes("seer-scheduled-capture") && html.includes("Export CSV ↓") && html.includes("OBSERVED PRICE TRACE") && html.includes('data-wire-action="history"') && html.includes("No repricing observed yet.") && html.includes("AUTO-REFRESH 60S") && html.includes('id="getAppButton"') && html.includes("top-app-cta") && html.includes("PHASE 03 / SIGNAL &amp; FORECAST LAB") && html.includes("PHASE 04 / OPPORTUNITY DECISION DESK") && html.includes("SOURCE CHANGE FORENSICS / V1") && html.includes("sourceFingerprint") && html.includes("marketChainId!==null&&Number.isFinite(marketChainId)&&marketChainId!==0") && html.includes("Number(x.chainId)!==0") && html.includes("function matchesSelectedMarket(m)") && html.includes("function toggleMarketDetail(key,chainId)") && html.includes("function marketIdentity(m)") && html.includes("function historyChainMatches(sampleChainId,marketChainId)") && html.includes("function toggleMarketWatchlist(key,chainId)") && html.includes("state.futarchyMarketChainId=parseMarketChainId") && html.includes("state.opportunityMarketChainId=parseMarketChainId(selected.chainId)") && html.includes("marketIdentity(m)===String(requestedIdentity)") && html.includes('data-market-action="model-opportunity"') && html.includes("function toggleMarketCompare(key,chainId)") && html.includes("data-market-chain-id") && html.includes("data-f34-decision-chain-id") && html.includes("resolution_criteria_field") && html.includes("seerF34ScoreCandidate") && html.includes("seer-six-forecast-journal-v1") && html.includes("seer-six-decision-desk-v1") && html.includes('data-f34-save-forecast') && html.includes('data-f34-decision-save') && html.includes("const reportedNumber=") && html.includes("liquidityUSD:reportedNumber(m.liquidityUSD)") && html.includes("function marketSideControls(m)") && html.includes("market-side-picker") && html.includes('data-market-action="analyze-side"') && html.includes("function canPaperFrameOutcome(m)") && html.includes("function makeBinaryPaperProjection(m)") && html.includes("hasNativeBinaryPrices(m)") && html.includes("derived-frame-notice") && html.includes("NO represents all remaining listed outcomes") && html.includes("not a returned NO quote") && html.includes("DERIVED PAPER FRAME") && html.includes("Premium art direction refresh") && html.includes("LAVENDER BRAND DIRECTION") && html.includes('body data-theme="light"') && html.includes("--bg:#f7f7f9") && html.includes("--bg:#101013") && html.includes("--panel-raised:#f2f2f4") && html.includes("--panel-raised:#2f2f34") && html.includes("--violet:#6c2bd9") && html.includes("--violet:#b7a0ff") && html.includes("linear-gradient(180deg,#f7f7f9 0%,#efe9fc 52%,#f7f7f9 100%)") && html.includes("--text:#17171c") && html.includes("--dim:#6d6d78") && html.includes("signal-cyan:#67e6ee") && html.includes(".signal-ticker.market-tape:before") && html.includes("no squeezed headers or six tiny wrapped nav buttons") && html.includes("Mobile information hierarchy: navigation always follows the header, with the market wire below it.") && html.includes("function renderLiquidityLandscape") && html.includes("Liquidity landscape") && html.includes("landscape-rail is-unreported") && html.includes("function renderOpportunityLab") && html.includes("Price your own thesis.") && html.includes("function refreshOpportunityMarketSelection") && html.includes("data-entry-price") && html.includes("function openWireMarket") && html.includes('data-wire-action="inspect"') && html.includes(".market-wire-viewport:focus-within .market-wire-track") && html.includes("function renderExplorerLedger") && html.includes('data-explorer-view="table"') && html.includes("data-opportunity-field=\"belief\"")) {
                 console.log(`Deployed build marker found on attempt ${attempt}; HTTP ${response.status}`);
                 process.exit(0);
               }
@@ -371,6 +371,15 @@ jobs:
                         const originalShared = marketTrace.sharedSamples;
                         const originalWatchlist = state.watchlist;
                         const originalCompare = state.compareMarkets;
+                        const originalMarkets = markets;
+                        const originalExplorerMarkets = explorerMarkets;
+                        const previousFutarchyId = state.futarchyMarketId;
+                        const previousFutarchyChain = state.futarchyMarketChainId;
+                        const previousOpportunityId = state.opportunityMarketId;
+                        const previousOpportunityChain = state.opportunityMarketChainId;
+                        const previousOpportunitySnapshot = state.opportunityMarketSnapshot;
+                        const previousOpportunityBelief = state.opportunityBelief;
+                        const previousOpportunitySide = state.opportunitySide;
                         const key = "__qa_chain_identity_collision__";
                         const make = (chainId, snapshotId, minutes) => ({
                           key, chainId, snapshotId, source: "seer-scheduled-capture", schemaVersion: 2,
@@ -378,8 +387,16 @@ jobs:
                           observedAt: new Date(Date.UTC(2026, 9, 23, 12, minutes)).toISOString(),
                           outcomeIndex: 0, outcomeName: "Yes", p: 50
                         });
-                        const baseMarket = { id: key, fullId: key, chainId: 8453, chain: "Base", title: "QA collision market" };
-                        const optimismMarket = { id: key, fullId: key, chainId: 10, chain: "Optimism", title: "QA collision market" };
+                        const baseMarket = {
+                          id: key, fullId: key, chainId: 8453, chain: "Base", title: "QA collision market",
+                          p: 25, volume: "$10", depth: "$5", volumeUSD: 10, liquidityUSD: 5,
+                          outcomes: ["Yes", "No"], outcomePrices: [{ name: "Yes", p: 25 }, { name: "No", p: 75 }], isLive: true
+                        };
+                        const optimismMarket = {
+                          ...baseMarket, chainId: 10, chain: "Optimism", title: "QA collision market",
+                          p: 70, volume: "$20", depth: "$9", volumeUSD: 20, liquidityUSD: 9,
+                          outcomePrices: [{ name: "Yes", p: 70 }, { name: "No", p: 30 }]
+                        };
                         let result;
                         try {
                           marketTrace.sharedSamples = [
@@ -388,19 +405,49 @@ jobs:
                             make(null, "qa-missing-chain", 2),
                             make(0, "qa-zero-chain", 3)
                           ];
+                          markets = [baseMarket, optimismMarket];
+                          explorerMarkets = [baseMarket, optimismMarket];
                           const snapshots = seerF5Snapshots(baseMarket);
                           state.watchlist = [compactSavedMarket(optimismMarket)];
                           state.compareMarkets = [compactSavedMarket(baseMarket)];
+                          state.futarchyMarketId = key;
+                          state.futarchyMarketChainId = 10;
+                          const futarchyReference = currentFutarchyReference();
+                          const futarchyMarkup = renderFutarchy();
+                          state.opportunityMarketId = key;
+                          state.opportunityMarketChainId = 10;
+                          state.opportunityMarketSnapshot = null;
+                          state.opportunityBelief = null;
+                          state.opportunitySide = "yes";
+                          const opportunityReference = opportunityScenarioMarket([baseMarket, optimismMarket]);
+                          const opportunityMarkup = renderOpportunityLab([baseMarket, optimismMarket]);
+                          const opportunityPageMarkup = renderOpportunity();
+                          const sideMarkup = marketSideControls(optimismMarket);
                           result = {
                             snapshotChains: snapshots.map(snapshot => snapshot.chainId),
                             watchlistSeparatesNetworks: !isWatched(baseMarket) && isWatched(optimismMarket),
                             comparisonSeparatesNetworks: marketIsCompared(baseMarket) && !marketIsCompared(optimismMarket),
-                            historySeparatesNetworks: historyChainMatches(8453, 8453) && !historyChainMatches(10, 8453) && !historyChainMatches(null, 8453) && !historyChainMatches(0, 8453) && historyChainMatches(null, 0)
+                            historySeparatesNetworks: historyChainMatches(8453, 8453) && !historyChainMatches(10, 8453) && !historyChainMatches(null, 8453) && !historyChainMatches(0, 8453) && historyChainMatches(null, 0),
+                            futarchySelectedCorrectNetwork: !!futarchyReference && Number(futarchyReference.chainId) === 10,
+                            futarchyRendersBothIdentities: futarchyMarkup.includes('value="8453::' + key + '"') && futarchyMarkup.includes('value="10::' + key + '"') && futarchyMarkup.includes('data-chain-id="10" selected'),
+                            opportunitySelectedCorrectNetwork: !!opportunityReference && Number(opportunityReference.chainId) === 10,
+                            opportunityRendersBothIdentities: opportunityMarkup.includes('value="8453::' + key + '"') && opportunityMarkup.includes('value="10::' + key + '"') && opportunityMarkup.includes('data-chain-id="10" selected'),
+                            sideButtonsCarryNetwork: sideMarkup.includes('data-market-chain-id="10"'),
+                            modelButtonCarriesNetwork: opportunityPageMarkup.includes('data-market-action="model-opportunity" data-market-id="' + key + '" data-market-chain-id="10"')
                           };
                         } finally {
                           marketTrace.sharedSamples = originalShared;
                           state.watchlist = originalWatchlist;
                           state.compareMarkets = originalCompare;
+                          markets = originalMarkets;
+                          explorerMarkets = originalExplorerMarkets;
+                          state.futarchyMarketId = previousFutarchyId;
+                          state.futarchyMarketChainId = previousFutarchyChain;
+                          state.opportunityMarketId = previousOpportunityId;
+                          state.opportunityMarketChainId = previousOpportunityChain;
+                          state.opportunityMarketSnapshot = previousOpportunitySnapshot;
+                          state.opportunityBelief = previousOpportunityBelief;
+                          state.opportunitySide = previousOpportunitySide;
                         }
                         return result;
                       });
@@ -412,6 +459,15 @@ jobs:
                       }
                       if (!identityProbe.historySeparatesNetworks) {
                         report.failures.push("desktop/dark/app: price history failed to keep unknown-chain observations separate from known networks");
+                      }
+                      if (!identityProbe.futarchySelectedCorrectNetwork || !identityProbe.futarchyRendersBothIdentities) {
+                        report.failures.push("desktop/dark/app: Futarchy selector conflated or failed to retain a duplicate market ID across networks");
+                      }
+                      if (!identityProbe.opportunitySelectedCorrectNetwork || !identityProbe.opportunityRendersBothIdentities) {
+                        report.failures.push("desktop/dark/app: Decision Lab selector conflated or failed to retain a duplicate market ID across networks");
+                      }
+                      if (!identityProbe.sideButtonsCarryNetwork || !identityProbe.modelButtonCarriesNetwork) {
+                        report.failures.push("desktop/dark/app: Yes/No paper-analysis controls did not preserve the selected network");
                       }
                       if (captureInfo.snapshots >= 2 && !forensicsText.includes("what changed between captures?")) {
                         report.failures.push("desktop/dark/app: two fingerprinted captures exist but their source-diff ledger is not rendered (chain="+captureInfo.chainId+", captures="+captureInfo.snapshots+", rows="+captureInfo.rows+")");
