@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
  * Captures a periodic public Seer API snapshot into a compact, source-labelled archive.
+ * Each outcome row carries the normalized source-field envelope and its deterministic SHA-256 fingerprint so a later capture can be diffed.
  * These are scheduled API observations, NOT historical trades or an execution feed.
  */
 import fs from "node:fs/promises";
