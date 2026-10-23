@@ -2530,7 +2530,7 @@ function seerEvidenceText(value){
  return "";
 }
 function seerResolutionField(raw){
- const candidates=["resolutionCriteria","resolutionRules","resolutionDescription","resolutionSource","resolution_source","rules","criteria","oracle","resolution"];
+ const candidates=["resolutionCriteria","resolutionRules","resolutionDescription","rules","criteria"];
  for(const name of candidates){const value=raw&&raw[name];const text=seerEvidenceText(value);if(text)return {field:name,text:text};}
  return {field:"",text:""};
 }
@@ -2566,7 +2566,7 @@ function seerBuildEvidence(raw,details){
   schemaVersion:1,recordKey:String(chainId)+":"+fullId,
   source:{name:"Seer public markets-search API",endpoint:SEER_EVIDENCE_ENDPOINT,recordId:fullId,marketUrl:String(raw.url||""),mode:"live-response"},
   observation:{capturedAt:observedAt,captureMeaning:"Browser receipt time for a successful API response",sourceUpdatedAt:sourceUpdate?String(sourceUpdate):null},
-  marketStructure:{kind:seerStructure(raw,outcomes,raw.parentMarket||raw.parentMarketId||raw.parent?.id||raw.conditionalParentMarket||""),sourceType:String(raw.type||"Not returned as a market format"),outcomeCount:outcomes.length,outcomeNames:outcomes.map(outcomeName),isConditional:Boolean(raw.parentMarket||raw.parentMarketId||raw.parent?.id||raw.conditionalParentMarket)},
+  marketStructure:{kind:seerStructure(raw,outcomes,raw.parentMarket||raw.parentMarketId||raw.parent?.id||raw.conditionalParentMarket||""),sourceType:String(raw.marketType||raw.marketFormat||raw.marketKind||raw.type||"Not returned as a market format"),outcomeCount:outcomes.length,outcomeNames:outcomes.map(outcomeName),isConditional:Boolean(raw.parentMarket||raw.parentMarketId||raw.parent?.id||raw.conditionalParentMarket)},
   resolution:{criteria:resolution.text||null,sourceField:resolution.field||null,status:resolution.text?"criteria returned in response":"criteria not found in this response"},
   fields:{
    title:seerEvidenceField(raw.marketName,Boolean(raw.marketName),"Seer API marketName"),
