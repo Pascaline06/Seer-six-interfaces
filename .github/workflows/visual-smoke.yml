@@ -237,6 +237,47 @@ jobs:
                 if (resumedClass?.includes("is-paused") || resumedPressed !== "false") report.failures.push(viewport.name+"/"+theme+"/"+route+": resume control did not restore ticker motion");
               }
               }
+              // Market Wire: inspect must route to the exact source record and Refresh must complete/recover.
+              if (route === "app" && viewport.name === "desktop" && theme === "dark") {
+                const wireInspect = page.locator('#marketWire .wire-item[data-wire-action="inspect"]').first();
+                if (await wireInspect.count() !== 1) {
+                  report.failures.push("desktop/dark/app: Market Wire is missing inspectable market rows");
+                } else {
+                  const wireLabel = await wireInspect.getAttribute("aria-label") || "";
+                  const wireTitle = wireLabel.replace(/^Inspect market:\s*/, "").replace(/, price\s+[^,]+$/, "").trim();
+                  await wireInspect.click();
+                  const wireDetailReady = await page.waitForFunction((wanted) => {
+                    const main = document.querySelector("#main");
+                    const detail = document.querySelector("#marketDetail");
+                    return main?.dataset.page === "app" && !!detail && detail.querySelector("h2")?.innerText.trim() === wanted;
+                  }, wireTitle, { timeout: 8000 }).then(() => true).catch(() => false);
+                  if (!wireDetailReady) report.failures.push("desktop/dark/app: Market Wire Inspect did not open the matching market detail");
+                  if (wireDetailReady) {
+                    await page.locator('#main #marketDetail button[data-market-action="close-detail"]').click();
+                    if (await page.locator("#main #marketDetail").count() !== 0) report.failures.push("desktop/dark/app: Market Wire market detail could not be closed");
+                  }
+                }
+                const refreshButton = page.locator('#marketWire button[data-wire-action="refresh"]');
+                if (await refreshButton.count() !== 1) {
+                  report.failures.push("desktop/dark/app: Market Wire Refresh control is missing");
+                } else {
+                  const readyToRefresh = await page.waitForFunction(() => {
+                    const button = document.querySelector('#marketWire button[data-wire-action="refresh"]');
+                    return !!button && !button.disabled;
+                  }, null, { timeout: 20000 }).then(() => true).catch(() => false);
+                  if (!readyToRefresh) {
+                    report.warnings.push("desktop/dark/app: Market Wire Refresh stayed disabled while the initial source request was in progress");
+                  } else {
+                    await refreshButton.click();
+                    const refreshRecovered = await page.waitForFunction(() => {
+                      const button = document.querySelector('#marketWire button[data-wire-action="refresh"]');
+                      return !!button && !button.disabled && !button.innerText.includes("Syncing");
+                    }, null, { timeout: 25000 }).then(() => true).catch(() => false);
+                    if (!refreshRecovered) report.failures.push("desktop/dark/app: Market Wire Refresh did not return to an actionable state");
+                  }
+                }
+              }
+
               const screenshot = `artifacts/${viewport.name}-${theme}-${route}.png`;
               await page.screenshot({ path: screenshot, fullPage: true, animations: "disabled" });
               const result = { viewport: viewport.name, theme, route, screenshot, ...metrics, pageErrors: [...pageErrors] };
