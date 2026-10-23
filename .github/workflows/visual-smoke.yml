@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: seer-six-visual-smoke-live-index-v2
+  group: seer-six-visual-smoke-live-index-v3
   cancel-in-progress: true
 
 jobs:
