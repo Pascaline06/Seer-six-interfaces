@@ -327,8 +327,14 @@ jobs:
                   }, wireTitle, { timeout: 8000 }).then(() => true).catch(() => false);
                   if (!wireDetailReady) report.failures.push("desktop/dark/app: Market Wire Inspect did not open the matching market detail");
                   if (wireDetailReady) {
-                    const detailKey = await page.locator('#main #marketDetail button[data-market-action="save"]').getAttribute("data-market-id");
-                    const hasLiveEvidence = await page.evaluate(key => markets.some(m => marketKey(m) === key && m.isLive && m.evidence), detailKey);
+                    const detailSaveButton = page.locator('#main #marketDetail button[data-market-action="save"]');
+                    const detailKey = await detailSaveButton.getAttribute("data-market-id");
+                    const detailChainId = await detailSaveButton.getAttribute("data-market-chain-id");
+                    const detailIdentity = { key: detailKey, chainId: detailChainId };
+                    const hasLiveEvidence = await page.evaluate(({ key, chainId }) => {
+                      const selectedChainId = parseMarketChainId(chainId);
+                      return markets.some(m => marketKey(m) === key && parseMarketChainId(m.chainId) === selectedChainId && m.isLive && m.evidence);
+                    }, detailIdentity);
                     const evidencePanel = page.locator("#main #marketDetail .market-evidence");
                     if (hasLiveEvidence && await evidencePanel.count() !== 1) {
                       report.failures.push("desktop/dark/app: live market inspector is missing its Source & Provenance ledger");
@@ -350,14 +356,14 @@ jobs:
                       if (!forensicsText.includes("source change forensics / v1") || !forensicsText.includes("normalized source fields") || !forensicsText.includes("not an explanation")) {
                         report.failures.push("desktop/dark/app: source forensics does not explain provenance and non-causal interpretation");
                       }
-                      const captureInfo = await page.evaluate(key => {
-                        const market = [...markets, ...explorerMarkets].find(m => marketKey(m) === key);
-                        const chainId = market && Number(market.chainId);
-                        const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.source === "seer-scheduled-capture" && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && row.snapshotId && row.observedAt && Number.isFinite(chainId) && row.chainId !== null && row.chainId !== undefined && row.chainId !== "" && Number.isFinite(Number(row.chainId)) && Number(row.chainId) === chainId);
+                      const captureInfo = await page.evaluate(({ key, chainId: rawChainId }) => {
+                        const chainId = parseMarketChainId(rawChainId);
+                        const market = [...markets, ...explorerMarkets].find(m => marketKey(m) === key && parseMarketChainId(m.chainId) === chainId);
+                        const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.source === "seer-scheduled-capture" && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && row.snapshotId && row.observedAt && chainId !== null && Number.isFinite(chainId) && parseMarketChainId(row.chainId) === chainId);
                         const forensicSnapshots = market && typeof seerF5Snapshots === "function" ? seerF5Snapshots(market) : [];
-                        const mixedChainSnapshots = Number.isFinite(chainId) ? forensicSnapshots.filter(snapshot => !Number.isFinite(Number(snapshot.chainId)) || Number(snapshot.chainId) !== chainId).length : forensicSnapshots.length;
+                        const mixedChainSnapshots = chainId !== null && Number.isFinite(chainId) ? forensicSnapshots.filter(snapshot => parseMarketChainId(snapshot.chainId) !== chainId).length : forensicSnapshots.length;
                         return { snapshots: [...new Set(rows.map(row => row.snapshotId).filter(Boolean))].length, rows: rows.length, mixedChainSnapshots };
-                      }, detailKey);
+                      }, detailIdentity);
                       if (captureInfo.mixedChainSnapshots > 0) {
                         report.failures.push("desktop/dark/app: Source Change Forensics included a snapshot without an exact matching chain identity");
                       }
