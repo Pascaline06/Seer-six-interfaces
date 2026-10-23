@@ -308,7 +308,7 @@ jobs:
                       report.failures.push("desktop/dark/app: live market inspector is missing its Source & Provenance ledger");
                     } else if (hasLiveEvidence) {
                       const evidenceText = await evidencePanel.innerText();
-                      if (!evidenceText.includes("SOURCE & PROVENANCE") || !evidenceText.includes("Outcome prices") || !evidenceText.includes("Browser observed") || !evidenceText.includes("Provenance")) {
+                      if (!evidenceText.includes("Source & provenance ledger") || !evidenceText.includes("Outcome prices") || !evidenceText.includes("Browser observed") || !evidenceText.includes("Provenance")) {
                         report.failures.push("desktop/dark/app: field-level source/absence provenance is incomplete");
                       }
                     }
