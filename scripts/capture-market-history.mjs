@@ -5,6 +5,7 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 
 const ENDPOINT = "https://app.seer.pm/.netlify/functions/markets-search";
 const OUTPUT = path.resolve(process.cwd(), "data/market-history.json");
@@ -12,7 +13,7 @@ const CHAINS = [100, 10, 8453, 1];
 const PER_CHAIN_LIMIT = 8;
 const PER_SERIES_LIMIT = 96; // About 48 hours at a 30-minute schedule.
 const GLOBAL_LIMIT = 12000;
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 function normalizePrice(raw) {
   if (raw === null || raw === undefined || raw === "") return null;
@@ -26,6 +27,34 @@ function nameOf(value, index) {
   return "Outcome " + (index + 1);
 }
 function safeArray(value) { return Array.isArray(value) ? value : []; }
+function reportedMetric(value) {
+  if (value === null || value === undefined || (typeof value === "string" && value.trim() === "")) return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+function sourceText(value) {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value).trim();
+  if (Array.isArray(value)) return value.map(sourceText).filter(Boolean).join("\n");
+  if (typeof value === "object") {
+    for (const key of ["text", "criteria", "rules", "resolution", "url", "name", "title", "value"]) {
+      if (value[key] !== undefined) { const found = sourceText(value[key]); if (found) return found; }
+    }
+  }
+  return "";
+}
+function returnedResolutionCriteria(market) {
+  for (const field of ["resolutionCriteria", "resolutionRules", "resolutionDescription", "rules", "criteria"]) {
+    const text = sourceText(market && market[field]);
+    if (text) return { field, text };
+  }
+  return { field: null, text: null };
+}
+function reportedSourceUpdatedAt(market) {
+  const value = market && (market.updatedAt || market.updated_at || market.lastUpdatedAt || market.lastUpdated || market.last_updated);
+  if (value === null || value === undefined || value === "") return null;
+  return String(value);
+}
 function safeSample(value) {
   if (!value || typeof value.key !== "string" || !value.key || !value.observedAt || !Number.isFinite(Date.parse(value.observedAt))) return false;
   if (!Number.isInteger(Number(value.outcomeIndex)) || Number(value.outcomeIndex) < 0) return false;
@@ -108,6 +137,21 @@ async function main() {
       const outcomes = safeArray(market.outcomes);
       const odds = safeArray(market.odds);
       const rowCount = Math.max(outcomes.length, odds.length);
+      const volumeUSD = reportedMetric(market.volumeUSD);
+      const liquidityUSD = reportedMetric(market.liquidityUSD);
+      const verificationStatus = market.verification && market.verification.status !== undefined ? String(market.verification.status) : null;
+      const sourceUpdatedAt = reportedSourceUpdatedAt(market);
+      const resolution = returnedResolutionCriteria(market);
+      const marketType = String(market.marketType || market.marketFormat || market.marketKind || market.type || "Not returned as a market format");
+      const outcomeNames = outcomes.map((value, index) => nameOf(value, index));
+      const fingerprintPayload = {
+        chainId, marketId: key, marketType, marketStatus: market.status || market.marketStatus || null,
+        odds: odds.map(value => value === null || value === undefined || value === "" ? null : normalizePrice(value)),
+        outcomeNames, volumeUSD, liquidityUSD, verificationStatus, sourceUpdatedAt,
+        resolutionCriteriaField: resolution.field, resolutionCriteria: resolution.text
+      };
+      const sourceFingerprint = createHash("sha256").update(JSON.stringify(fingerprintPayload)).digest("hex");
+      const rowCount = Math.max(outcomes.length, odds.length);
       for (let i = 0; i < rowCount; i++) {
         const p = normalizePrice(odds[i]);
         if (p === null) continue;
@@ -119,7 +163,13 @@ async function main() {
           chainId, outcomeIndex: i, outcomeName, p, observedAt,
           source: "seer-scheduled-capture", sourceEndpoint: ENDPOINT,
           marketUrl: String(market.url || ""), schemaVersion: SCHEMA_VERSION,
-          sourceMode: "periodic-read-only-api-snapshot"
+          sourceMode: "periodic-read-only-api-snapshot",
+          snapshotId: chainId + ":" + key + ":" + observedAt,
+          marketType, marketStatus: market.status || market.marketStatus || null,
+          outcomeCount: outcomes.length, outcomeNames,
+          volumeUSD, liquidityUSD, verificationStatus, sourceUpdatedAt,
+          resolutionCriteria: resolution.text, resolutionCriteriaField: resolution.field,
+          sourceFingerprint
         });
       }
     }
