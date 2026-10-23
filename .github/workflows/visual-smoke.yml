@@ -353,9 +353,14 @@ jobs:
                       const captureInfo = await page.evaluate(key => {
                         const market = [...markets, ...explorerMarkets].find(m => marketKey(m) === key);
                         const chainId = market && Number(market.chainId);
-                        const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.source === "seer-scheduled-capture" && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && row.observedAt && (!Number.isFinite(chainId) || !Number.isFinite(Number(row.chainId)) || Number(row.chainId) === chainId));
-                        return { snapshots: [...new Set(rows.map(row => row.snapshotId || row.observedAt))].length, rows: rows.length };
+                        const rows = (marketTrace.sharedSamples || []).filter(row => row.key === key && row.source === "seer-scheduled-capture" && row.sourceFingerprint && Number(row.schemaVersion) >= 2 && row.snapshotId && row.observedAt && Number.isFinite(chainId) && row.chainId !== null && row.chainId !== undefined && row.chainId !== "" && Number.isFinite(Number(row.chainId)) && Number(row.chainId) === chainId);
+                        const forensicSnapshots = market && typeof seerF5Snapshots === "function" ? seerF5Snapshots(market) : [];
+                        const mixedChainSnapshots = Number.isFinite(chainId) ? forensicSnapshots.filter(snapshot => !Number.isFinite(Number(snapshot.chainId)) || Number(snapshot.chainId) !== chainId).length : forensicSnapshots.length;
+                        return { snapshots: [...new Set(rows.map(row => row.snapshotId)).filter(Boolean)].length, rows: rows.length, mixedChainSnapshots };
                       }, detailKey);
+                      if (captureInfo.mixedChainSnapshots > 0) {
+                        report.failures.push("desktop/dark/app: Source Change Forensics included a snapshot without an exact matching chain identity");
+                      }
                       if (captureInfo.snapshots >= 2 && !forensicsText.includes("What changed between captures?")) {
                         report.failures.push("desktop/dark/app: two fingerprinted captures exist but their source-diff ledger is not rendered");
                       }
