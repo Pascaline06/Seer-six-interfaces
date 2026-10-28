@@ -110,6 +110,42 @@ jobs:
               }
               if (route === "app") {
                 await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+                const inspect = page.locator('.explorer-market-grid button[data-market-action="inspect"]').first();
+                if (await inspect.count() > 0) {
+                  await inspect.click();
+                  const questionContext = page.locator("#marketDetail .seer-f6-question");
+                  const paperTrade = page.locator("#marketDetail .seer-f6-trader");
+                  const interfacePaths = page.locator("#marketDetail .seer-f6-paths .seer-f6-path");
+                  if (await questionContext.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing source-aware question context");
+                  if (await paperTrade.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing the trader paper preview");
+                  if (await interfacePaths.count() !== 4) report.failures.push(viewport.name+"/"+theme+"/app: market inspector must expose four contextual interface paths");
+                  const tradeOutcome = page.locator("#seerF6TradeOutcome");
+                  const tradeStake = page.locator("#seerF6TradeStake");
+                  if (await tradeOutcome.count() === 1 && await tradeStake.count() === 1 && !(await tradeStake.isDisabled())) {
+                    const options = await tradeOutcome.locator("option:not([disabled])").evaluateAll(nodes => nodes.map(n => ({value:n.value,price:Number(n.dataset.price)})).filter(n => Number.isFinite(n.price) && n.price > 0 && n.price <= 100));
+                    if (options.length) {
+                      await tradeOutcome.selectOption(options[0].value);
+                      await tradeStake.fill("50");
+                      const payout = (await page.locator('[data-f6-trade-output="payout"]').innerText()).trim();
+                      const shares = (await page.locator('[data-f6-trade-output="shares"]').innerText()).trim();
+                      if (payout === "—" || shares === "—") report.failures.push(viewport.name+"/"+theme+"/app: changing paper stake did not recalculate shares and gross payout");
+                    }
+                  }
+                  if (viewport.name === "desktop" && theme === "dark") {
+                    const deepPath = page.locator('#marketDetail button[data-seer-f6-route="deep"]');
+                    if (await deepPath.count() !== 1) {
+                      report.failures.push("desktop/dark/app: contextual Deep Forecasts path is missing");
+                    } else {
+                      await deepPath.click();
+                      const routed = await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "deep", null, {timeout:7000}).then(() => true).catch(() => false);
+                      if (!routed) report.failures.push("desktop/dark/app: contextual market path did not open Deep Forecasts");
+                      await page.goto(base+"#/app", {waitUntil:"domcontentloaded", timeout:45000});
+                      await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, {timeout:20000}).catch(() => {});
+                    }
+                  }
+                } else {
+                  report.failures.push(viewport.name+"/"+theme+"/app: no inspectable market card was available for the context/trader smoke test");
+                }
               }
               await page.waitForTimeout(500);
               // Rendering the live market response and focused controls can shift scroll after navigation.
