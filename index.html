@@ -2038,7 +2038,7 @@ function sortedSpecialistMarkets(items=markets){return [...items].filter(m=>m&&m
 function marketActivityScore(m,records){const maxL=Math.max(1,...records.map(x=>marketMoneyMetric(x,"liquidity")));const maxV=Math.max(1,...records.map(x=>marketMoneyMetric(x,"volume")));return Math.round(100*(.6*Math.min(1,marketMoneyMetric(m,"liquidity")/maxL)+.4*Math.min(1,marketMoneyMetric(m,"volume")/maxV)))}
 function marketOutcomeDistribution(m){const entries=(m&&Array.isArray(m.outcomePrices)?m.outcomePrices:[]).filter(x=>x.p!==null&&Number.isFinite(Number(x.p)));if(entries.length<2)return '<div class="notice">This API record does not include two or more priced outcomes in the returned payload. No range or missing outcome has been invented.</div>';return '<div class="outcome-distribution">'+entries.map(x=>'<div class="distribution-row"><div class="distribution-title"><span>'+htmlEscape(x.name)+'</span><strong>'+Math.round(x.p)+'%</strong></div><div class="distribution-track"><i style="width:'+x.p+'%"></i></div></div>').join("")+'</div>'}
 async function loadFutarchyMarkets(){if(["loading","live"].includes(futarchyFeed.status))return;futarchyFeed.status="loading";futarchyFeed.error="";render();try{const response=await fetch("https://app.seer.pm/.netlify/functions/markets-search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chainsList:marketFeed.chains.map(String),marketStatusList:["open","answer_not_final","in_dispute"],limit:60,page:1,orderBy:"liquidityUSD",orderDirection:"desc",showConditionalMarkets:true})});if(!response.ok)throw new Error("Seer conditional-market endpoint returned HTTP "+response.status);const payload=await response.json();if(!Array.isArray(payload.markets))throw new Error("Unexpected conditional-market response");const observedAt=new Date().toISOString();futarchyMarkets=payload.markets.map(m=>normalizeLiveMarket(m,observedAt)).filter(m=>m.fullId&&m.title);futarchyFeed.count=Number(payload.count)||futarchyMarkets.length;futarchyFeed.status=futarchyMarkets.length?"live":"fallback";futarchyFeed.updatedAt=new Date()}catch(error){futarchyFeed.status="fallback";futarchyFeed.error=error&&error.message?error.message:"Conditional market data unavailable";futarchyMarkets=[]}render()}
-function currentFutarchyReference(){const pool=sortedSpecialistMarkets(markets),selected=pool.find(m=>marketKey(m)===state.futarchyMarketId&&historyChainMatches(m.chainId,state.futarchyMarketChainId));if(selected)return selected;const fallback=pool[0]||null;if(fallback){state.futarchyMarketId=marketKey(fallback);state.futarchyMarketChainId=parseMarketChainId(fallback.chainId);}return fallback;}
+function currentFutarchyReference(){const raw=[...sortedSpecialistMarkets(markets),...explorerMarkets,...state.watchlist,...(state.futarchyMarketSnapshot?[state.futarchyMarketSnapshot]:[])];const pool=[...new Map(raw.filter(m=>m&&m.title).map(m=>[marketIdentity(m),m])).values()];const selected=pool.find(m=>marketKey(m)===state.futarchyMarketId&&historyChainMatches(m.chainId,state.futarchyMarketChainId));if(selected)return selected;const fallback=pool[0]||null;if(fallback){state.futarchyMarketId=marketKey(fallback);state.futarchyMarketChainId=parseMarketChainId(fallback.chainId);}return fallback;}
 function updateFutarchyScenario(){const m=currentFutarchyReference();const node=document.getElementById("futarchyScenarioValue");const base=m&&m.p!==null&&m.p!==undefined?Number(m.p):null;if(!node)return;const shift=Number(state.scenarioDelta||0)*(state.pass?1:-1);node.textContent=base===null?"No live price":Math.round(Math.max(0,Math.min(100,base+shift)))+"%";const explain=document.getElementById("futarchyScenarioLabel");if(explain)explain.textContent=base===null?"The selected record has no returned price.":(state.pass?"Pass assumption: +":"Fail assumption: −")+Math.abs(Number(state.scenarioDelta||0))+" percentage points from the current "+Math.round(base)+"% price."}
 
 function marketKey(m){return String(m?.fullId||m?.id||m?.title||"")}
@@ -2395,7 +2395,8 @@ function renderDeep(){
 
 function renderFutarchy(){
  const reference=currentFutarchyReference();
- const candidates=sortedSpecialistMarkets(markets);
+ const rawCandidates=[...sortedSpecialistMarkets(markets),...explorerMarkets,...state.watchlist,...(state.futarchyMarketSnapshot?[state.futarchyMarketSnapshot]:[])];
+ const candidates=[...new Map(rawCandidates.filter(m=>m&&m.title).map(m=>[marketIdentity(m),m])).values()];
  const conditional=futarchyFeed.status==="live"?futarchyMarkets.filter(m=>m.isConditional||m.parentMarket):[];
  const parentGroups={};conditional.forEach(m=>{const k=m.parentMarket||"unlinked";if(!parentGroups[k])parentGroups[k]=[];parentGroups[k].push(m)});
  const paired=Object.entries(parentGroups).filter(x=>x[0]!=="unlinked"&&x[1].length>1);
@@ -3402,6 +3403,8 @@ renderMarketDetail=function(m){
 .seer-f6-badge{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;padding:7px 10px;border:1px solid color-mix(in srgb,var(--violet) 35%,var(--line));border-radius:999px;color:var(--violet);font-size:10px;font-weight:800;letter-spacing:.04em}
 .seer-f6-badge:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .seer-f6-context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.seer-f6-resolution-source-link{display:inline-flex;align-items:center;gap:5px;margin-top:10px;color:var(--violet);font-size:10px;font-weight:800;line-height:1.5}
+.seer-f6-resolution-source-link:hover{text-decoration:underline;text-underline-offset:3px}
 .seer-f6-context-card{min-width:0;padding:14px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 78%,transparent)}
 .seer-f6-context-card span{display:block;margin-bottom:8px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .seer-f6-context-card strong{display:block;color:var(--text);font-size:13px;font-weight:700;line-height:1.55;overflow-wrap:anywhere}
@@ -3477,7 +3480,8 @@ normalizeLiveMarket=function(raw,observedAt){
   const author=seerF6Field(raw,["questionAuthor","question_author","askedBy","asked_by","asker","requester","requesterAddress","creator","createdBy","created_by","author"]);
   const context=seerF6Field(raw,["questionContext","question_context","decisionContext","decision_context","marketDescription","market_description","description","context"]);
   const criteria=seerF6Field(raw,["resolutionCriteria","resolution_criteria","resolutionRules","resolution_rules","resolutionDescription","resolution_description"]);
-  return Object.assign({},normalized,{questionAuthor:author.value,questionAuthorSourceField:author.field,questionContext:context.value,questionContextSourceField:context.field,sourceResolutionCriteria:criteria.value,sourceResolutionCriteriaField:criteria.field});
+  const resolutionSource=seerF6Field(raw,["resolutionSource","resolution_source","resolutionSourceUrl","resolution_source_url","settlementSource","settlement_source","resolutionEvidenceUrl","resolution_evidence_url","resolutionSourceName","resolution_source_name"]);
+  return Object.assign({},normalized,{questionAuthor:author.value,questionAuthorSourceField:author.field,questionContext:context.value,questionContextSourceField:context.field,sourceResolutionCriteria:criteria.value,sourceResolutionCriteriaField:criteria.field,sourceResolutionSource:resolutionSource.value,sourceResolutionSourceField:resolutionSource.field});
 };
 const seerF6OriginalCompactSavedMarket=compactSavedMarket;
 compactSavedMarket=function(m){
@@ -3488,7 +3492,9 @@ compactSavedMarket=function(m){
     questionContext:String(m&&m.questionContext||""),
     questionContextSourceField:String(m&&m.questionContextSourceField||""),
     sourceResolutionCriteria:String(m&&m.sourceResolutionCriteria||""),
-    sourceResolutionCriteriaField:String(m&&m.sourceResolutionCriteriaField||"")
+    sourceResolutionCriteriaField:String(m&&m.sourceResolutionCriteriaField||""),
+    sourceResolutionSource:String(m&&m.sourceResolutionSource||""),
+    sourceResolutionSourceField:String(m&&m.sourceResolutionSourceField||"")
   });
 };
 function seerF6Escape(value){return htmlEscape(String(value===null||value===undefined?"":value));}
@@ -3497,19 +3503,37 @@ function seerF6QuestionMarkup(m){
   const context=String(m.questionContext||"").trim();
   const evidenceResolution=m.evidence&&m.evidence.resolution;
   const criteria=String(m.sourceResolutionCriteria||evidenceResolution&&(evidenceResolution.value||evidenceResolution.text||evidenceResolution.description)||"").trim();
+  let evidenceSource="";
+  if(evidenceResolution){
+    const rawSource=evidenceResolution.sourceUrl||evidenceResolution.url||evidenceResolution.source;
+    if(typeof rawSource==="string"||typeof rawSource==="number")evidenceSource=String(rawSource).trim();
+    else if(rawSource&&typeof rawSource==="object")evidenceSource=String(rawSource.url||rawSource.uri||rawSource.name||rawSource.label||"").trim();
+  }
+  const resolutionSource=String(m.sourceResolutionSource||evidenceSource||"").trim();
+  const resolutionSourceIsUrl=/^https?:\\/\\/\\S+$/i.test(resolutionSource);
+  const outcomes=Array.isArray(m.outcomePrices)&&m.outcomePrices.length
+    ?m.outcomePrices.map((o,i)=>String(o&&(o.name||o.title||o.outcome)||"Outcome "+(i+1)).trim()).filter(Boolean)
+    :(Array.isArray(m.outcomes)?m.outcomes.map((o,i)=>String(typeof o==="object"?(o&&(o.name||o.title||o.outcome)||"Outcome "+(i+1)):o).trim()).filter(Boolean):[]);
+  const outcomeSummary=outcomes.length?outcomes.slice(0,8).join(" · "):"No outcome labels returned in the available record";
   const intentIdentity=marketIdentity(m);
   let privateNote="";
   try{const intentStore=JSON.parse(localStorage.getItem("seer-six-intent-notes-v1")||"{}");privateNote=String(intentStore[intentIdentity]&&intentStore[intentIdentity].note||"");}catch{}
-  const authorUnknown=!author,contextUnknown=!context,criteriaUnknown=!criteria;
+  const authorUnknown=!author,contextUnknown=!context,criteriaUnknown=!criteria,sourceUnknown=!resolutionSource;
+  const sourceLink=resolutionSourceIsUrl
+    ?'<a class="seer-f6-resolution-source-link" href="'+seerF6Escape(resolutionSource)+'" target="_blank" rel="noopener noreferrer">Open stated resolution source ↗</a>'
+    :(seerMarketHref(m)?'<a class="seer-f6-resolution-source-link" href="'+seerF6Escape(seerMarketHref(m))+'" target="_blank" rel="noopener noreferrer">Open original market to verify ↗</a>':"");
   return '<section class="seer-f6-question" aria-label="Question intent and accountability">'+
-    '<div class="seer-f6-section-head"><div><div class="seer-f6-kicker">THE INFORMATION SEEKER / MARKET INTENT</div><h3>Who needs an answer — and what settles it?</h3><p>A market is useful when visitors can understand the question, the accountable source and the rule that determines the outcome. Only payload-backed details are presented as facts.</p></div><span class="seer-f6-badge">SOURCE-AWARE</span></div>'+
+    '<div class="seer-f6-section-head"><div><div class="seer-f6-kicker">THE INFORMATION SEEKER / MARKET INTENT</div><h3>Understand the question before the price.</h3><p>Separate the source's question and resolution information from personal interpretation. Unknown fields stay unknown.</p></div><span class="seer-f6-badge">SOURCE-AWARE</span></div>'+
     '<div class="seer-f6-context-grid">'+
+      '<div class="seer-f6-context-card"><span>Question being asked</span><strong>'+seerF6Escape(m.title||"Question not supplied")+'</strong><p>Market question as returned by the source record.</p></div>'+
       '<div class="seer-f6-context-card '+(authorUnknown?"is-unknown":"")+'"><span>Question author / requester</span><strong>'+(authorUnknown?"Not supplied by the public market-search response":seerF6Escape(author))+'</strong><p>'+(authorUnknown?"No person or account is inferred from the market title.":("Source field: "+seerF6Escape(m.questionAuthorSourceField||"market record metadata")) )+'</p></div>'+
-      '<div class="seer-f6-context-card '+(contextUnknown?"is-unknown":"")+'"><span>Decision context</span><strong>'+(contextUnknown?"No separate context field returned":seerF6Escape(context))+'</strong><p>'+(contextUnknown?"The market question above is the only supported summary; this prototype will not invent the asker's motivation.":"Source field: "+seerF6Escape(m.questionContextSourceField||"market record metadata"))+'</p></div>'+
-      '<div class="seer-f6-context-card '+(criteriaUnknown?"is-unknown":"")+'"><span>Resolution rule</span><strong>'+(criteriaUnknown?"Not returned in the available record":seerF6Escape(criteria))+'</strong><p>'+(criteriaUnknown?"Open the original market and verify its settlement criteria before relying on a position.":"Source: "+seerF6Escape(m.sourceResolutionCriteriaField||evidenceResolution&&evidenceResolution.source||"Seer source metadata"))+'</p></div>'+
+      '<div class="seer-f6-context-card '+(contextUnknown?"is-unknown":"")+'"><span>Why the answer matters</span><strong>'+(contextUnknown?"No separate decision context returned":seerF6Escape(context))+'</strong><p>'+(contextUnknown?"The source does not provide a supported explanation of the asker's motivation or decision.":"Source field: "+seerF6Escape(m.questionContextSourceField||"market record metadata"))+'</p></div>'+
+      '<div class="seer-f6-context-card '+(!outcomes.length?"is-unknown":"")+'"><span>Outcome that resolves it</span><strong>'+seerF6Escape(outcomeSummary)+'</strong><p>'+(outcomes.length?"Outcome labels returned by the source; check the resolution criteria to determine which result qualifies.":"No outcome is inferred when the source omits labels.")+'</p></div>'+
+      '<div class="seer-f6-context-card '+(criteriaUnknown?"is-unknown":"")+'"><span>Resolution criteria</span><strong>'+(criteriaUnknown?"Not returned in the available record":seerF6Escape(criteria))+'</strong><p>'+(criteriaUnknown?"Open the original market and verify its settlement criteria before relying on a position.":"Source field: "+seerF6Escape(m.sourceResolutionCriteriaField||evidenceResolution&&evidenceResolution.source||"source resolution metadata"))+'</p></div>'+
+      '<div class="seer-f6-context-card '+(sourceUnknown?"is-unknown":"")+'"><span>Authoritative resolution source</span><strong>'+(sourceUnknown?"Not identified in the available record":seerF6Escape(resolutionSourceIsUrl?"Source URL provided":resolutionSource))+'</strong><p>'+(sourceUnknown?"The interface cannot claim which external source determines settlement unless the source identifies it.":(m.sourceResolutionSourceField?"Returned field: "+seerF6Escape(m.sourceResolutionSourceField):"Source metadata supplied for resolution."))+'</p>'+(sourceLink?sourceLink:"")+'</div>'+
     '</div>'+
     '<div class="seer-f6-private-note"><label for="seerF6PrivateDecisionNote">Your decision context <span>Optional · private to this browser</span></label><textarea id="seerF6PrivateDecisionNote" data-f6-intent-note data-market-key="'+seerF6Escape(marketKey(m))+'" data-market-chain-id="'+seerF6Escape(m.chainId===null||m.chainId===undefined?"":m.chainId)+'" placeholder="What decision will this answer help you make? What evidence or deadline matters?">'+seerF6Escape(privateNote)+'</textarea><button type="button" data-f6-save-intent data-market-key="'+seerF6Escape(marketKey(m))+'" data-market-chain-id="'+seerF6Escape(m.chainId===null||m.chainId===undefined?"":m.chainId)+'">Save private context</button><small id="seerF6IntentStatus" aria-live="polite">Stored on this device only. It is not submitted to Seer or shared with traders.</small></div>'+
-    '<p class="seer-f6-context-foot">For information seekers: verify the exact decision question and resolution rule. For traders: confirm the same rule before comparing odds. Missing author or criteria data is a source limitation—not proof that the market has none.</p>'+
+    '<p class="seer-f6-context-foot">For information seekers: confirm the exact question and what counts as a resolved outcome. For traders: verify the authoritative criteria before comparing odds. Missing metadata is a source limitation—not permission to guess.</p>'+
     '</section>';
 }
 function seerF6TradeMarkup(m){
@@ -3528,19 +3552,23 @@ function seerF6TradeMarkup(m){
   const status=m.isLive?"LIVE SOURCE INPUT":m.isSnapshot?"SAVED SOURCE SNAPSHOT":"DEMO / FALLBACK INPUT";
   const tradeUrl=m.isLive?seerMarketHref(m):"";
   return '<section class="seer-f6-trader" aria-label="Paper trade preview">'+
-    '<div class="seer-f6-section-head"><div><div class="seer-f6-kicker">THE TRADER / PRICE THE RISK</div><h3>What would this position look like?</h3><p>Translate one returned outcome price into an illustrative position size, gross payout and downside before committing to a view.</p></div><span class="seer-f6-badge">'+status+'</span></div>'+
+    '<div class="seer-f6-section-head"><div><div class="seer-f6-kicker">THE TRADER / PRICE THE RISK</div><h3>Model a position — without implying execution.</h3><p>Select a priced outcome and test estimated cost, payout and downside using assumptions you control. This panel does not send orders.</p></div><span class="seer-f6-badge">'+status+'</span></div>'+
     '<div class="seer-f6-trade-grid"><div class="seer-f6-trade-form">'+
-      '<div class="seer-f6-field"><label for="seerF6TradeOutcome">OUTCOME TO MODEL</label><select id="seerF6TradeOutcome" data-f6-trade="outcome" '+(disabled?"disabled":"")+'>'+options+'</select><p class="seer-f6-trade-help">Use only an outcome with a returned price. A missing quote is not treated as zero.</p></div>'+
-      '<div class="seer-f6-field"><label for="seerF6TradeStake">HYPOTHETICAL POSITION SIZE · USDC</label><input id="seerF6TradeStake" data-f6-trade="stake" type="number" min="1" max="1000000" step="1" inputmode="decimal" value="25" '+(disabled?"disabled":"")+'><p class="seer-f6-trade-help">Local what-if input only. No capital is transferred.</p></div>'+
-      '<div class="seer-f6-trade-feedback" id="seerF6TradeFeedback" aria-live="polite">'+(disabled?"No priceable outcome was returned. Check the original Seer market before modelling a position.":"Illustrative only: assumes a $1 payout for each winning share.")+'</div>'+
+      '<div class="seer-f6-field"><label for="seerF6TradeOutcome">OUTCOME TO MODEL</label><select id="seerF6TradeOutcome" data-f6-trade="outcome" '+(disabled?"disabled":"")+'>'+options+'</select><p class="seer-f6-trade-help">Uses only a source-returned outcome price. Missing prices are never treated as zero.</p></div>'+
+      '<div class="seer-f6-field"><label for="seerF6TradeStake">HYPOTHETICAL POSITION SIZE · USDC</label><input id="seerF6TradeStake" data-f6-trade="stake" type="number" min="1" max="1000000" step="1" inputmode="decimal" value="25" '+(disabled?"disabled":"")+'><p class="seer-f6-trade-help">Position notional before the modelled entry fee. Local calculation only.</p></div>'+
+      '<div class="seer-f6-field"><label for="seerF6TradeFee">ASSUMED ENTRY FEE · %</label><input id="seerF6TradeFee" data-f6-trade="fee" type="number" min="0" max="10" step="0.1" inputmode="decimal" value="0.5" '+(disabled?"disabled":"")+'><p class="seer-f6-trade-help">Editable assumption, not a published Seer or venue fee schedule. Applied once to the position notional.</p></div>'+
+      '<div class="seer-f6-field"><label for="seerF6TradeSlippage">ASSUMED PRICE SLIPPAGE · %</label><input id="seerF6TradeSlippage" data-f6-trade="slippage" type="number" min="0" max="25" step="0.1" inputmode="decimal" value="1" '+(disabled?"disabled":"")+'><p class="seer-f6-trade-help">Simple percentage adjustment to the indicative entry price; not derived from live order-book depth.</p></div>'+
+      '<div class="seer-f6-trade-feedback" id="seerF6TradeFeedback" aria-live="polite">'+(disabled?"No priceable outcome was returned. Check the original Seer market before modelling a position.":"Illustrative paper scenario. Default fee and slippage are assumptions that you can change.")+'</div>'+
     '</div><div><div class="seer-f6-trade-results">'+
-      '<div class="seer-f6-trade-metric"><span>Indicative entry</span><strong data-f6-trade-output="entry">—</strong><small>Per share, derived from the displayed price</small></div>'+
-      '<div class="seer-f6-trade-metric"><span>Estimated shares</span><strong data-f6-trade-output="shares">—</strong><small>Position size ÷ assumed entry price</small></div>'+
-      '<div class="seer-f6-trade-metric is-positive"><span>Gross payout if correct</span><strong data-f6-trade-output="payout">—</strong><small>Assumes $1 settlement per winning share</small></div>'+
-      '<div class="seer-f6-trade-metric is-positive"><span>Gross profit if correct</span><strong data-f6-trade-output="profit">—</strong><small>Before fees, spread and slippage</small></div>'+
-      '<div class="seer-f6-trade-metric is-risk"><span>Maximum modeled loss</span><strong data-f6-trade-output="loss">—</strong><small>Position amount, if outcome loses</small></div>'+
-      '<div class="seer-f6-trade-metric"><span>Break-even probability</span><strong data-f6-trade-output="breakeven">—</strong><small>Before execution costs</small></div>'+
-    '</div>'+(tradeUrl?'<a class="seer-f6-live-trade-link" href="'+seerF6Escape(tradeUrl)+'" target="_blank" rel="noopener noreferrer">Continue to Seer to trade ↗</a><span class="seer-f6-live-trade-context">Opens the official market page in a new tab. Recheck the current quote and settlement rules there.</span>':"")+'<p class="seer-f6-trade-disclaimer">Paper model only — this is not a live executable quote, order book, recommendation, or transaction. The source price may be stale or thinly traded. Fees, spread, slippage, minimum order size, settlement mechanics and price impact are not modelled. No wallet is connected and no order can be submitted here.</p></div></div></section>';
+      '<div class="seer-f6-trade-metric"><span>Modeled entry incl. slippage</span><strong data-f6-trade-output="entry">—</strong><small>Indicative price adjusted by your slippage assumption</small></div>'+
+      '<div class="seer-f6-trade-metric"><span>Estimated shares</span><strong data-f6-trade-output="shares">—</strong><small>Position notional ÷ modeled entry price</small></div>'+
+      '<div class="seer-f6-trade-metric"><span>Estimated entry fee</span><strong data-f6-trade-output="fee">—</strong><small>User-defined one-time fee assumption</small></div>'+
+      '<div class="seer-f6-trade-metric"><span>Total entry cost</span><strong data-f6-trade-output="totalcost">—</strong><small>Position notional plus modeled entry fee</small></div>'+
+      '<div class="seer-f6-trade-metric is-positive"><span>Modeled payout if correct</span><strong data-f6-trade-output="payout">—</strong><small>Assumes $1 per winning share before any settlement fee</small></div>'+
+      '<div class="seer-f6-trade-metric is-positive"><span>Net profit if correct</span><strong data-f6-trade-output="profit">—</strong><small>After assumed entry fee; slippage reduces shares</small></div>'+
+      '<div class="seer-f6-trade-metric is-risk"><span>Maximum modeled loss</span><strong data-f6-trade-output="loss">—</strong><small>Total entry cost if the outcome loses</small></div>'+
+      '<div class="seer-f6-trade-metric"><span>Break-even probability</span><strong data-f6-trade-output="breakeven">—</strong><small>Includes assumed entry fee and slippage</small></div>'+
+    '</div>'+(tradeUrl?'<a class="seer-f6-live-trade-link" href="'+seerF6Escape(tradeUrl)+'" target="_blank" rel="noopener noreferrer">Review original Seer market ↗</a><span class="seer-f6-live-trade-context">Opens the source market separately. Recheck its current quote, fee schedule, executable depth and settlement rules before any action.</span>':"")+'<p class="seer-f6-trade-disclaimer">Paper model only — not a live quote, order book, recommendation, or transaction. Fee and slippage inputs are user assumptions, not actual venue costs. Slippage is a simplified price adjustment and is not calculated from liquidity or executable depth. Spread, price impact, exit/settlement fees, gas, taxes, minimum order sizes and market-specific settlement mechanics remain unmodelled. No wallet is connected and no order can be submitted here.</p></div></div></section>';
 }
 function seerF6PathsMarkup(m){
   const id=seerF6Escape(marketKey(m)),chain=seerF6Escape(m.chainId===undefined||m.chainId===null?"":m.chainId);
@@ -3569,48 +3597,73 @@ function seerF6Money(n){
 function seerF6RecalculateTradePreview(){
   const root=document.getElementById("seerF6TradeOutcome");
   const stakeInput=document.getElementById("seerF6TradeStake");
-  if(!root||!stakeInput)return;
+  const feeInput=document.getElementById("seerF6TradeFee");
+  const slippageInput=document.getElementById("seerF6TradeSlippage");
+  if(!root||!stakeInput||!feeInput||!slippageInput)return;
   const selected=root.selectedOptions&&root.selectedOptions[0];
   const rawPrice=selected?selected.dataset.price:"";
   const price=rawPrice!==""&&Number.isFinite(Number(rawPrice))?Number(rawPrice):null;
-  const amount=Number(stakeInput.value);
+  const amount=Number(stakeInput.value),feePercent=Number(feeInput.value),slippagePercent=Number(slippageInput.value);
   const feedback=document.getElementById("seerF6TradeFeedback");
   const write=(name,value)=>{const el=document.querySelector('[data-f6-trade-output="'+name+'"]');if(el)el.textContent=value;};
+  const outputKeys=["entry","shares","payout","profit","loss","breakeven","fee","totalcost"];
   if(price===null||price<0||price>100){
-    ["entry","shares","payout","profit","loss","breakeven"].forEach(k=>write(k,"—"));
+    outputKeys.forEach(k=>write(k,"—"));
     if(feedback)feedback.textContent="No reliable source price is available for this outcome. No estimate was calculated.";
     return;
   }
   if(!Number.isFinite(amount)||amount<1||amount>1000000){
-    ["entry","shares","payout","profit","loss","breakeven"].forEach(k=>write(k,"—"));
+    outputKeys.forEach(k=>write(k,"—"));
     if(feedback)feedback.textContent="Enter a position size between 1 and 1,000,000 USDC for this local paper scenario.";
     return;
   }
+  if(!Number.isFinite(feePercent)||feePercent<0||feePercent>10){
+    outputKeys.forEach(k=>write(k,"—"));
+    if(feedback)feedback.textContent="Enter an assumed entry fee between 0% and 10%.";
+    return;
+  }
+  if(!Number.isFinite(slippagePercent)||slippagePercent<0||slippagePercent>25){
+    outputKeys.forEach(k=>write(k,"—"));
+    if(feedback)feedback.textContent="Enter an assumed slippage adjustment between 0% and 25%.";
+    return;
+  }
   if(price===0){
-    ["entry","shares","payout","profit","loss","breakeven"].forEach(k=>write(k,"—"));
+    outputKeys.forEach(k=>write(k,"—"));
     if(feedback)feedback.textContent="A 0% returned price cannot be used as a finite entry price. Verify the original market.";
     return;
   }
-  const entry=price/100,shares=amount/entry,payout=shares,profit=payout-amount;
+  const baseEntry=price/100,entry=baseEntry*(1+slippagePercent/100),shares=amount/entry;
+  const fee=amount*(feePercent/100),totalCost=amount+fee,payout=shares,profit=payout-totalCost,loss=totalCost;
+  const breakeven=totalCost/shares*100;
   write("entry",seerF6Money(entry)+" / share");
   write("shares",shares.toLocaleString("en-US",{maximumFractionDigits:3}));
+  write("fee",seerF6Money(fee));
+  write("totalcost",seerF6Money(totalCost));
   write("payout",seerF6Money(payout));
   write("profit",seerF6Money(profit));
-  write("loss",seerF6Money(amount));
-  write("breakeven",price.toFixed(1)+"%");
-  if(feedback)feedback.textContent="Illustrative result at "+price.toFixed(1)+"% entry. Before fees, spread, slippage, price impact and settlement-specific rules.";
+  write("loss",seerF6Money(loss));
+  write("breakeven",breakeven.toFixed(1)+"%");
+  if(feedback)feedback.textContent="Indicative price "+price.toFixed(1)+"% adjusted by "+slippagePercent.toFixed(1)+"% assumed slippage; fee "+feePercent.toFixed(1)+"% applied once to entry notional. These assumptions are not venue quotes.";
 }
 function seerF6MarketForButton(button){
   const key=String(button.dataset.marketId||"");
   const chain=parseMarketChainId(button.dataset.marketChainId);
   const pool=[...explorerMarkets,...markets,...state.watchlist,...state.compareMarkets,...(state.opportunityMarketSnapshot?[state.opportunityMarketSnapshot]:[])];
-  return pool.find(m=>marketKey(m)===key&&parseMarketChainId(m.chainId)===chain)||pool.find(m=>marketKey(m)===key)||null;
+  const exact=pool.find(m=>marketKey(m)===key&&parseMarketChainId(m.chainId)===chain);
+  if(exact)return exact;
+  if(chain!==null)return null;
+  return pool.find(m=>marketKey(m)===key&&(parseMarketChainId(m.chainId)===null||parseMarketChainId(m.chainId)===0))||null;
 }
 document.getElementById("main").addEventListener("input",function(event){
-  if(event.target.closest("[data-f6-trade='stake']"))seerF6RecalculateTradePreview();
+  if(event.target.closest("[data-f6-trade]"))seerF6RecalculateTradePreview();
 });
 function seerF6LeadMarket(){
-  const pools=[...(Array.isArray(explorerMarkets)?explorerMarkets:[]),...(Array.isArray(markets)?markets:[])];
+  const pools=[...(Array.isArray(explorerMarkets)?explorerMarkets:[]),...(Array.isArray(markets)?markets:[]),...(Array.isArray(state.watchlist)?state.watchlist:[]),...(Array.isArray(state.compareMarkets)?state.compareMarkets:[]),...(state.futarchyMarketSnapshot?[state.futarchyMarketSnapshot]:[]),...(state.opportunityMarketSnapshot?[state.opportunityMarketSnapshot]:[])];
+  if(["app","deep","futarchy","opportunity","risk"].includes(state.page)&&state.selectedMarketId){
+    const chain=parseMarketChainId(state.selectedMarketChainId);
+    const selected=pools.find(m=>marketKey(m)===String(state.selectedMarketId)&&parseMarketChainId(m.chainId)===chain);
+    if(selected)return selected;
+  }
   const seen=new Set();
   for(const m of pools){
     if(!m||!m.title)continue;
@@ -3694,7 +3747,7 @@ document.getElementById("main").addEventListener("click",function(event){
     requestAnimationFrame(focusMarketDetail);
   });
 });document.getElementById("main").addEventListener("change",function(event){
-  if(event.target.closest("[data-f6-trade='outcome']"))seerF6RecalculateTradePreview();
+  if(event.target.closest("[data-f6-trade]"))seerF6RecalculateTradePreview();
 });
 document.getElementById("main").addEventListener("click",function(event){
   const saveIntent=event.target.closest("[data-f6-save-intent]");
@@ -3723,6 +3776,7 @@ document.getElementById("main").addEventListener("click",function(event){
     if(target==="futarchy"){
       state.futarchyMarketId=marketKey(market);
       state.futarchyMarketChainId=parseMarketChainId(market.chainId);
+      state.futarchyMarketSnapshot=compactSavedMarket(market);
     }
     if(target==="opportunity"){
       const framed=makeBinaryPaperProjection(market);
@@ -3748,7 +3802,7 @@ document.getElementById("main").addEventListener("click",function(event){
   }
   go(target);
   requestAnimationFrame(function(){
-    const targetId=target==="deep"?"seerForecastLab":target==="opportunity"?"opportunityLab":target==="risk"?"riskA":"futarchyMarketSelect";
+    const targetId=target==="deep"?"seerForecastLab":target==="opportunity"?"opportunityLab":target==="risk"?(state.selectedMarketId?"marketDetail":"riskA"):"futarchyMarketSelect";
     const anchor=document.getElementById(targetId);
     if(anchor)anchor.scrollIntoView({behavior:window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
   });
