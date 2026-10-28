@@ -3408,6 +3408,13 @@ renderMarketDetail=function(m){
 .seer-f6-context-card p{margin:7px 0 0;color:var(--muted);font-size:11px;line-height:1.65;overflow-wrap:anywhere}
 .seer-f6-context-card.is-unknown{background:color-mix(in srgb,var(--panel) 65%,transparent);border-style:dashed}
 .seer-f6-context-foot{margin:13px 0 0;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.7}
+.seer-f6-private-note{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:10px 13px;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 80%,transparent)}
+.seer-f6-private-note label{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;gap:10px;color:var(--text);font-size:12px;font-weight:750}
+.seer-f6-private-note label span{color:var(--muted);font-size:10px;font-weight:500}
+.seer-f6-private-note textarea{width:100%;min-height:72px;resize:vertical;padding:10px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:400 12px/1.6 "DM Sans",sans-serif}
+.seer-f6-private-note button{min-height:38px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--violet) 50%,var(--line));border-radius:8px;background:color-mix(in srgb,var(--violet) 12%,var(--panel));color:var(--violet);font-size:11px;font-weight:800}
+.seer-f6-private-note small{grid-column:1/-1;color:var(--muted);font-size:10px;line-height:1.5}
+@media(max-width:560px){.seer-f6-private-note{grid-template-columns:1fr}.seer-f6-private-note label{display:block}.seer-f6-private-note label span{display:block;margin-top:4px}.seer-f6-private-note small{grid-column:auto}}
 .seer-f6-trade-grid{display:grid;grid-template-columns:minmax(220px,.82fr) minmax(0,1.18fr);gap:20px}
 .seer-f6-trade-form{display:grid;gap:13px}
 .seer-f6-field label{display:block;margin-bottom:7px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.04em}
@@ -3473,6 +3480,9 @@ function seerF6QuestionMarkup(m){
   const context=String(m.questionContext||"").trim();
   const evidenceResolution=m.evidence&&m.evidence.resolution;
   const criteria=String(m.sourceResolutionCriteria||evidenceResolution&&(evidenceResolution.value||evidenceResolution.text||evidenceResolution.description)||"").trim();
+  const intentIdentity=marketIdentity(m);
+  let privateNote="";
+  try{const intentStore=JSON.parse(localStorage.getItem("seer-six-intent-notes-v1")||"{}");privateNote=String(intentStore[intentIdentity]&&intentStore[intentIdentity].note||"");}catch{}
   const authorUnknown=!author,contextUnknown=!context,criteriaUnknown=!criteria;
   return '<section class="seer-f6-question" aria-label="Question intent and accountability">'+
     '<div class="seer-f6-section-head"><div><div class="seer-f6-kicker">THE INFORMATION SEEKER / MARKET INTENT</div><h3>Who needs an answer — and what settles it?</h3><p>A market is useful when visitors can understand the question, the accountable source and the rule that determines the outcome. Only payload-backed details are presented as facts.</p></div><span class="seer-f6-badge">SOURCE-AWARE</span></div>'+
@@ -3481,6 +3491,7 @@ function seerF6QuestionMarkup(m){
       '<div class="seer-f6-context-card '+(contextUnknown?"is-unknown":"")+'"><span>Decision context</span><strong>'+(contextUnknown?"No separate context field returned":seerF6Escape(context))+'</strong><p>'+(contextUnknown?"The market question above is the only supported summary; this prototype will not invent the asker's motivation.":"Source field: "+seerF6Escape(m.questionContextSourceField||"market record metadata"))+'</p></div>'+
       '<div class="seer-f6-context-card '+(criteriaUnknown?"is-unknown":"")+'"><span>Resolution rule</span><strong>'+(criteriaUnknown?"Not returned in the available record":seerF6Escape(criteria))+'</strong><p>'+(criteriaUnknown?"Open the original market and verify its settlement criteria before relying on a position.":"Source: "+seerF6Escape(m.sourceResolutionCriteriaField||evidenceResolution&&evidenceResolution.source||"Seer source metadata"))+'</p></div>'+
     '</div>'+
+    '<div class="seer-f6-private-note"><label for="seerF6PrivateDecisionNote">Your decision context <span>Optional · private to this browser</span></label><textarea id="seerF6PrivateDecisionNote" data-f6-intent-note data-market-key="'+seerF6Escape(marketKey(m))+'" data-market-chain-id="'+seerF6Escape(m.chainId===null||m.chainId===undefined?"":m.chainId)+'" placeholder="What decision will this answer help you make? What evidence or deadline matters?">'+seerF6Escape(privateNote)+'</textarea><button type="button" data-f6-save-intent data-market-key="'+seerF6Escape(marketKey(m))+'" data-market-chain-id="'+seerF6Escape(m.chainId===null||m.chainId===undefined?"":m.chainId)+'">Save private context</button><small id="seerF6IntentStatus" aria-live="polite">Stored on this device only. It is not submitted to Seer or shared with traders.</small></div>'+
     '<p class="seer-f6-context-foot">For information seekers: verify the exact decision question and resolution rule. For traders: confirm the same rule before comparing odds. Missing author or criteria data is a source limitation—not proof that the market has none.</p>'+
     '</section>';
 }
@@ -3584,6 +3595,22 @@ document.getElementById("main").addEventListener("change",function(event){
   if(event.target.closest("[data-f6-trade='outcome']"))seerF6RecalculateTradePreview();
 });
 document.getElementById("main").addEventListener("click",function(event){
+  const saveIntent=event.target.closest("[data-f6-save-intent]");
+  if(saveIntent){
+    const section=saveIntent.closest(".seer-f6-question");
+    const field=section&&section.querySelector("[data-f6-intent-note]");
+    const status=section&&section.querySelector("#seerF6IntentStatus");
+    const key=String(saveIntent.dataset.marketKey||"");
+    const chain=parseMarketChainId(saveIntent.dataset.marketChainId);
+    if(!field||!key){if(status)status.textContent="Could not identify this market. Reopen the inspector and try again.";return;}
+    try{
+      const store=JSON.parse(localStorage.getItem("seer-six-intent-notes-v1")||"{}");
+      store[marketIdentity({id:key,chainId:chain})]={note:String(field.value||"").trim(),updatedAt:new Date().toISOString()};
+      localStorage.setItem("seer-six-intent-notes-v1",JSON.stringify(store));
+      if(status)status.textContent="Decision context saved privately on this device.";
+    }catch(error){if(status)status.textContent="Browser storage is unavailable or full; this note was not saved.";}
+    return;
+  }
   const button=event.target.closest("[data-seer-f6-route]");
   if(!button)return;
   const target=button.dataset.seerF6Route;
