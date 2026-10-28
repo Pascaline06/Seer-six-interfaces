@@ -3011,7 +3011,7 @@ function seerF34Outcomes(m){
 }
 function seerF34ForecastRecords(){
  return seerF34Records().filter(m=>{
-  const kind=String(m.evidence&&m.evidence.marketStructure&&m.evidence.marketStructure.kind||m.type||"").toLowerCase();
+  const kind=String(m.sourceMarketStructureKind||m.evidence&&m.evidence.marketStructure&&m.evidence.marketStructure.kind||m.type||"").toLowerCase();
   if(kind.includes("scalar"))return false;
   return seerF34Outcomes(m).some(o=>o.p!==null&&o.p>=0&&o.p<=100);
  }).sort((a,b)=>marketMoneyMetric(b,"liquidity")-marketMoneyMetric(a,"liquidity"));
@@ -3484,7 +3484,12 @@ normalizeLiveMarket=function(raw,observedAt){
   const context=seerF6Field(raw,["questionContext","question_context","decisionContext","decision_context","requesterContext","requester_context","questionPurpose","question_purpose","decisionPurpose","decision_purpose"]);
   const criteria=seerF6Field(raw,["resolutionCriteria","resolution_criteria","resolutionRules","resolution_rules","resolutionDescription","resolution_description"]);
   const resolutionSource=seerF6Field(raw,["resolutionSource","resolution_source","resolutionSourceUrl","resolution_source_url","settlementSource","settlement_source","resolutionEvidenceUrl","resolution_evidence_url","resolutionSourceName","resolution_source_name"]);
-  return Object.assign({},normalized,{questionAuthor:author.value,questionAuthorSourceField:author.field,questionContext:context.value,questionContextSourceField:context.field,sourceResolutionCriteria:criteria.value,sourceResolutionCriteriaField:criteria.field,sourceResolutionSource:resolutionSource.value,sourceResolutionSourceField:resolutionSource.field});
+  const structure=seerF6Field(raw,["marketStructureKind","market_structure_kind","marketFormat","market_format","marketKind","market_kind","outcomeType","outcome_type","format","kind"]);
+  const nestedStructure=raw&&raw.marketStructure&&typeof raw.marketStructure==="object"?(raw.marketStructure.kind||raw.marketStructure.type||raw.marketStructure.format||""):"";
+  const nestedStructureSnake=raw&&raw.market_structure&&typeof raw.market_structure==="object"?(raw.market_structure.kind||raw.market_structure.type||raw.market_structure.format||""):"";
+  const structureValue=String(structure.value||nestedStructure||nestedStructureSnake||"").trim();
+  const structureField=structure.field||(nestedStructure?"marketStructure.kind":nestedStructureSnake?"market_structure.kind":"");
+  return Object.assign({},normalized,{questionAuthor:author.value,questionAuthorSourceField:author.field,questionContext:context.value,questionContextSourceField:context.field,sourceResolutionCriteria:criteria.value,sourceResolutionCriteriaField:criteria.field,sourceResolutionSource:resolutionSource.value,sourceResolutionSourceField:resolutionSource.field,sourceMarketStructureKind:structureValue,sourceMarketStructureField:structureField});
 };
 const seerF6OriginalCompactSavedMarket=compactSavedMarket;
 compactSavedMarket=function(m){
@@ -3497,7 +3502,9 @@ compactSavedMarket=function(m){
     sourceResolutionCriteria:String(m&&m.sourceResolutionCriteria||""),
     sourceResolutionCriteriaField:String(m&&m.sourceResolutionCriteriaField||""),
     sourceResolutionSource:String(m&&m.sourceResolutionSource||""),
-    sourceResolutionSourceField:String(m&&m.sourceResolutionSourceField||"")
+    sourceResolutionSourceField:String(m&&m.sourceResolutionSourceField||""),
+    sourceMarketStructureKind:String(m&&m.sourceMarketStructureKind||""),
+    sourceMarketStructureField:String(m&&m.sourceMarketStructureField||"")
   });
 };
 function seerF6Escape(value){return htmlEscape(String(value===null||value===undefined?"":value));}
@@ -3578,7 +3585,7 @@ function seerF6TradeMarkup(m){
 }
 function seerF6PathsMarkup(m){
   const id=seerF6Escape(marketKey(m)),chain=seerF6Escape(m.chainId===undefined||m.chainId===null?"":m.chainId);
-  const structureKind=String(m.evidence&&m.evidence.marketStructure&&m.evidence.marketStructure.kind||m.type||"").toLowerCase();
+  const structureKind=String(m.sourceMarketStructureKind||m.evidence&&m.evidence.marketStructure&&m.evidence.marketStructure.kind||m.type||"").toLowerCase();
   const leadPrice=m.p!==null&&m.p!==undefined&&m.p!==""&&Number.isFinite(Number(m.p))&&Number(m.p)>=0&&Number(m.p)<=100;
   const deepAvailable=!structureKind.includes("scalar")&&leadPrice&&m.isLive===true;
   const futarchyAvailable=leadPrice;
