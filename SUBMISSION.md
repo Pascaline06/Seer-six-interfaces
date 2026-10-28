@@ -22,6 +22,12 @@ Seer can surface what a market believes; a useful interface must also show how m
 
 The experiences are purposefully differentiated: the Overview introduces Seer as one protocol beneath several decision contexts; Market Explorer helps people find and compare records; Deep Forecasts emphasizes multi-outcome structure and outcome-level evidence; Futarchy makes pass/fail scenarios around measurable outcomes easier to compare; Opportunity Markets adds explicit review-priority reasoning without automating the final selection; and Risk Pricing separates reported price, liquidity, volume, and user-defined sensitivity assumptions rather than hiding them inside one opaque score.
 
+## Updated marketplace decision journey
+
+The Market Explorer now treats a market as a two-sided question: an information seeker needs an answer for a decision, while a trader evaluates whether an outcome's price and risk fit their own thesis. The inspector surfaces question-author/requester metadata, context and resolution criteria only when returned by the source. Where the public payload omits those fields, the experience says so instead of inferring a person, motivation or settlement rule.
+
+A trader-side paper preview translates a source-returned outcome price into a hypothetical position size, estimated shares, gross payout, gross profit, maximum modeled loss and break-even probability. It is an educational scenario, not live execution: no wallet is connected, no orders are sent and fees, spread, slippage, price impact and settlement details are not modeled. Four market-aware links connect the same network-qualified record to Deep Forecasts, Futarchy, Opportunity Markets and Risk Pricing, giving the Explorer a hub role rather than leaving the market as a standalone card.
+
 ## Electric Foundation adaptations
 
 The design keeps a coordinated violet/lavender visual identity, consistent navigation and component language, strong display typography, and compact technical data treatments. It extends the brand kit into an evidence-first analytical system: distinctive visualizations and controls vary by decision context, while the shared shell makes the six interfaces feel like one product.
@@ -57,5 +63,9 @@ Attach **one image** for this single claim: the supplied `seer-six-claim-preview
 - Responsive layouts, light/dark themes, keyboard-operable controls, and reduced-motion support.
 
 ## Accuracy and limitations
+
+The public market-search response may not include a question author, separate intent/context, or explicit resolution criteria for every record. The interface labels those fields as unavailable when they are not returned and does not infer missing details. The trader-side calculator is a hypothetical paper preview derived from displayed outcome prices; it is not an executable quote or order book and omits costs and settlement mechanics.
+
+
 
 This is a front-end prototype with a read-only live market feed, not a trading terminal. It does not connect a wallet, place orders, execute on-chain transactions, independently verify market resolution, or provide a protocol-security audit. Source prices may be stale or affected by thin liquidity. Observation history represents captured API snapshots, not trades or settlement records. Scenario outcomes and assumptions remain hypothetical; the interface labels missing source fields rather than inventing them.
