@@ -49,7 +49,7 @@ Price history now combines two clearly labelled layers. The browser captures suc
 
 ## The two-sided marketplace: questioner context and trader decisioning
 
-Market inspection now explicitly separates the information seeker's need from the trader's risk decision. The question-context panel surfaces a requester/author, separate decision context, and resolution criteria only when those fields are actually returned by the public market-search payload or existing source evidence. Missing author, context, or settlement criteria are called out as unavailable; the interface does not infer a person's identity or invent a reason for asking.
+Market inspection now explicitly separates the information seeker's need from the trader's risk decision. The question-context panel surfaces a requester/author, separate decision context, and resolution criteria only when those fields are actually returned by the public market-search payload or existing source evidence. Missing author, context, or settlement criteria are called out as unavailable; the interface does not infer a person's identity or invent a reason for asking. Visitors can add a private decision-context note, saved only in that browser and never sent to Seer.
 
 The market inspector also offers an outcome-level paper-position preview. For a priced outcome, visitors can vary a hypothetical USDC position and see illustrative entry cost, share count, gross payout if correct, gross profit, maximum modeled loss, and break-even probability. The preview is a transparent local calculation—not an executable quote, order book, trading recommendation, or submitted transaction. It explicitly excludes fees, spread, slippage, price impact and settlement-specific mechanics; no wallet is connected.
 
