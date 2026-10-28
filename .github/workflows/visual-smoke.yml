@@ -198,6 +198,8 @@ jobs:
                   interfaceArtCount: main?.querySelectorAll(".interface-art svg").length || 0,
                   explorerControlCount: ["#marketSearch","#marketFilter","#marketNetwork","#marketSort"].filter(selector => document.querySelector(selector)).length,
                   explorerVisibleCardCount: main?.querySelectorAll(".explorer-market-grid .market").length || 0,
+                  marketDecisionStripCount: main?.querySelectorAll(".seer-f6-signal-strip").length || 0,
+                  marketDecisionStripCells: main?.querySelectorAll(".seer-f6-signal-strip .seer-f6-signal-cell").length || 0,
                   explorerWatchlistButtonCount: main?.querySelectorAll(".market-save[data-market-action='save']").length || 0,
                   marketPulseItemCount: main?.querySelectorAll(".market-pulse .pulse-item").length || 0,
                   signalDeskCount: main?.querySelectorAll(".signal-desk").length || 0,
@@ -271,6 +273,20 @@ jobs:
                 };
               });
 
+              if (metrics.marketDecisionStripCount !== 1 || metrics.marketDecisionStripCells !== 3) {
+                report.failures.push(viewport.name+"/"+theme+"/"+route+": shared Asked by / What is priced / Use the signal strip is missing or incomplete");
+              }
+              // The three-part market signal is intended to appear on the first screen of every interface.
+              const decisionStrip = page.locator("#main .seer-f6-signal-strip");
+              if (await decisionStrip.count() === 1) {
+                if (!(await decisionStrip.locator(".seer-f6-signal-cell").nth(0).innerText()).includes("Asked by")) report.failures.push(viewport.name+"/"+theme+"/"+route+": questioner context label is missing");
+                if (!(await decisionStrip.locator(".seer-f6-signal-cell").nth(1).innerText()).includes("What is priced")) report.failures.push(viewport.name+"/"+theme+"/"+route+": price context label is missing");
+                if (!(await decisionStrip.locator(".seer-f6-signal-cell").nth(2).innerText()).includes("Use the signal")) report.failures.push(viewport.name+"/"+theme+"/"+route+": signal-use guidance label is missing");
+                if (route === "app" && viewport.name === "desktop" && theme === "dark") {
+                  const openSignal = decisionStrip.locator("button[data-f6-open-signal]");
+                  if (await openSignal.count() !== 1) report.failures.push("desktop/dark/app: signal strip is missing the Explorer inspector handoff");
+                }
+              }
               // Price changes is intentionally absent until the browser observes a qualifying repricing.
               // Exercise the populated state with a temporary in-memory fixture, then restore real history.
               if (route !== "home") {
