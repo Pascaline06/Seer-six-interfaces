@@ -3429,6 +3429,9 @@ renderMarketDetail=function(m){
 .seer-f6-trade-metric.is-positive strong{color:var(--green)}
 .seer-f6-trade-metric.is-risk strong{color:var(--amber)}
 .seer-f6-trade-feedback{min-height:20px;margin:11px 0 0;color:var(--muted);font-size:11px;line-height:1.65}
+.seer-f6-live-trade-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:42px;margin-top:14px;padding:10px 15px;border:1px solid #8756f3;border-radius:9px;background:var(--purple);color:#fff;font-size:12px;font-weight:800;transition:transform .16s,background .16s}
+.seer-f6-live-trade-link:hover{transform:translateY(-1px);background:#7c3aed}
+.seer-f6-live-trade-context{display:block;margin-top:7px;color:var(--muted);font-size:10px;line-height:1.6}
 .seer-f6-trade-disclaimer{margin:15px 0 0;padding:12px 13px;border:1px solid color-mix(in srgb,var(--amber) 33%,var(--line));border-radius:9px;background:color-mix(in srgb,var(--amber) 6%,transparent);color:var(--muted);font-size:10px;line-height:1.75}
 .seer-f6-path-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .seer-f6-path{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0;min-height:146px;padding:15px;border:1px solid var(--line);border-radius:11px;background:color-mix(in srgb,var(--panel) 76%,transparent);color:var(--text);text-align:left;transition:transform .16s,border-color .16s,background .16s}
@@ -3509,6 +3512,7 @@ function seerF6TradeMarkup(m){
   const options=outcomes.map(o=>'<option value="'+o.index+'" data-price="'+(o.p===null?"":o.p)+'" '+(o.p===null?"disabled":"")+'>'+seerF6Escape(o.name)+(o.p===null?" · no price returned":" · "+o.p.toFixed(1)+"%")+'</option>').join("");
   const disabled=!priced.length;
   const status=m.isLive?"LIVE SOURCE INPUT":m.isSnapshot?"SAVED SOURCE SNAPSHOT":"DEMO / FALLBACK INPUT";
+  const tradeUrl=m.isLive?seerMarketHref(m):"";
   return '<section class="seer-f6-trader" aria-label="Paper trade preview">'+
     '<div class="seer-f6-section-head"><div><div class="seer-f6-kicker">THE TRADER / PRICE THE RISK</div><h3>What would this position look like?</h3><p>Translate one returned outcome price into an illustrative position size, gross payout and downside before committing to a view.</p></div><span class="seer-f6-badge">'+status+'</span></div>'+
     '<div class="seer-f6-trade-grid"><div class="seer-f6-trade-form">'+
@@ -3522,7 +3526,7 @@ function seerF6TradeMarkup(m){
       '<div class="seer-f6-trade-metric is-positive"><span>Gross profit if correct</span><strong data-f6-trade-output="profit">—</strong><small>Before fees, spread and slippage</small></div>'+
       '<div class="seer-f6-trade-metric is-risk"><span>Maximum modeled loss</span><strong data-f6-trade-output="loss">—</strong><small>Position amount, if outcome loses</small></div>'+
       '<div class="seer-f6-trade-metric"><span>Break-even probability</span><strong data-f6-trade-output="breakeven">—</strong><small>Before execution costs</small></div>'+
-    '</div><p class="seer-f6-trade-disclaimer">Paper model only — this is not a live executable quote, order book, recommendation, or transaction. The source price may be stale or thinly traded. Fees, spread, slippage, minimum order size, settlement mechanics and price impact are not modelled. No wallet is connected and no order can be submitted here.</p></div></div></section>';
+    '</div>'+(tradeUrl?'<a class="seer-f6-live-trade-link" href="'+seerF6Escape(tradeUrl)+'" target="_blank" rel="noopener noreferrer">Continue to Seer to trade ↗</a><span class="seer-f6-live-trade-context">Opens the official market page in a new tab. Recheck the current quote and settlement rules there.</span>':"")+'<p class="seer-f6-trade-disclaimer">Paper model only — this is not a live executable quote, order book, recommendation, or transaction. The source price may be stale or thinly traded. Fees, spread, slippage, minimum order size, settlement mechanics and price impact are not modelled. No wallet is connected and no order can be submitted here.</p></div></div></section>';
 }
 function seerF6PathsMarkup(m){
   const id=seerF6Escape(marketKey(m)),chain=seerF6Escape(m.chainId===undefined||m.chainId===null?"":m.chainId);
