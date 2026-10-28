@@ -129,9 +129,10 @@ jobs:
                   if (!inspectorReady || await questionContext.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing source-aware question context");
                   if (await paperTrade.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing the trader paper preview");
                   if (await interfacePaths.count() !== 4) report.failures.push(viewport.name+"/"+theme+"/app: market inspector must expose four contextual interface paths");
-                  const intentText = await questionContext.innerText().catch(() => "");
+                  // The six field labels are styled with text-transform: uppercase. Compare case-insensitively so the test measures visible content, not CSS presentation.
+                  const intentText = (await questionContext.innerText().catch(() => "")).toLocaleLowerCase();
                   for (const label of ["Question being asked","Question author / requester","Why the answer matters","Outcome that resolves it","Resolution criteria","Authoritative resolution source"]) {
-                    if (!intentText.includes(label)) report.failures.push(viewport.name+"/"+theme+"/app: question brief is missing the "+label+" field");
+                    if (!intentText.includes(label.toLocaleLowerCase())) report.failures.push(viewport.name+"/"+theme+"/app: question brief is missing the "+label+" field");
                   }
                   const selectedIdentity = await page.evaluate(() => ({id:String(state.selectedMarketId||""),chain:state.selectedMarketChainId===null||state.selectedMarketChainId===undefined?"":String(state.selectedMarketChainId)}));
                   const pathIdentities = await interfacePaths.evaluateAll(nodes => nodes.map(node => ({target:node.dataset.seerF6Route,id:node.dataset.marketId||"",chain:node.dataset.marketChainId||""})));
