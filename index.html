@@ -3435,7 +3435,7 @@ renderMarketDetail=function(m){
 .seer-f6-signal-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0 0 28px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(120deg,color-mix(in srgb,var(--violet) 8%,var(--panel)),var(--panel) 65%)}
 .seer-f6-signal-cell{min-width:0;padding:17px 19px;border-right:1px solid var(--line)}
 .seer-f6-signal-cell:last-child{border-right:0}
-.seer-f6-signal-label{display:flex;align-items:center;gap:7px;margin-bottom:9px;color:var(--violet);font-size:9px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.seer-f6-signal-label{display:flex;align-items:center;gap:7px;margin-bottom:9px;color:var(--violet);font-size:9px;font-weight:850;letter-spacing:.09em;text-transform:none}
 .seer-f6-signal-label i{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor}
 .seer-f6-signal-cell strong{display:block;color:var(--text);font:600 15px/1.4 "Bricolage Grotesque",sans-serif;overflow-wrap:anywhere}
 .seer-f6-signal-cell p{margin:7px 0 0;color:var(--muted);font-size:11px;line-height:1.65}
@@ -3649,28 +3649,30 @@ function seerF6SharedSignalMarkup(m,page){
     '<button type="button" class="seer-f6-signal-action" data-f6-open-signal data-market-id="'+seerF6Escape(marketKey(m))+'" data-market-chain-id="'+seerF6Escape(m.chainId===null||m.chainId===undefined?"":m.chainId)+'">Inspect this market in Explorer ↗</button>'+
     '<p>'+seerF6Escape(statusCopy)+'</p></div></section>';
 }
+function seerF6MountSignalStrip(){
+  const main=document.getElementById("main");
+  if(!main||main.querySelector(".seer-f6-signal-strip"))return;
+  const page=state.page||"home";
+  const m=seerF6LeadMarket()||demoMarkets[0]||null;
+  if(!m)return;
+  const host=document.createElement("div");
+  host.innerHTML=seerF6SharedSignalMarkup(m,page);
+  const strip=host.firstElementChild;
+  if(!strip)return;
+  const hero=main.querySelector(".home-hero");
+  const intro=hero&&hero.querySelector(".home-hero-copy .intro");
+  const headrow=main.querySelector(".headrow");
+  if(page==="home"&&intro)intro.insertAdjacentElement("afterend",strip);
+  else if(headrow)headrow.insertAdjacentElement("afterend",strip);
+  else if(main.firstElementChild)main.firstElementChild.insertAdjacentElement("afterend",strip);
+  else main.appendChild(strip);
+}
 const seerF6PriorRender=render;
 render=function(){
   const result=seerF6PriorRender.apply(this,arguments);
   try{
-    const main=document.getElementById("main");
-    const page=state.page||"home";
-    if(main&&!main.querySelector(".seer-f6-signal-strip")){
-      const m=seerF6LeadMarket();
-      if(m){
-        const markup=seerF6SharedSignalMarkup(m,page);
-        const stripHost=document.createElement("div");
-        stripHost.innerHTML=markup;
-        const strip=stripHost.firstElementChild;
-        const hero=main.querySelector(".home-hero");
-        const intro=hero&&hero.querySelector(".home-hero-copy .intro");
-        const headrow=main.querySelector(".headrow");
-        if(page==="home"&&intro)intro.insertAdjacentElement("afterend",strip);
-        else if(headrow)headrow.insertAdjacentElement("afterend",strip);
-        else if(main.firstElementChild)main.firstElementChild.insertAdjacentElement("afterend",strip);
-        else main.appendChild(strip);
-      }
-    }
+    seerF6MountSignalStrip();
+    requestAnimationFrame(seerF6MountSignalStrip);
   }catch(error){console.error("Shared question/price/use strip did not mount:",error);}
   return result;
 };
