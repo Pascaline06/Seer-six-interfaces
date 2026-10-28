@@ -235,6 +235,9 @@ jobs:
                         report.failures.push("desktop/dark/app: "+target+" handoff changed the selected network-qualified market identity");
                       }
                     }
+                    // Return to Explorer before the outer loop records Explorer's layout metrics.
+                    await page.goto(base+"#/app", {waitUntil:"domcontentloaded", timeout:45000});
+                    await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, {timeout:20000}).catch(() => {});
                   }
                 } else {
                   report.failures.push(viewport.name+"/"+theme+"/app: no inspectable market card was available for the context/trader smoke test");
