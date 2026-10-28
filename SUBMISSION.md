@@ -61,6 +61,13 @@ The deliberate departure is the emphasis on legibility and auditability over a u
 - Chain-qualified market identity so same-ID records on different networks remain separate across selectors, inspectors, comparison, forecast/review records, and history.
 - Responsive layouts, light/dark themes, keyboard-operable controls, and reduced-motion support.
 
+
+## Automated verification
+
+The application source at revision [800f981](https://github.com/Pascaline06/Seer-six-interfaces/commit/800f981a18f122e4223f715b3621efe81c867e88) passed the browser smoke and visual-capture workflow on 28 October 2026. The run covered the six routes across desktop/mobile sizes and light/dark themes, and reported zero test failures. The corresponding Pages build and deployment also succeeded: [browser smoke and visual capture](https://github.com/Pascaline06/Seer-six-interfaces/actions/runs/40680747450) · [Pages build and deployment](https://github.com/Pascaline06/Seer-six-interfaces/actions/runs/40680746337).
+
+These checks cover the rendered interface and tested interactions; they do not guarantee continuous availability of the external market feed, executable liquidity, or trading outcomes.
+
 ## Accuracy and limitations
 
 The public market-search response may not include a question author, separate intent/context, or explicit resolution criteria for every record. The interface labels those fields as unavailable when they are not returned and does not infer missing details. The trader-side calculator is a hypothetical paper preview derived from displayed outcome prices; it is not an executable quote or order book and omits costs and settlement mechanics.
