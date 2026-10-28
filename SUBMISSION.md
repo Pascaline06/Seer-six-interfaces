@@ -47,9 +47,6 @@ The deliberate departure is the emphasis on legibility and auditability over a u
 
 **In-product documentation:** https://pascaline06.github.io/Seer-six-interfaces/#/docs
 
-## Preview image to attach
-
-Attach **one image** for this single claim: `seer-six-claim-preview.png` (1200×630 PNG), a single contact sheet of the six desktop interfaces. It is a claim attachment, not a required live-site asset. Upload it with Poidh's native image uploader rather than pasting a GitHub page into the image field. The separate `preview.svg` in the repository is branded promotional art, not the six-screen screenshot sheet. The preview image does not replace the six labelled demo links above.
 
 ## What is implemented
 
