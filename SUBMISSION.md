@@ -18,9 +18,9 @@ https://github.com/Pascaline06/Seer-six-interfaces
 
 ## Short design rationale
 
-Seer can surface what a market believes; a useful interface must also show how much that signal deserves to be trusted. Seer Six treats market probabilities as decision inputs, not verdicts. Across all six interfaces, the design puts source status, evidence quality, assumptions, limitations, and human decision authority close to the signal being interpreted.
+Seer is a two-sided marketplace: information seekers bring questions tied to real decisions, while traders put capital behind forecasts in pursuit of potential profit. The Seer app is designed as an Etherscan-like front door to markets across the ecosystem: one place to discover a question, understand its quoted outcomes and evidence, inspect liquidity and settlement limits, then follow the market into the right decision tool or the official market page. Seer Six treats probabilities as decision inputs, not verdicts, and keeps source facts, personal assumptions and unresolved data gaps distinct.
 
-The experiences are purposefully differentiated: the Overview introduces Seer as one protocol beneath several decision contexts; Market Explorer helps people find and compare records; Deep Forecasts emphasizes multi-outcome structure and outcome-level evidence; Futarchy makes pass/fail scenarios around measurable outcomes easier to compare; Opportunity Markets adds explicit review-priority reasoning without automating the final selection; and Risk Pricing separates reported price, liquidity, volume, and user-defined sensitivity assumptions rather than hiding them inside one opaque score.
+The six interfaces are designed as a connected decision journey, not six isolated dashboards. The experiences are purposefully differentiated: the Overview introduces Seer as one protocol beneath several decision contexts; Market Explorer helps people find and compare records; Deep Forecasts emphasizes multi-outcome structure and outcome-level evidence; Futarchy makes pass/fail scenarios around measurable outcomes easier to compare; Opportunity Markets adds explicit review-priority reasoning without automating the final selection; and Risk Pricing separates reported price, liquidity, volume, and user-defined sensitivity assumptions rather than hiding them inside one opaque score.
 
 ## Updated marketplace decision journey
 
