@@ -3432,6 +3432,20 @@ renderMarketDetail=function(m){
 .seer-f6-live-trade-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:42px;margin-top:14px;padding:10px 15px;border:1px solid #8756f3;border-radius:9px;background:var(--purple);color:#fff;font-size:12px;font-weight:800;transition:transform .16s,background .16s}
 .seer-f6-live-trade-link:hover{transform:translateY(-1px);background:#7c3aed}
 .seer-f6-live-trade-context{display:block;margin-top:7px;color:var(--muted);font-size:10px;line-height:1.6}
+.seer-f6-signal-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0 0 28px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:linear-gradient(120deg,color-mix(in srgb,var(--violet) 8%,var(--panel)),var(--panel) 65%)}
+.seer-f6-signal-cell{min-width:0;padding:17px 19px;border-right:1px solid var(--line)}
+.seer-f6-signal-cell:last-child{border-right:0}
+.seer-f6-signal-label{display:flex;align-items:center;gap:7px;margin-bottom:9px;color:var(--violet);font-size:9px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.seer-f6-signal-label i{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor}
+.seer-f6-signal-cell strong{display:block;color:var(--text);font:600 15px/1.4 "Bricolage Grotesque",sans-serif;overflow-wrap:anywhere}
+.seer-f6-signal-cell p{margin:7px 0 0;color:var(--muted);font-size:11px;line-height:1.65}
+.seer-f6-signal-cell .seer-f6-signal-missing{font:600 12px/1.55 "DM Sans",sans-serif;color:var(--muted)}
+.seer-f6-signal-action{display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:0;border:0;background:transparent;color:var(--violet);font-size:11px;font-weight:800;text-align:left}
+.seer-f6-signal-action:hover{text-decoration:underline;text-underline-offset:3px}
+.seer-f6-signal-stamp{display:inline-flex;align-items:center;gap:6px;margin-top:9px;color:var(--muted);font-size:9px;letter-spacing:.03em}
+.seer-f6-signal-stamp:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--green)}
+@media(max-width:780px){.seer-f6-signal-strip{grid-template-columns:1fr}.seer-f6-signal-cell{padding:14px 16px;border-right:0;border-bottom:1px solid var(--line)}.seer-f6-signal-cell:last-child{border-bottom:0}.seer-f6-signal-cell p{margin-top:5px}}
+@media(max-width:560px){.seer-f6-signal-strip{margin-bottom:21px}.seer-f6-signal-cell strong{font-size:14px}}
 .seer-f6-trade-disclaimer{margin:15px 0 0;padding:12px 13px;border:1px solid color-mix(in srgb,var(--amber) 33%,var(--line));border-radius:9px;background:color-mix(in srgb,var(--amber) 6%,transparent);color:var(--muted);font-size:10px;line-height:1.75}
 .seer-f6-path-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .seer-f6-path{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0;min-height:146px;padding:15px;border:1px solid var(--line);border-radius:11px;background:color-mix(in srgb,var(--panel) 76%,transparent);color:var(--text);text-align:left;transition:transform .16s,border-color .16s,background .16s}
@@ -3593,7 +3607,92 @@ function seerF6MarketForButton(button){
   return pool.find(m=>marketKey(m)===key&&parseMarketChainId(m.chainId)===chain)||pool.find(m=>marketKey(m)===key)||null;
 }
 document.getElementById("main").addEventListener("input",function(event){
-  if(event.target.closest("[data-f6-trade='stake']"))seerF6RecalculateTradePreview();
+  if(event.target.closest("[data-f6-trade='stake']"))
+function seerF6LeadMarket(){
+  const pools=[...(Array.isArray(explorerMarkets)?explorerMarkets:[]),...(Array.isArray(markets)?markets:[])];
+  const seen=new Set();
+  for(const m of pools){
+    if(!m||!m.title)continue;
+    const identity=marketIdentity(m);
+    if(seen.has(identity))continue;
+    seen.add(identity);
+    if(m.p!==null&&m.p!==undefined&&Number.isFinite(Number(m.p))&&Number(m.p)>=0&&Number(m.p)<=100)return m;
+  }
+  return pools.find(m=>m&&m.title)||demoMarkets[0]||null;
+}
+function seerF6SharedSignalMarkup(m,page){
+  if(!m)return "";
+  const author=String(m.questionAuthor||"").trim();
+  const sourceState=m.isLive===true?"Live market record":m.isSnapshot?"Saved record":"Demo fallback";
+  const statusCopy=m.isLive===true?"Price and market identity come from the current source response.":m.isSnapshot?"This saved snapshot can be out of date.":"Live data is not available right now; this is not a current quote.";
+  const guidance={
+    home:"Start with the question, then check source evidence, outcome rules and liquidity. A market price is a signal, not a verdict.",
+    app:"Search and compare across market types. Inspect resolution rules and reported liquidity before treating price as an entry reference.",
+    deep:"Compare source-returned outcomes and record your own probability separately. Price is not proof of forecast calibration.",
+    futarchy:"Change the pass/fail assumption explicitly. The adjusted value is a what-if, not a causal estimate or actual conditional quote.",
+    opportunity:"Use market activity to choose what to review next—not as evidence that a person, proposal or grant deserves to win.",
+    risk:"Read indicative price beside reported depth and volume. This is not a protocol-security rating or a promise of executable liquidity.",
+    docs:"Trace each number to its source, observation time and limits. Missing data is a reason to verify, not a reason to guess."
+  };
+  const knownPrice=m.p!==null&&m.p!==undefined&&Number.isFinite(Number(m.p))&&Number(m.p)>=0&&Number(m.p)<=100;
+  return '<section class="seer-f6-signal-strip" aria-label="Asked by, market price, and use of signal">'+
+    '<div class="seer-f6-signal-cell"><div class="seer-f6-signal-label"><i></i>01 / Asked by</div>'+
+    '<strong class="'+(!author?"seer-f6-signal-missing":"")+'">'+(author?seerF6Escape(author):"Not supplied by the public market response")+'</strong>'+
+    '<p>'+(author?"Source field: "+seerF6Escape(m.questionAuthorSourceField||"market record metadata"):"No person is inferred from a market title. Verify the original market or its creator metadata.")+'</p></div>'+
+    '<div class="seer-f6-signal-cell"><div class="seer-f6-signal-label"><i></i>02 / What is priced</div>'+
+    '<strong>'+seerF6Escape(m.title)+'</strong>'+
+    '<p>'+(knownPrice?("Indicative lead-outcome price · "+Number(m.p).toFixed(1)+"%"): "No reliable price returned for the selected record")+' · '+seerF6Escape(m.chain||"Network not reported")+'</p>'+
+    '<span class="seer-f6-signal-stamp">'+seerF6Escape(sourceState)+'</span></div>'+
+    '<div class="seer-f6-signal-cell"><div class="seer-f6-signal-label"><i></i>03 / Use the signal</div>'+
+    '<strong>Evidence before confidence.</strong><p>'+seerF6Escape(guidance[page]||guidance.home)+'</p>'+
+    '<button type="button" class="seer-f6-signal-action" data-f6-open-signal data-market-id="'+seerF6Escape(marketKey(m))+'" data-market-chain-id="'+seerF6Escape(m.chainId===null||m.chainId===undefined?"":m.chainId)+'">Inspect this market in Explorer ↗</button>'+
+    '<p>'+seerF6Escape(statusCopy)+'</p></div></section>';
+}
+const seerF6PriorRender=render;
+render=function(){
+  const result=seerF6PriorRender.apply(this,arguments);
+  try{
+    const main=document.getElementById("main");
+    const page=state.page||"home";
+    if(main&&!main.querySelector(".seer-f6-signal-strip")){
+      const m=seerF6LeadMarket();
+      if(m){
+        const markup=seerF6SharedSignalMarkup(m,page);
+        const stripHost=document.createElement("div");
+        stripHost.innerHTML=markup;
+        const strip=stripHost.firstElementChild;
+        const hero=main.querySelector(".home-hero");
+        const intro=hero&&hero.querySelector(".home-hero-copy .intro");
+        const headrow=main.querySelector(".headrow");
+        if(page==="home"&&intro)intro.insertAdjacentElement("afterend",strip);
+        else if(headrow)headrow.insertAdjacentElement("afterend",strip);
+        else if(main.firstElementChild)main.firstElementChild.insertAdjacentElement("afterend",strip);
+        else main.appendChild(strip);
+      }
+    }
+  }catch(error){console.error("Shared question/price/use strip did not mount:",error);}
+  return result;
+};
+document.getElementById("main").addEventListener("click",function(event){
+  const button=event.target.closest("[data-f6-open-signal]");
+  if(!button)return;
+  const key=String(button.dataset.marketId||"");
+  const chain=parseMarketChainId(button.dataset.marketChainId);
+  state.selectedMarketId=key;
+  state.selectedMarketChainId=chain;
+  if(state.page==="app"){
+    toggleMarketDetail(key,chain);
+    return;
+  }
+  go("app");
+  requestAnimationFrame(function(){
+    if(!state.selectedMarketId){state.selectedMarketId=key;state.selectedMarketChainId=chain;}
+    render();
+    requestAnimationFrame(focusMarketDetail);
+  });
+});
+
+seerF6RecalculateTradePreview();
 });
 document.getElementById("main").addEventListener("change",function(event){
   if(event.target.closest("[data-f6-trade='outcome']"))seerF6RecalculateTradePreview();
