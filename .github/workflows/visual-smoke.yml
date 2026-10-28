@@ -119,6 +119,13 @@ jobs:
                   if (await questionContext.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing source-aware question context");
                   if (await paperTrade.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing the trader paper preview");
                   if (await interfacePaths.count() !== 4) report.failures.push(viewport.name+"/"+theme+"/app: market inspector must expose four contextual interface paths");
+                  const liveTradeLink = page.locator("#marketDetail a.seer-f6-live-trade-link");
+                  if (await liveTradeLink.count() > 0) {
+                    const tradeHref = await liveTradeLink.getAttribute("href");
+                    if (!tradeHref || !tradeHref.startsWith("https://app.seer.pm/markets/") || (await liveTradeLink.getAttribute("target")) !== "_blank") {
+                      report.failures.push(viewport.name+"/"+theme+"/app: live trade handoff must open the source-backed Seer market in a new tab");
+                    }
+                  }
                   const intentField = page.locator("#seerF6PrivateDecisionNote");
                   if (await intentField.count() !== 1) {
                     report.failures.push(viewport.name+"/"+theme+"/app: information seekers are missing their private decision-context field");
