@@ -110,13 +110,23 @@ jobs:
               }
               if (route === "app") {
                 await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, { timeout: 20000 }).catch(() => {});
+                // Start from a known closed state; earlier interactions can leave a selection in the shared page session.
+                const previousDetailClose = page.locator('#marketDetail button[data-market-action="close-detail"]');
+                if (await previousDetailClose.count() > 0) {
+                  await previousDetailClose.click();
+                  await page.waitForFunction(() => !document.querySelector("#marketDetail"), null, {timeout:5000}).catch(() => {});
+                }
                 const inspect = page.locator('.explorer-market-grid button[data-market-action="inspect"]').first();
                 if (await inspect.count() > 0) {
                   await inspect.click();
+                  const inspectorReady = await page.waitForFunction(() => {
+                    const detail = document.querySelector("#marketDetail");
+                    return !!detail && !!detail.querySelector(".seer-f6-question") && !!detail.querySelector(".seer-f6-trader") && detail.querySelectorAll(".seer-f6-paths .seer-f6-path").length === 4;
+                  }, null, {timeout:8000}).then(() => true).catch(() => false);
                   const questionContext = page.locator("#marketDetail .seer-f6-question");
                   const paperTrade = page.locator("#marketDetail .seer-f6-trader");
                   const interfacePaths = page.locator("#marketDetail .seer-f6-paths .seer-f6-path");
-                  if (await questionContext.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing source-aware question context");
+                  if (!inspectorReady || await questionContext.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing source-aware question context");
                   if (await paperTrade.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing the trader paper preview");
                   if (await interfacePaths.count() !== 4) report.failures.push(viewport.name+"/"+theme+"/app: market inspector must expose four contextual interface paths");
                   const liveTradeLink = page.locator("#marketDetail a.seer-f6-live-trade-link");
