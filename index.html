@@ -3547,7 +3547,8 @@ function seerF6TradeMarkup(m){
     outcomes.push({index:0,name:"Lead outcome (market-level price)",p:Number(m.p)});
   }
   const priced=outcomes.filter(o=>o.p!==null);
-  const options=outcomes.map(o=>'<option value="'+o.index+'" data-price="'+(o.p===null?"":o.p)+'" '+(o.p===null?"disabled":"")+'>'+seerF6Escape(o.name)+(o.p===null?" · no price returned":" · "+o.p.toFixed(1)+"%")+'</option>').join("");
+  const firstPriced=priced[0]||null;
+  const options=outcomes.map(o=>'<option value="'+o.index+'" data-price="'+(o.p===null?"":o.p)+'" '+(o.p===null?"disabled":"")+(firstPriced&&o.index===firstPriced.index?" selected":"")+'>'+seerF6Escape(o.name)+(o.p===null?" · no price returned":" · "+o.p.toFixed(1)+"%")+'</option>').join("");
   const disabled=!priced.length;
   const status=m.isLive?"LIVE SOURCE INPUT":m.isSnapshot?"SAVED SOURCE SNAPSHOT":"DEMO / FALLBACK INPUT";
   const tradeUrl=m.isLive?seerMarketHref(m):"";
@@ -3560,6 +3561,8 @@ function seerF6TradeMarkup(m){
       '<div class="seer-f6-field"><label for="seerF6TradeSlippage">ASSUMED PRICE SLIPPAGE · %</label><input id="seerF6TradeSlippage" data-f6-trade="slippage" type="number" min="0" max="25" step="0.1" inputmode="decimal" value="1" '+(disabled?"disabled":"")+'><p class="seer-f6-trade-help">Simple percentage adjustment to the indicative entry price; not derived from live order-book depth.</p></div>'+
       '<div class="seer-f6-trade-feedback" id="seerF6TradeFeedback" aria-live="polite">'+(disabled?"No priceable outcome was returned. Check the original Seer market before modelling a position.":"Illustrative paper scenario. Default fee and slippage are assumptions that you can change.")+'</div>'+
     '</div><div><div class="seer-f6-trade-results">'+
+      '<div class="seer-f6-trade-metric"><span>Source indicative price</span><strong data-f6-trade-output="sourceprice">—</strong><small>Returned outcome price before any assumed adjustment</small></div>'+
+      '<div class="seer-f6-trade-metric"><span>Available liquidity (reported)</span><strong data-f6-trade-output="reportedliquidity">'+seerF6Escape(m.depth||"Not reported")+'</strong><small>Source-reported liquidity is not guaranteed executable depth</small></div>'+
       '<div class="seer-f6-trade-metric"><span>Modeled entry incl. slippage</span><strong data-f6-trade-output="entry">—</strong><small>Indicative price adjusted by your slippage assumption</small></div>'+
       '<div class="seer-f6-trade-metric"><span>Estimated shares</span><strong data-f6-trade-output="shares">—</strong><small>Position notional ÷ modeled entry price</small></div>'+
       '<div class="seer-f6-trade-metric"><span>Estimated entry fee</span><strong data-f6-trade-output="fee">—</strong><small>User-defined one-time fee assumption</small></div>'+
@@ -3608,6 +3611,7 @@ function seerF6RecalculateTradePreview(){
   const write=(name,value)=>{const el=document.querySelector('[data-f6-trade-output="'+name+'"]');if(el)el.textContent=value;};
   const outputKeys=["entry","shares","payout","profit","loss","breakeven","fee","totalcost"];
   if(price===null||price<0||price>100){
+    write("sourceprice","—");
     outputKeys.forEach(k=>write(k,"—"));
     if(feedback)feedback.textContent="No reliable source price is available for this outcome. No estimate was calculated.";
     return;
@@ -3627,6 +3631,7 @@ function seerF6RecalculateTradePreview(){
     if(feedback)feedback.textContent="Enter an assumed slippage adjustment between 0% and 25%.";
     return;
   }
+  write("sourceprice",price.toFixed(1)+"%");
   if(price===0){
     outputKeys.forEach(k=>write(k,"—"));
     if(feedback)feedback.textContent="A 0% returned price cannot be used as a finite entry price. Verify the original market.";
