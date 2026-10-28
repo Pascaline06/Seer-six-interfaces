@@ -3575,13 +3575,18 @@ function seerF6TradeMarkup(m){
 }
 function seerF6PathsMarkup(m){
   const id=seerF6Escape(marketKey(m)),chain=seerF6Escape(m.chainId===undefined||m.chainId===null?"":m.chainId);
+  const structureKind=String(m.evidence&&m.evidence.marketStructure&&m.evidence.marketStructure.kind||m.type||"").toLowerCase();
+  const leadPrice=m.p!==null&&m.p!==undefined&&m.p!==""&&Number.isFinite(Number(m.p))&&Number(m.p)>=0&&Number(m.p)<=100;
+  const deepAvailable=!structureKind.includes("scalar")&&leadPrice;
+  const futarchyAvailable=leadPrice;
+  const opportunityAvailable=canPaperFrameOutcome(m);
   const routes=[
-    ["deep","03 / Deep Forecasts","Record a separate probability, thesis and evidence note."],
-    ["futarchy","04 / Futarchy","Test an explicit pass/fail scenario against a source quote."],
-    ["opportunity","05 / Opportunity Markets","Compare an outcome with your own probability and paper position."],
-    ["risk","06 / Risk Pricing","Inspect reported depth, volume and user-defined sensitivity."]
+    ["deep","03 / Deep Forecasts","Record a separate probability, thesis and evidence note.",deepAvailable,"A priced, non-scalar outcome is required for the forecast journal."],
+    ["futarchy","04 / Futarchy","Test an explicit pass/fail scenario against a source quote.",futarchyAvailable,"A valid source price is required for a meaningful pass/fail baseline."],
+    ["opportunity","05 / Opportunity Markets","Compare an outcome with your own probability and paper position.",opportunityAvailable,"This paper-analysis tool requires at least two outcomes and a usable first-outcome price."],
+    ["risk","06 / Risk Pricing","Inspect reported depth, volume and user-defined sensitivity.",true,""]
   ];
-  return '<section class="seer-f6-paths" aria-label="Continue this market across Seer interfaces"><div class="seer-f6-section-head"><div><div class="seer-f6-kicker">ONE MARKET / DIFFERENT DECISIONS</div><h3>Continue with this market</h3><p>Keep the network-qualified market identity when moving from discovery to forecast review, scenario analysis or risk inspection.</p></div></div><div class="seer-f6-path-grid">'+routes.map(x=>'<button type="button" class="seer-f6-path" data-seer-f6-route="'+x[0]+'" data-market-id="'+id+'" data-market-chain-id="'+chain+'"><small>'+x[1].split(" / ")[0]+'</small><strong>'+x[1].split(" / ")[1]+'</strong><span>'+x[2]+'</span><em>Continue ↗</em></button>').join("")+'</div></section>';
+  return '<section class="seer-f6-paths" aria-label="Continue this market across Seer interfaces"><div class="seer-f6-section-head"><div><div class="seer-f6-kicker">ONE MARKET / DIFFERENT DECISIONS</div><h3>Continue with this market</h3><p>Each enabled path retains this network-qualified market. Paths that cannot produce a meaningful analysis are disabled rather than silently substituting another market.</p></div></div><div class="seer-f6-path-grid">'+routes.map(x=>'<button type="button" class="seer-f6-path" data-seer-f6-route="'+x[0]+'" data-market-id="'+id+'" data-market-chain-id="'+chain+'" '+(x[3]?"":'disabled aria-disabled="true" title="'+seerF6Escape(x[4])+'"')+'><small>'+x[1].split(" / ")[0]+'</small><strong>'+x[1].split(" / ")[1]+'</strong><span>'+x[2]+'</span><em>'+(x[3]?"Continue ↗":"Unavailable for this market")+'</em>'+(x[3]?"":'<span class="seer-f6-path-unavailable">'+seerF6Escape(x[4])+'</span>')+'</button>').join("")+'</div></section>';
 }
 const seerF6PreviousMarketDetail=renderMarketDetail;
 renderMarketDetail=function(m){
