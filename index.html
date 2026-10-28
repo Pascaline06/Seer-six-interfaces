@@ -3607,7 +3607,8 @@ function seerF6MarketForButton(button){
   return pool.find(m=>marketKey(m)===key&&parseMarketChainId(m.chainId)===chain)||pool.find(m=>marketKey(m)===key)||null;
 }
 document.getElementById("main").addEventListener("input",function(event){
-  if(event.target.closest("[data-f6-trade='stake']"))
+  if(event.target.closest("[data-f6-trade='stake']"))seerF6RecalculateTradePreview();
+});
 function seerF6LeadMarket(){
   const pools=[...(Array.isArray(explorerMarkets)?explorerMarkets:[]),...(Array.isArray(markets)?markets:[])];
   const seen=new Set();
@@ -3690,11 +3691,7 @@ document.getElementById("main").addEventListener("click",function(event){
     render();
     requestAnimationFrame(focusMarketDetail);
   });
-});
-
-seerF6RecalculateTradePreview();
-});
-document.getElementById("main").addEventListener("change",function(event){
+});document.getElementById("main").addEventListener("change",function(event){
   if(event.target.closest("[data-f6-trade='outcome']"))seerF6RecalculateTradePreview();
 });
 document.getElementById("main").addEventListener("click",function(event){
