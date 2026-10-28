@@ -197,6 +197,12 @@ jobs:
                     for (const target of ["deep","futarchy","opportunity","risk"]) {
                       await page.goto(base+"#/app", {waitUntil:"domcontentloaded", timeout:45000});
                       await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, {timeout:20000}).catch(() => {});
+                      // Selection state survives route changes, so close the inspector before clicking Inspect again.
+                      const staleInspectorClose = page.locator('#marketDetail button[data-market-action="close-detail"]');
+                      if (await staleInspectorClose.count() > 0) {
+                        await staleInspectorClose.click();
+                        await page.waitForFunction(() => !document.querySelector("#marketDetail"), null, {timeout:5000}).catch(() => {});
+                      }
                       const inspectAgain = page.locator('.explorer-market-grid button[data-market-action="inspect"]').first();
                       if (await inspectAgain.count() === 0) {
                         report.failures.push("desktop/dark/app: no market was available to test the "+target+" handoff");
@@ -238,6 +244,11 @@ jobs:
                     // Return to Explorer before the outer loop records Explorer's layout metrics.
                     await page.goto(base+"#/app", {waitUntil:"domcontentloaded", timeout:45000});
                     await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, {timeout:20000}).catch(() => {});
+                    const finalInspectorClose = page.locator('#marketDetail button[data-market-action="close-detail"]');
+                    if (await finalInspectorClose.count() > 0) {
+                      await finalInspectorClose.click();
+                      await page.waitForFunction(() => !document.querySelector("#marketDetail"), null, {timeout:5000}).catch(() => {});
+                    }
                   }
                 } else {
                   report.failures.push(viewport.name+"/"+theme+"/app: no inspectable market card was available for the context/trader smoke test");
