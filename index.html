@@ -3725,7 +3725,11 @@ render=function(){
   const result=seerF6PriorRender.apply(this,arguments);
   try{
     seerF6MountSignalStrip();
-    requestAnimationFrame(seerF6MountSignalStrip);
+    seerF6RecalculateTradePreview();
+    requestAnimationFrame(function(){
+      seerF6MountSignalStrip();
+      seerF6RecalculateTradePreview();
+    });
   }catch(error){console.error("Shared question/price/use strip did not mount:",error);}
   return result;
 };
