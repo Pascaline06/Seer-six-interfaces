@@ -3391,5 +3391,241 @@ renderMarketDetail=function(m){
 };
 </script>
 
+
+<style>
+/* Phase 6 — make the two-sided marketplace legible at the exact market decision point. */
+.seer-f6-question,.seer-f6-trader,.seer-f6-paths{margin:20px 0 0;padding:22px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,color-mix(in srgb,var(--violet) 7%,var(--panel)),var(--panel) 70%);min-width:0}
+.seer-f6-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.seer-f6-kicker{font-size:10px;font-weight:800;letter-spacing:.13em;color:var(--violet);text-transform:uppercase}
+.seer-f6-section-head h3{margin:7px 0 6px;font:600 22px/1.25 "Bricolage Grotesque",sans-serif;letter-spacing:-.02em;color:var(--text)}
+.seer-f6-section-head p{max-width:68ch;margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+.seer-f6-badge{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;padding:7px 10px;border:1px solid color-mix(in srgb,var(--violet) 35%,var(--line));border-radius:999px;color:var(--violet);font-size:10px;font-weight:800;letter-spacing:.04em}
+.seer-f6-badge:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.seer-f6-context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.seer-f6-context-card{min-width:0;padding:14px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 78%,transparent)}
+.seer-f6-context-card span{display:block;margin-bottom:8px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.seer-f6-context-card strong{display:block;color:var(--text);font-size:13px;font-weight:700;line-height:1.55;overflow-wrap:anywhere}
+.seer-f6-context-card p{margin:7px 0 0;color:var(--muted);font-size:11px;line-height:1.65;overflow-wrap:anywhere}
+.seer-f6-context-card.is-unknown{background:color-mix(in srgb,var(--panel) 65%,transparent);border-style:dashed}
+.seer-f6-context-foot{margin:13px 0 0;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.7}
+.seer-f6-trade-grid{display:grid;grid-template-columns:minmax(220px,.82fr) minmax(0,1.18fr);gap:20px}
+.seer-f6-trade-form{display:grid;gap:13px}
+.seer-f6-field label{display:block;margin-bottom:7px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.04em}
+.seer-f6-field select,.seer-f6-field input{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);font-size:13px}
+.seer-f6-trade-form input:focus,.seer-f6-trade-form select:focus{outline:2px solid var(--violet);outline-offset:2px}
+.seer-f6-trade-help{margin:6px 0 0;color:var(--muted);font-size:10px;line-height:1.6}
+.seer-f6-trade-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-content:start}
+.seer-f6-trade-metric{min-width:0;padding:14px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 70%,transparent)}
+.seer-f6-trade-metric span{display:block;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.seer-f6-trade-metric strong{display:block;margin-top:8px;color:var(--text);font:600 clamp(18px,2.2vw,25px)/1.2 "JetBrains Mono",monospace;letter-spacing:-.045em;overflow-wrap:anywhere}
+.seer-f6-trade-metric small{display:block;margin-top:6px;color:var(--muted);font-size:10px;line-height:1.55}
+.seer-f6-trade-metric.is-positive strong{color:var(--green)}
+.seer-f6-trade-metric.is-risk strong{color:var(--amber)}
+.seer-f6-trade-feedback{min-height:20px;margin:11px 0 0;color:var(--muted);font-size:11px;line-height:1.65}
+.seer-f6-trade-disclaimer{margin:15px 0 0;padding:12px 13px;border:1px solid color-mix(in srgb,var(--amber) 33%,var(--line));border-radius:9px;background:color-mix(in srgb,var(--amber) 6%,transparent);color:var(--muted);font-size:10px;line-height:1.75}
+.seer-f6-path-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.seer-f6-path{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0;min-height:146px;padding:15px;border:1px solid var(--line);border-radius:11px;background:color-mix(in srgb,var(--panel) 76%,transparent);color:var(--text);text-align:left;transition:transform .16s,border-color .16s,background .16s}
+.seer-f6-path:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--violet) 65%,var(--line));background:color-mix(in srgb,var(--violet) 9%,var(--panel))}
+.seer-f6-path small{color:var(--violet);font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.seer-f6-path strong{font:600 16px/1.25 "Bricolage Grotesque",sans-serif}
+.seer-f6-path span{color:var(--muted);font-size:11px;line-height:1.6}
+.seer-f6-path em{margin-top:auto;color:var(--violet);font-size:11px;font-style:normal;font-weight:800}
+@media(max-width:820px){.seer-f6-context-grid{grid-template-columns:1fr 1fr}.seer-f6-context-card:last-child{grid-column:1/-1}.seer-f6-trade-grid{grid-template-columns:1fr}.seer-f6-path-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.seer-f6-question,.seer-f6-trader,.seer-f6-paths{padding:16px;margin-top:15px}.seer-f6-section-head{flex-direction:column;gap:10px}.seer-f6-section-head h3{font-size:20px}.seer-f6-context-grid{grid-template-columns:1fr}.seer-f6-context-card:last-child{grid-column:auto}.seer-f6-path-grid{grid-template-columns:1fr 1fr;gap:8px}.seer-f6-path{min-height:150px;padding:12px}.seer-f6-path strong{font-size:14px}.seer-f6-trade-results{gap:8px}.seer-f6-trade-metric{padding:12px}.seer-f6-trade-metric strong{font-size:18px}}
+</style>
+<script>
+/* Source metadata is only surfaced when the public payload actually contains it. */
+const seerF6OriginalNormalizeLiveMarket = normalizeLiveMarket;
+function seerF6Field(raw, keys){
+  for(const key of keys){
+    const value=raw&&raw[key];
+    if(value===null||value===undefined||value==="")continue;
+    if(typeof value==="string"||typeof value==="number")return {value:String(value).trim(),field:key};
+    if(typeof value==="object"){
+      const nested=value.displayName||value.display_name||value.name||value.username||value.handle||value.address||value.id;
+      if(nested!==null&&nested!==undefined&&String(nested).trim())return {value:String(nested).trim(),field:key};
+    }
+  }
+  return {value:"",field:""};
+}
+normalizeLiveMarket=function(raw,observedAt){
+  const normalized=seerF6OriginalNormalizeLiveMarket.apply(this,arguments);
+  const author=seerF6Field(raw,["questionAuthor","question_author","askedBy","asked_by","asker","requester","requesterAddress","creator","createdBy","created_by","author"]);
+  const context=seerF6Field(raw,["questionContext","question_context","decisionContext","decision_context","marketDescription","market_description","description","context"]);
+  const criteria=seerF6Field(raw,["resolutionCriteria","resolution_criteria","resolutionRules","resolution_rules","resolutionDescription","resolution_description"]);
+  return Object.assign({},normalized,{questionAuthor:author.value,questionAuthorSourceField:author.field,questionContext:context.value,questionContextSourceField:context.field,sourceResolutionCriteria:criteria.value,sourceResolutionCriteriaField:criteria.field});
+};
+const seerF6OriginalCompactSavedMarket=compactSavedMarket;
+compactSavedMarket=function(m){
+  const saved=seerF6OriginalCompactSavedMarket.apply(this,arguments);
+  return Object.assign({},saved,{
+    questionAuthor:String(m&&m.questionAuthor||""),
+    questionAuthorSourceField:String(m&&m.questionAuthorSourceField||""),
+    questionContext:String(m&&m.questionContext||""),
+    questionContextSourceField:String(m&&m.questionContextSourceField||""),
+    sourceResolutionCriteria:String(m&&m.sourceResolutionCriteria||""),
+    sourceResolutionCriteriaField:String(m&&m.sourceResolutionCriteriaField||"")
+  });
+};
+function seerF6Escape(value){return htmlEscape(String(value===null||value===undefined?"":value));}
+function seerF6QuestionMarkup(m){
+  const author=String(m.questionAuthor||"").trim();
+  const context=String(m.questionContext||"").trim();
+  const evidenceResolution=m.evidence&&m.evidence.resolution;
+  const criteria=String(m.sourceResolutionCriteria||evidenceResolution&&(evidenceResolution.value||evidenceResolution.text||evidenceResolution.description)||"").trim();
+  const authorUnknown=!author,contextUnknown=!context,criteriaUnknown=!criteria;
+  return '<section class="seer-f6-question" aria-label="Question intent and accountability">'+
+    '<div class="seer-f6-section-head"><div><div class="seer-f6-kicker">THE INFORMATION SEEKER / MARKET INTENT</div><h3>Who needs an answer — and what settles it?</h3><p>A market is useful when visitors can understand the question, the accountable source and the rule that determines the outcome. Only payload-backed details are presented as facts.</p></div><span class="seer-f6-badge">SOURCE-AWARE</span></div>'+
+    '<div class="seer-f6-context-grid">'+
+      '<div class="seer-f6-context-card '+(authorUnknown?"is-unknown":"")+'"><span>Question author / requester</span><strong>'+(authorUnknown?"Not supplied by the public market-search response":seerF6Escape(author))+'</strong><p>'+(authorUnknown?"No person or account is inferred from the market title.":("Source field: "+seerF6Escape(m.questionAuthorSourceField||"market record metadata")) )+'</p></div>'+
+      '<div class="seer-f6-context-card '+(contextUnknown?"is-unknown":"")+'"><span>Decision context</span><strong>'+(contextUnknown?"No separate context field returned":seerF6Escape(context))+'</strong><p>'+(contextUnknown?"The market question above is the only supported summary; this prototype will not invent the asker's motivation.":"Source field: "+seerF6Escape(m.questionContextSourceField||"market record metadata"))+'</p></div>'+
+      '<div class="seer-f6-context-card '+(criteriaUnknown?"is-unknown":"")+'"><span>Resolution rule</span><strong>'+(criteriaUnknown?"Not returned in the available record":seerF6Escape(criteria))+'</strong><p>'+(criteriaUnknown?"Open the original market and verify its settlement criteria before relying on a position.":"Source: "+seerF6Escape(m.sourceResolutionCriteriaField||evidenceResolution&&evidenceResolution.source||"Seer source metadata"))+'</p></div>'+
+    '</div>'+
+    '<p class="seer-f6-context-foot">For information seekers: verify the exact decision question and resolution rule. For traders: confirm the same rule before comparing odds. Missing author or criteria data is a source limitation—not proof that the market has none.</p>'+
+    '</section>';
+}
+function seerF6TradeMarkup(m){
+  const raw=Array.isArray(m.outcomePrices)?m.outcomePrices:[];
+  const outcomes=raw.map((o,i)=>({
+    index:Number.isInteger(Number(o&&o.index))?Number(o.index):i,
+    name:String(o&&(o.name||o.title||o.outcome)||"Outcome "+(i+1)),
+    p:o&&o.p!==null&&o.p!==undefined&&o.p!==""&&Number.isFinite(Number(o.p))&&Number(o.p)>=0&&Number(o.p)<=100?Number(o.p):null
+  })).filter(o=>o.name);
+  if(!outcomes.length&&m.p!==null&&m.p!==undefined&&Number.isFinite(Number(m.p))&&Number(m.p)>=0&&Number(m.p)<=100){
+    outcomes.push({index:0,name:"Lead outcome (market-level price)",p:Number(m.p)});
+  }
+  const priced=outcomes.filter(o=>o.p!==null);
+  const options=outcomes.map(o=>'<option value="'+o.index+'" data-price="'+(o.p===null?"":o.p)+'" '+(o.p===null?"disabled":"")+'>'+seerF6Escape(o.name)+(o.p===null?" · no price returned":" · "+o.p.toFixed(1)+"%")+'</option>').join("");
+  const disabled=!priced.length;
+  const status=m.isLive?"LIVE SOURCE INPUT":m.isSnapshot?"SAVED SOURCE SNAPSHOT":"DEMO / FALLBACK INPUT";
+  return '<section class="seer-f6-trader" aria-label="Paper trade preview">'+
+    '<div class="seer-f6-section-head"><div><div class="seer-f6-kicker">THE TRADER / PRICE THE RISK</div><h3>What would this position look like?</h3><p>Translate one returned outcome price into an illustrative position size, gross payout and downside before committing to a view.</p></div><span class="seer-f6-badge">'+status+'</span></div>'+
+    '<div class="seer-f6-trade-grid"><div class="seer-f6-trade-form">'+
+      '<div class="seer-f6-field"><label for="seerF6TradeOutcome">OUTCOME TO MODEL</label><select id="seerF6TradeOutcome" data-f6-trade="outcome" '+(disabled?"disabled":"")+'>'+options+'</select><p class="seer-f6-trade-help">Use only an outcome with a returned price. A missing quote is not treated as zero.</p></div>'+
+      '<div class="seer-f6-field"><label for="seerF6TradeStake">HYPOTHETICAL POSITION SIZE · USDC</label><input id="seerF6TradeStake" data-f6-trade="stake" type="number" min="1" max="1000000" step="1" inputmode="decimal" value="25" '+(disabled?"disabled":"")+'><p class="seer-f6-trade-help">Local what-if input only. No capital is transferred.</p></div>'+
+      '<div class="seer-f6-trade-feedback" id="seerF6TradeFeedback" aria-live="polite">'+(disabled?"No priceable outcome was returned. Check the original Seer market before modelling a position.":"Illustrative only: assumes a $1 payout for each winning share.")+'</div>'+
+    '</div><div><div class="seer-f6-trade-results">'+
+      '<div class="seer-f6-trade-metric"><span>Indicative entry</span><strong data-f6-trade-output="entry">—</strong><small>Per share, derived from the displayed price</small></div>'+
+      '<div class="seer-f6-trade-metric"><span>Estimated shares</span><strong data-f6-trade-output="shares">—</strong><small>Position size ÷ assumed entry price</small></div>'+
+      '<div class="seer-f6-trade-metric is-positive"><span>Gross payout if correct</span><strong data-f6-trade-output="payout">—</strong><small>Assumes $1 settlement per winning share</small></div>'+
+      '<div class="seer-f6-trade-metric is-positive"><span>Gross profit if correct</span><strong data-f6-trade-output="profit">—</strong><small>Before fees, spread and slippage</small></div>'+
+      '<div class="seer-f6-trade-metric is-risk"><span>Maximum modeled loss</span><strong data-f6-trade-output="loss">—</strong><small>Position amount, if outcome loses</small></div>'+
+      '<div class="seer-f6-trade-metric"><span>Break-even probability</span><strong data-f6-trade-output="breakeven">—</strong><small>Before execution costs</small></div>'+
+    '</div><p class="seer-f6-trade-disclaimer">Paper model only — this is not a live executable quote, order book, recommendation, or transaction. The source price may be stale or thinly traded. Fees, spread, slippage, minimum order size, settlement mechanics and price impact are not modelled. No wallet is connected and no order can be submitted here.</p></div></div></section>';
+}
+function seerF6PathsMarkup(m){
+  const id=seerF6Escape(marketKey(m)),chain=seerF6Escape(m.chainId===undefined||m.chainId===null?"":m.chainId);
+  const routes=[
+    ["deep","03 / Deep Forecasts","Record a separate probability, thesis and evidence note."],
+    ["futarchy","04 / Futarchy","Test an explicit pass/fail scenario against a source quote."],
+    ["opportunity","05 / Opportunity Markets","Compare an outcome with your own probability and paper position."],
+    ["risk","06 / Risk Pricing","Inspect reported depth, volume and user-defined sensitivity."]
+  ];
+  return '<section class="seer-f6-paths" aria-label="Continue this market across Seer interfaces"><div class="seer-f6-section-head"><div><div class="seer-f6-kicker">ONE MARKET / DIFFERENT DECISIONS</div><h3>Continue with this market</h3><p>Keep the network-qualified market identity when moving from discovery to forecast review, scenario analysis or risk inspection.</p></div></div><div class="seer-f6-path-grid">'+routes.map(x=>'<button type="button" class="seer-f6-path" data-seer-f6-route="'+x[0]+'" data-market-id="'+id+'" data-market-chain-id="'+chain+'"><small>'+x[1].split(" / ")[0]+'</small><strong>'+x[1].split(" / ")[1]+'</strong><span>'+x[2]+'</span><em>Continue ↗</em></button>').join("")+'</div></section>';
+}
+const seerF6PreviousMarketDetail=renderMarketDetail;
+renderMarketDetail=function(m){
+  let markup=seerF6PreviousMarketDetail.apply(this,arguments);
+  if(!m||typeof markup!=="string")return markup;
+  const question=seerF6QuestionMarkup(m);
+  const gridAnchor='<div class="market-detail-grid">';
+  if(markup.includes(gridAnchor))markup=markup.replace(gridAnchor,question+gridAnchor);
+  const actionAnchor='<div class="market-detail-actions">';
+  const decision=seerF6TradeMarkup(m)+seerF6PathsMarkup(m);
+  return markup.includes(actionAnchor)?markup.replace(actionAnchor,decision+actionAnchor):markup.replace("</section>",decision+"</section>");
+};
+function seerF6Money(n){
+  return Number.isFinite(n)?new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2}).format(n):"—";
+}
+function seerF6RecalculateTradePreview(){
+  const root=document.getElementById("seerF6TradeOutcome");
+  const stakeInput=document.getElementById("seerF6TradeStake");
+  if(!root||!stakeInput)return;
+  const selected=root.selectedOptions&&root.selectedOptions[0];
+  const rawPrice=selected?selected.dataset.price:"";
+  const price=rawPrice!==""&&Number.isFinite(Number(rawPrice))?Number(rawPrice):null;
+  const amount=Number(stakeInput.value);
+  const feedback=document.getElementById("seerF6TradeFeedback");
+  const write=(name,value)=>{const el=document.querySelector('[data-f6-trade-output="'+name+'"]');if(el)el.textContent=value;};
+  if(price===null||price<0||price>100){
+    ["entry","shares","payout","profit","loss","breakeven"].forEach(k=>write(k,"—"));
+    if(feedback)feedback.textContent="No reliable source price is available for this outcome. No estimate was calculated.";
+    return;
+  }
+  if(!Number.isFinite(amount)||amount<1||amount>1000000){
+    ["entry","shares","payout","profit","loss","breakeven"].forEach(k=>write(k,"—"));
+    if(feedback)feedback.textContent="Enter a position size between 1 and 1,000,000 USDC for this local paper scenario.";
+    return;
+  }
+  if(price===0){
+    ["entry","shares","payout","profit","loss","breakeven"].forEach(k=>write(k,"—"));
+    if(feedback)feedback.textContent="A 0% returned price cannot be used as a finite entry price. Verify the original market.";
+    return;
+  }
+  const entry=price/100,shares=amount/entry,payout=shares,profit=payout-amount;
+  write("entry",seerF6Money(entry)+" / share");
+  write("shares",shares.toLocaleString("en-US",{maximumFractionDigits:3}));
+  write("payout",seerF6Money(payout));
+  write("profit",seerF6Money(profit));
+  write("loss",seerF6Money(amount));
+  write("breakeven",price.toFixed(1)+"%");
+  if(feedback)feedback.textContent="Illustrative result at "+price.toFixed(1)+"% entry. Before fees, spread, slippage, price impact and settlement-specific rules.";
+}
+function seerF6MarketForButton(button){
+  const key=String(button.dataset.marketId||"");
+  const chain=parseMarketChainId(button.dataset.marketChainId);
+  const pool=[...explorerMarkets,...markets,...state.watchlist,...state.compareMarkets,...(state.opportunityMarketSnapshot?[state.opportunityMarketSnapshot]:[])];
+  return pool.find(m=>marketKey(m)===key&&parseMarketChainId(m.chainId)===chain)||pool.find(m=>marketKey(m)===key)||null;
+}
+document.getElementById("main").addEventListener("input",function(event){
+  if(event.target.closest("[data-f6-trade='stake']"))seerF6RecalculateTradePreview();
+});
+document.getElementById("main").addEventListener("change",function(event){
+  if(event.target.closest("[data-f6-trade='outcome']"))seerF6RecalculateTradePreview();
+});
+document.getElementById("main").addEventListener("click",function(event){
+  const button=event.target.closest("[data-seer-f6-route]");
+  if(!button)return;
+  const target=button.dataset.seerF6Route;
+  const market=seerF6MarketForButton(button);
+  if(market){
+    state.selectedMarketId=marketKey(market);
+    state.selectedMarketChainId=parseMarketChainId(market.chainId);
+    if(target==="futarchy"){
+      state.futarchyMarketId=marketKey(market);
+      state.futarchyMarketChainId=parseMarketChainId(market.chainId);
+    }
+    if(target==="opportunity"){
+      const framed=makeBinaryPaperProjection(market);
+      state.opportunityMarketId=marketKey(framed||market);
+      state.opportunityMarketChainId=parseMarketChainId((framed||market).chainId);
+      state.opportunityMarketSnapshot=framed||compactSavedMarket(market);
+      const p=opportunityOutcomePrice(framed||market,0);
+      if(Number.isFinite(p))state.opportunityBelief=p;
+      state.opportunitySide="yes";
+    }
+    if(target==="deep"){
+      const record=seerF34ForecastRecords().find(x=>marketIdentity(x)===marketIdentity(market))||market;
+      const outcomes=seerF34Outcomes(record);
+      const outcome=outcomes.find(x=>x.p!==null)||outcomes[0];
+      seerF34Draft.marketKey=marketKey(record);
+      seerF34Draft.chainId=parseMarketChainId(record.chainId);
+      seerF34Draft.outcomeIndex=outcome?outcome.index:0;
+      seerF34Draft.belief=outcome&&outcome.p!==null?outcome.p:50;
+      seerF34Draft.rationale="";
+      seerF34Draft.evidenceNote="";
+      seerF34Feedback.forecast="Market selected from the shared Explorer context. Add a thesis before saving a forecast.";
+    }
+  }
+  go(target);
+  requestAnimationFrame(function(){
+    const targetId=target==="deep"?"seerForecastLab":target==="opportunity"?"opportunityLab":target==="risk"?"riskA":"futarchyMarketSelect";
+    const anchor=document.getElementById(targetId);
+    if(anchor)anchor.scrollIntoView({behavior:window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  });
+});
+seerF6RecalculateTradePreview();
+</script>
+
 </body>
 </html>
