@@ -3510,7 +3510,7 @@ function seerF6QuestionMarkup(m){
     else if(rawSource&&typeof rawSource==="object")evidenceSource=String(rawSource.url||rawSource.uri||rawSource.name||rawSource.label||"").trim();
   }
   const resolutionSource=String(m.sourceResolutionSource||evidenceSource||"").trim();
-  const resolutionSourceIsUrl=/^https?:\\/\\/\\S+$/i.test(resolutionSource);
+  const resolutionSourceIsUrl=resolutionSource.toLowerCase().startsWith("https://")||resolutionSource.toLowerCase().startsWith("http://");
   const outcomes=Array.isArray(m.outcomePrices)&&m.outcomePrices.length
     ?m.outcomePrices.map((o,i)=>String(o&&(o.name||o.title||o.outcome)||"Outcome "+(i+1)).trim()).filter(Boolean)
     :(Array.isArray(m.outcomes)?m.outcomes.map((o,i)=>String(typeof o==="object"?(o&&(o.name||o.title||o.outcome)||"Outcome "+(i+1)):o).trim()).filter(Boolean):[]);
