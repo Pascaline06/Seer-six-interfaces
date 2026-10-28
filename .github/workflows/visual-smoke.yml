@@ -119,6 +119,15 @@ jobs:
                   if (await questionContext.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing source-aware question context");
                   if (await paperTrade.count() !== 1) report.failures.push(viewport.name+"/"+theme+"/app: market inspector is missing the trader paper preview");
                   if (await interfacePaths.count() !== 4) report.failures.push(viewport.name+"/"+theme+"/app: market inspector must expose four contextual interface paths");
+                  const intentField = page.locator("#seerF6PrivateDecisionNote");
+                  if (await intentField.count() !== 1) {
+                    report.failures.push(viewport.name+"/"+theme+"/app: information seekers are missing their private decision-context field");
+                  } else {
+                    await intentField.fill("Smoke-test context for this market decision");
+                    await page.locator("#marketDetail button[data-f6-save-intent]").click();
+                    const intentStatus = (await page.locator("#seerF6IntentStatus").innerText()).trim();
+                    if (!intentStatus.includes("saved privately on this device")) report.failures.push(viewport.name+"/"+theme+"/app: private decision context did not confirm a successful local save");
+                  }
                   const tradeOutcome = page.locator("#seerF6TradeOutcome");
                   const tradeStake = page.locator("#seerF6TradeStake");
                   if (await tradeOutcome.count() === 1 && await tradeStake.count() === 1 && !(await tradeStake.isDisabled())) {
