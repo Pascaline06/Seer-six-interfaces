@@ -3477,8 +3477,8 @@ function seerF6Field(raw, keys){
 }
 normalizeLiveMarket=function(raw,observedAt){
   const normalized=seerF6OriginalNormalizeLiveMarket.apply(this,arguments);
-  const author=seerF6Field(raw,["questionAuthor","question_author","askedBy","asked_by","asker","requester","requesterAddress","creator","createdBy","created_by","author"]);
-  const context=seerF6Field(raw,["questionContext","question_context","decisionContext","decision_context","marketDescription","market_description","description","context"]);
+  const author=seerF6Field(raw,["questionAuthor","question_author","askedBy","asked_by","askedByAddress","asked_by_address","asker","askerAddress","asker_address","requester","requesterAddress","requester_address","requesterName","requester_name","questioner","questionerAddress","questioner_address"]);
+  const context=seerF6Field(raw,["questionContext","question_context","decisionContext","decision_context","requesterContext","requester_context","questionPurpose","question_purpose","decisionPurpose","decision_purpose"]);
   const criteria=seerF6Field(raw,["resolutionCriteria","resolution_criteria","resolutionRules","resolution_rules","resolutionDescription","resolution_description"]);
   const resolutionSource=seerF6Field(raw,["resolutionSource","resolution_source","resolutionSourceUrl","resolution_source_url","settlementSource","settlement_source","resolutionEvidenceUrl","resolution_evidence_url","resolutionSourceName","resolution_source_name"]);
   return Object.assign({},normalized,{questionAuthor:author.value,questionAuthorSourceField:author.field,questionContext:context.value,questionContextSourceField:context.field,sourceResolutionCriteria:criteria.value,sourceResolutionCriteriaField:criteria.field,sourceResolutionSource:resolutionSource.value,sourceResolutionSourceField:resolutionSource.field});
