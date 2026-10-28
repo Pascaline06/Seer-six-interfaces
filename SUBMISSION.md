@@ -24,7 +24,7 @@ The experiences are purposefully differentiated: the Overview introduces Seer as
 
 ## Updated marketplace decision journey
 
-The Market Explorer now treats a market as a two-sided question: an information seeker needs an answer for a decision, while a trader evaluates whether an outcome's price and risk fit their own thesis. The inspector surfaces question-author/requester metadata, context and resolution criteria only when returned by the source. Where the public payload omits those fields, the experience says so instead of inferring a person, motivation or settlement rule.
+The Market Explorer now treats a market as a two-sided question: an information seeker needs an answer for a decision, while a trader evaluates whether an outcome's price and risk fit their own thesis. The inspector surfaces question-author/requester metadata, context and resolution criteria only when returned by the source. Where the public payload omits those fields, the experience says so instead of inferring a person, motivation or settlement rule. Information seekers can also save a private decision-context note locally on their own device; it is not submitted to Seer or shared.
 
 A trader-side paper preview translates a source-returned outcome price into a hypothetical position size, estimated shares, gross payout, gross profit, maximum modeled loss and break-even probability. It is an educational scenario, not live execution: no wallet is connected, no orders are sent and fees, spread, slippage, price impact and settlement details are not modeled. Four market-aware links connect the same network-qualified record to Deep Forecasts, Futarchy, Opportunity Markets and Risk Pricing, giving the Explorer a hub role rather than leaving the market as a standalone card.
 
