@@ -189,15 +189,44 @@ jobs:
                     }
                   }
                   if (viewport.name === "desktop" && theme === "dark") {
-                    const deepPath = page.locator('#marketDetail button[data-seer-f6-route="deep"]');
-                    if (await deepPath.count() !== 1) {
-                      report.failures.push("desktop/dark/app: contextual Deep Forecasts path is missing");
-                    } else {
-                      await deepPath.click();
-                      const routed = await page.waitForFunction(() => document.querySelector("#main")?.dataset.page === "deep", null, {timeout:7000}).then(() => true).catch(() => false);
-                      if (!routed) report.failures.push("desktop/dark/app: contextual market path did not open Deep Forecasts");
+                    // Exercise every enabled contextual route and verify the destination still selects the exact network-qualified market, not merely that navigation occurred.
+                    for (const target of ["deep","futarchy","opportunity","risk"]) {
                       await page.goto(base+"#/app", {waitUntil:"domcontentloaded", timeout:45000});
                       await page.waitForFunction(() => ["live","fallback"].includes(document.querySelector("#explorerStatus")?.dataset.status || ""), null, {timeout:20000}).catch(() => {});
+                      const inspectAgain = page.locator('.explorer-market-grid button[data-market-action="inspect"]').first();
+                      if (await inspectAgain.count() === 0) {
+                        report.failures.push("desktop/dark/app: no market was available to test the "+target+" handoff");
+                        continue;
+                      }
+                      await inspectAgain.click();
+                      await page.waitForFunction(() => !!document.querySelector("#marketDetail .seer-f6-paths"), null, {timeout:8000}).catch(() => {});
+                      const routeButton = page.locator('#marketDetail button[data-seer-f6-route="'+target+'"]');
+                      if (await routeButton.count() !== 1) {
+                        report.failures.push("desktop/dark/app: contextual "+target+" path is missing");
+                        continue;
+                      }
+                      if (await routeButton.isDisabled()) {
+                        if (target === "risk") report.failures.push("desktop/dark/app: Risk Pricing should remain available for market inspection");
+                        continue;
+                      }
+                      const sourceIdentity = await page.evaluate(() => ({id:String(state.selectedMarketId||""),chain:state.selectedMarketChainId===null||state.selectedMarketChainId===undefined?"":String(state.selectedMarketChainId)}));
+                      await routeButton.click();
+                      const routed = await page.waitForFunction(expected => document.querySelector("#main")?.dataset.page === expected, target, {timeout:7000}).then(() => true).catch(() => false);
+                      if (!routed) {
+                        report.failures.push("desktop/dark/app: contextual market path did not open "+target);
+                        continue;
+                      }
+                      const destinationIdentity = await page.evaluate(target => {
+                        let m=null;
+                        if (target === "deep") m=seerF34SelectedMarket();
+                        else if (target === "futarchy") m=currentFutarchyReference();
+                        else if (target === "opportunity") m=opportunityScenarioMarket();
+                        else if (target === "risk") m=[...sortedSpecialistMarkets(markets),...state.watchlist,...explorerMarkets].find(candidate => matchesSelectedMarket(candidate))||null;
+                        return m?{id:marketKey(m),chain:parseMarketChainId(m.chainId)===null?"":String(parseMarketChainId(m.chainId))}:null;
+                      }, target);
+                      if (!destinationIdentity || destinationIdentity.id !== sourceIdentity.id || destinationIdentity.chain !== sourceIdentity.chain) {
+                        report.failures.push("desktop/dark/app: "+target+" handoff changed the selected network-qualified market identity");
+                      }
                     }
                   }
                 } else {
